@@ -1,7 +1,4 @@
-# Let's Encrypt
-Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG).
-
-[![Let's Encrypt](images/letsencrypt-logo-horizontal.png)](../../../lets-encrypt)
+[![Let's Encrypt](images/letsencrypt-logo-horizontal.svg)](../../../lets-encrypt)
 ## Jelastic Let's Encrypt Add-on
 
 This repository provides [Let's Encrypt](https://letsencrypt.org/about/) add-on for Jelastic Platform.
