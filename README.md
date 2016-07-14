@@ -1,4 +1,4 @@
-[![Let's Encrypt](images/letsencrypt-logo-horizontal.svg)](../../../lets-encrypt)
+[![Let's Encrypt](images/letsencrypt-logo-horizontal.png)](../../../lets-encrypt)
 ## Jelastic Let's Encrypt Add-on
 
 This repository provides [Let's Encrypt](https://letsencrypt.org/about/) add-on for Jelastic Platform.
