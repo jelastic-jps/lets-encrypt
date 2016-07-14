@@ -10,11 +10,11 @@ This repository provides [Let's Encrypt](https://letsencrypt.org/about/) add-on 
 
 ### What it can be used for?
 With a help of our bookmarklet, Let's Encrypt is installed on selected app server available in the environment. The key principles behind Let’s Encrypt are:<br />
-    **Free**: Anyone who owns a domain name can use Let’s Encrypt to obtain a trusted certificate at zero cost.
-    **Automatic**: Software running on a web server can interact with Let’s Encrypt to painlessly obtain a certificate, securely configure it for use, and automatically take care of renewal.
-    **Secure**: Let’s Encrypt will serve as a platform for advancing TLS security best practices, both on the CA side and by helping site operators properly secure their servers.
-    **Transparent**: All certificates issued or revoked will be publicly recorded and available for anyone to inspect.
-    **Open**: The automatic issuance and renewal protocol will be published as an open standard that others can adopt.
+    **Free**: Anyone who owns a domain name can use Let’s Encrypt to obtain a trusted certificate at zero cost.<br />
+    **Automatic**: Software running on a web server can interact with Let’s Encrypt to painlessly obtain a certificate, securely configure it for use, and automatically take care of renewal.<br />
+    **Secure**: Let’s Encrypt will serve as a platform for advancing TLS security best practices, both on the CA side and by helping site operators properly secure their servers.<br />
+    **Transparent**: All certificates issued or revoked will be publicly recorded and available for anyone to inspect.<br />
+    **Open**: The automatic issuance and renewal protocol will be published as an open standard that others can adopt.<br />
     **Cooperative**: Much like the underlying Internet protocols themselves, Let’s Encrypt is a joint effort to benefit the community, beyond the control of any one organization.
 
 	
