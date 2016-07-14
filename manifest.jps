@@ -6,7 +6,7 @@
     "name": "LetsEncrypt SSL",
     "version": "1.0",
     "homepage": "http://jelastic.com/",
-    "logo": "https://letsencrypt.org/images/le-logo-lockonly.svg",
+    "logo": "https://github.com/jelastic-jps/lets-encrypt/raw/master/images/le-logo-lockonly.png",
     "description": {
       "text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG)."
     },
@@ -30,7 +30,7 @@
               {
                 "nodeMission": "cp",
                 "commands": [
-                  "curl -sSf \"https://download.jelastic.com/public.php?service=files&t=19029b8d195ecd285eb2ecab82d2f584&download\" -o ${SERVER_SCRIPTS}/prepareos.sh 2>&1",
+                  "curl -sSf \"https://github.com/jelastic-jps/lets-encrypt/raw/master/prepareos.sh\" -o ${SERVER_SCRIPTS}/prepareos.sh 2>&1",
                   "/bin/bash ${SERVER_SCRIPTS}/prepareos.sh 2>&1"
                 ],
                 "user": "root"
@@ -40,7 +40,7 @@
           {
             "executeScript": {
               "type": "js",
-              "script": "https://download.jelastic.com/public.php?service=files&t=d214d5857b7bdbbf1c8dbcbba6dc19c5&download",
+              "script": "https://github.com/jelastic-jps/lets-encrypt/raw/master/script.js",
               "nodeMission": "cp",
               "user": "root"
             }
@@ -55,7 +55,7 @@
               {
                 "nodeMission": "cp",
                 "commands": [
-                  "curl -sSf \"https://download.jelastic.com/public.php?service=files&t=f9ecab49eff2e7c66913a3f7a7cc65e0&download\" -o ${SERVER_SCRIPTS}/install_certs.sh 2>&1",
+                  "curl -sSf \"https://github.com/jelastic-jps/lets-encrypt/raw/master/install_certs.sh\" -o ${SERVER_SCRIPTS}/install_certs.sh 2>&1",
                   "/bin/bash ${SERVER_SCRIPTS}/install_certs.sh \"${this.domains}\" \"${user.email}\" \"${env.appid}\" \"${env.domain}\" 2>&1"
                 ],
                 "user": "root"
@@ -70,7 +70,7 @@
           {
             "executeScript": {
               "type": "js",
-              "script": "https://download.jelastic.com/public.php?service=files&t=b34a8c678e6918dc99c23f267b763b35&download",
+              "script": "https://github.com/jelastic-jps/lets-encrypt/raw/master/ssl_install.js",
               "nodeMission": "cp",
               "user": "root"
             }
