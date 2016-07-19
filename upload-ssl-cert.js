@@ -6,9 +6,8 @@ var APPID = getParam("TARGET_APPID"),
     oEnvInfo;
 
 oEnvInfo = new Environment(APPID, SESSION).getEnvInfo();
-
-return oEnvInfo;
 if (!oEnvInfo.isOK()) return oEnvInfo;
+oEnvInfo = toNative(oEnvInfo);
 
 //read certificates
 var cert_key = jelastic.env.file.Read(oEnvInfo.env.envName, SESSION, "/tmp/privkey.url", null, NODE_GROUP, -1);
