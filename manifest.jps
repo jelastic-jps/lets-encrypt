@@ -55,24 +55,13 @@
                 "nodeMission": "cp",
                 "commands": [
                   "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh\" -o ${SERVER_SCRIPTS}/generate-ssl-cert.sh 2>&1",
-                  "/bin/bash ${SERVER_SCRIPTS}/generate-ssl-cert.sh \"${this.domains}\" \"${user.email}\" \"${env.appid}\" \"${env.domain}\" 2>&1"
+                  "printf \"#!/bin/bash\n${SERVER_SCRIPTS}/generate-ssl-cert.sh '${this.domains}' '${user.email}' '${env.appid}' '${env.domain}' 2>&1\n\" > ~/update-ssl-cert.sh",
+                  "/bin/bash ~/update-ssl-cert.sh 2>&1",
+                  "(crontab -l ; echo "0 0 1 */2 * /bin/bash ~/update-ssl-cert.sh 2>&1") | crontab - "
                 ],
                 "user": "root"
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "upload-ssl-cert",
-        "onCall": [
-          {
-            "executeScript": {
-              "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-ssl-cert.js",
-              "nodeMission": "cp",
-              "user": "root"
-            }
           }
         ]
       }
