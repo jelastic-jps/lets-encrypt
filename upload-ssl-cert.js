@@ -7,6 +7,7 @@ var APPID = getParam("TARGET_APPID"),
 
 oEnvInfo = new Environment(APPID, SESSION).getEnvInfo();
 
+return oEnvInfo;
 if (!oEnvInfo.isOK()) return oEnvInfo;
 
 //read certificates
