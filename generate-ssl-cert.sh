@@ -36,9 +36,9 @@ echo appdomain = $appdomain
 uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@$certdir/privkey.pem" -F "fid=fullchain.pem" -F "file=@$certdir/fullchain.pem" -F "fid=cert.pem" -F "file=@$certdir/cert.pem" http://app.$appdomain/xssu/rest/upload)
 
 #Save urls to certificate files
-echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' >> /tmp/privkey.url
-echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' >> /tmp/fullchain.url
-echo $uploadresult | awk -F '{"file":"' '{print $4}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' >> /tmp/cert.url
+echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/privkey.url
+echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/fullchain.url
+echo $uploadresult | awk -F '{"file":"' '{print $4}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/cert.url
 
 #Upload 3 certificate files one by file
 #echo $(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@$certdir/privkey.pem" http://app.$appdomain/xssu/rest/upload | awk -F ",\"" '{print $2}' | awk -F ":\"" '{print $2}' | sed 's/"//g') >> /tmp/privkey.url
