@@ -16,22 +16,22 @@
     "onInstall": [
       {
         "call": [
-          "prepare_os",
-          "compleateinstalation"
+          "install-le",
+          "upload-ssl-cert"
         ]
       }
     ],
     "procedures": [
       {
-        "id": "prepare_os",
+        "id": "install-le",
         "onCall": [
           {
             "executeShellCommands": [
               {
                 "nodeMission": "cp",
                 "commands": [
-                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/prepareos.sh\" -o ${SERVER_SCRIPTS}/prepareos.sh 2>&1",
-                  "/bin/bash ${SERVER_SCRIPTS}/prepareos.sh 2>&1"
+                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh\" -o ${SERVER_SCRIPTS}/install-le.sh 2>&1",
+                  "/bin/bash ${SERVER_SCRIPTS}/install-le.sh 2>&1"
                 ],
                 "user": "root"
               }
@@ -40,7 +40,7 @@
           {
             "executeScript": {
               "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/script.js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl-cert.js",
               "nodeMission": "cp",
               "user": "root"
             }
@@ -48,15 +48,15 @@
         ]
       },
       {
-        "id": "instconfletencrypt",
+        "id": "generate-ssl-cert",
         "onCall": [
           {
             "executeShellCommands": [
               {
                 "nodeMission": "cp",
                 "commands": [
-                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install_certs.sh\" -o ${SERVER_SCRIPTS}/install_certs.sh 2>&1",
-                  "/bin/bash ${SERVER_SCRIPTS}/install_certs.sh \"${this.domains}\" \"${user.email}\" \"${env.appid}\" \"${env.domain}\" 2>&1"
+                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install_certs.sh\" -o ${SERVER_SCRIPTS}/generate-ssl-cert.sh 2>&1",
+                  "/bin/bash ${SERVER_SCRIPTS}/generate-ssl-cert.sh \"${this.domains}\" \"${user.email}\" \"${env.appid}\" \"${env.domain}\" 2>&1"
                 ],
                 "user": "root"
               }
@@ -65,12 +65,12 @@
         ]
       },
       {
-        "id": "compleateinstalation",
+        "id": "upload-ssl-cert",
         "onCall": [
           {
             "executeScript": {
               "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/ssl_install.js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-ssl-cert.js",
               "nodeMission": "cp",
               "user": "root"
             }
