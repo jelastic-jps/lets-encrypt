@@ -55,7 +55,7 @@
               {
                 "nodeMission": "cp",
                 "commands": [
-                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install_certs.sh\" -o ${SERVER_SCRIPTS}/generate-ssl-cert.sh 2>&1",
+                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh\" -o ${SERVER_SCRIPTS}/generate-ssl-cert.sh 2>&1",
                   "/bin/bash ${SERVER_SCRIPTS}/generate-ssl-cert.sh \"${this.domains}\" \"${user.email}\" \"${env.appid}\" \"${env.domain}\" 2>&1"
                 ],
                 "user": "root"
