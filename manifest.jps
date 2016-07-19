@@ -16,8 +16,7 @@
     "onInstall": [
       {
         "call": [
-          "install-le",
-          "upload-ssl-cert"
+          "install-le"
         ]
       }
     ],
