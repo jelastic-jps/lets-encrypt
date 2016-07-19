@@ -5,7 +5,7 @@ var APPID = getParam("TARGET_APPID"),
     NODE_GROUP = "cp",//getParam("nodeGroup");
     oEnvInfo;
 
-oEnvInfo = new hivext.local.exp.wrapRequest(Environment(APPID, SESSION)).getEnvInfo();
+oEnvInfo = hivext.local.exp.wrapRequest(new Environment(APPID, SESSION)).getEnvInfo();
 if (!oEnvInfo.isOK()) return oEnvInfo;
 oEnvInfo = toNative(oEnvInfo);
 
