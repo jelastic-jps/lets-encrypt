@@ -7,7 +7,7 @@ appdomain=$4
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
-chmod -R 777 /etc/letsencrypt/
+chmown -R jelastic:jelastic /etc/letsencrypt/
 
 cd /opt/letsencrypt
 git pull origin master
@@ -25,9 +25,9 @@ iptables -D INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
 
 certdir=$(sed -nr '/^[[:digit:]-]{10} [[:digit:]:]{8},[[:digit:]]+:INFO:[[:alnum:]\.]*:Reporting to user: Congratulations![[:alnum:][:space:]]*([^[:blank:]]+)[/][^/[[:blank:]]+[.][[:alnum:][:space:]]*.*$/{s//\1/p}' /var/log/letsencrypt/letsencrypt.log | tail -n 1)
 
-#To be sure that r/w access
-mkdir -p /tmp/
-chmod -R 777 /tmp/
+echo "------\n"
+echo $certdir
+echo "\n------"
 
 #installing ssl cert via JEM
 sed -i '/function doDownloadKeys/a return 0;#letsenctemp' /usr/lib/jelastic/modules/keystore.module
