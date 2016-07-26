@@ -1,3 +1,4 @@
+//@req(domain)
 import com.hivext.api.environment.Environment;
 
 var APPID = getParam("TARGET_APPID"),
@@ -40,6 +41,10 @@ for (var i = 0; i < lenghtCP; i += 1) {
 }
 
 var domains = "-d " + oEnvInfo.env.domain + " ";
+if (domain){
+    domains += "-d " + domain + " ";
+}
+
 var extDomains = oEnvInfo.env.extdomains;
 if (extDomains) {
     for (var i = 0; i < extDomains.length; i += 1) {
