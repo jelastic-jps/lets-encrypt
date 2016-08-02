@@ -81,8 +81,8 @@
             },
             "custom_domain": {
               "en": "Use custom domain"
-            }]
-          },
+            }
+          }],
           "showIf": {
             "custom_domain": [
               {
