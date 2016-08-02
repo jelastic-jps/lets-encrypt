@@ -77,7 +77,7 @@
           "default": "current_domain",
           "values": {
             "current_domain": {
-              "en": "Use current domain i.e. ${domain}"
+              "en": "Use current domain i.e. ${envName}"
             },
             "custom_domain": {
               "en": "Use custom domain"
