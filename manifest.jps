@@ -75,13 +75,13 @@
           "type": "radio-fieldset",
           "name": "ext_domain",
           "default": "current_domain",
-          "values": {
+          "values": [{
             "current_domain": {
-              "en": "Use current domain i.e. ${envName}"
+              "en": "Use current domain i.e. ${env.domain}"
             },
             "custom_domain": {
               "en": "Use custom domain"
-            }
+            }]
           },
           "showIf": {
             "custom_domain": [
