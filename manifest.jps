@@ -74,17 +74,13 @@
         {
           "type": "radio-fieldset",
           "name": "ext_domain",
-          "default": "current_domain",
-          "values": [{
-            "current_domain": {
-              "en": "Use current domain i.e. ${env.domain}"
-            },
-            "custom_domain": {
-              "en": "Use custom domain"
-            }
-          }],
+          "default": "currentDomain",
+          "values": {
+            "current_Domain": "Generate SSL for current domain i.e. ${env.domain}",
+            "custom_Domain": "Generate SSL for custom domain"
+          },
           "showIf": {
-            "custom_domain": [
+            "customDomain": [
               {
                 "type": "string",
                 "name": "customdomain",
