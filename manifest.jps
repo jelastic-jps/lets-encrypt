@@ -76,8 +76,8 @@
           "name": "ext_domain",
           "default": "currentDomain",
           "values": {
-            "current_Domain": "Generate SSL for current domain i.e. ${env.domain}",
-            "custom_Domain": "Generate SSL for custom domain"
+            "currentDomain": "Generate SSL for current domain i.e. ${env.domain}",
+            "customDomain": "Generate SSL for custom domain"
           },
           "showIf": {
             "customDomain": [
