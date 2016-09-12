@@ -16,13 +16,15 @@
     "onInstall": [
       {
         "call": [
-          "install-le"
+          "install-letsencrypt",
+          "generate-ssl-certificates",
+          "install-ssl-certificates"
         ]
       }
     ],
     "procedures": [
       {
-        "id": "install-le",
+        "id": "install-letsencrypt",
         "onCall": [
           {
             "executeShellCommands": [
@@ -35,22 +37,12 @@
                 "user": "root"
               }
             ]
-          },
-          {
-            "executeScript": {
-              "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl-cert.js",
-              "params": {
-                "domain": "${settings.customdomain}"
-              },
-              "nodeMission": "cp",
-              "user": "root"
-            }
           }
         ]
       },
+
       {
-        "id": "generate-ssl-cert",
+        "id": "generate-ssl-certificates",
         "onCall": [
           {
             "executeShellCommands": [
@@ -65,6 +57,22 @@
                 "user": "root"
               }
             ]
+          }
+        ]
+      },
+      {
+        "id": "install-ssl-certificates",
+        "onCall": [
+          {
+            "executeScript": {
+              "type": "js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl-cert.js",
+              "params": {
+                "domain": "${settings.customdomain}"
+              },
+              "nodeMission": "cp",
+              "user": "root"
+            }
           }
         ]
       }
