@@ -54,7 +54,7 @@ if (extDomains) {
 
 callArgs = [];
 callArgs.push({
-    procedure : "generate-ssl-cert",
+    procedure : "generate-ssl-certificates",
     params : {
         domains : domains
     }
