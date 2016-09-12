@@ -39,7 +39,6 @@
           }
         ]
       },
-
       {
         "id": "generate-ssl-certificates",
         "onCall": [
@@ -72,7 +71,20 @@
             }
           }
         ]
-      }
+      },
+      {
+        "id": "upload-ssl-certificates",
+        "onCall": [
+          {
+            "executeScript": {
+              "type": "js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/multi-node/upload-ssl-cert.js",
+              "nodeMission": "cp",
+              "user": "root"
+            }
+          }
+        ]
+      }    
     ],
     "settings": {
       "fields": [
