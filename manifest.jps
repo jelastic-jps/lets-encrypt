@@ -17,9 +17,8 @@
       {
         "call": [
           "install-letsencrypt",
-          "generate-ssl-certificates",
           "install-ssl-certificates"
-        ]
+          ]
       }
     ],
     "procedures": [
