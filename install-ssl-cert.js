@@ -60,11 +60,6 @@ callArgs.push({
     }
 });
 
-//why we call it twice? one more time in JPS
-//callArgs.push({
-//    procedure : "upload-ssl-cert"
-//});
-
 return {
     result : 0,
     onAfterReturn : {
