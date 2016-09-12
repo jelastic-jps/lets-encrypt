@@ -31,6 +31,6 @@ echo $certdir
 echo "\n------"
 
 #installing ssl cert via JEM
-sed -i '/function doDownloadKeys/a return 0;#letsenctemp' /usr/lib/jelastic/modules/keystore.module
-jem ssl install
-sed -i  '/letsenctemp/d' /usr/lib/jelastic/modules/keystore.module
+#sed -i '/function doDownloadKeys/a return 0;#letsenctemp' /usr/lib/jelastic/modules/keystore.module
+#jem ssl install
+#sed -i  '/letsenctemp/d' /usr/lib/jelastic/modules/keystore.module
