@@ -17,7 +17,8 @@
       {
         "call": [
           "install-letsencrypt",
-          "install-ssl-certificates"
+          "install-ssl-certificates",
+          "upload-ssl-certificates"
           ]
       }
     ],
