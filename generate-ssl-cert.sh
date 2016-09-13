@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -f '/etc/letsencrypt/settings'  ] && source '/etc/letsencrypt/settings' || echo "No settings available"
+[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || echo "No settings available"
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
