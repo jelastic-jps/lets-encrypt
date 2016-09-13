@@ -1,9 +1,6 @@
 #!/bin/bash
 
-domain=$1
-email=$2
-appid=$3
-appdomain=$4
+[ -f '/etc/letsencrypt/settings'  ] && source '/etc/letsencrypt/settings' || echo "No settings available"
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
