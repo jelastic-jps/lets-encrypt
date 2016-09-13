@@ -39,6 +39,8 @@ echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}'
 echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' >> /tmp/fullchain.url
 echo $uploadresult | awk -F '{"file":"' '{print $4}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' >> /tmp/cert.url
 
+sed -i '/^\s*$/d' /tmp/*.url
+
 #installing ssl cert via JEM
 #sed -i '/function doDownloadKeys/a return 0;#letsenctemp' /usr/lib/jelastic/modules/keystore.module
 #jem ssl install
