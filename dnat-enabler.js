@@ -3,14 +3,15 @@
 var envName = '${env.envName}', 
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes,
 enabled = Boolean(getParam("enabled")),
-
+masterIP = nodes[0].address,
 IPs = [], resp = [];
 
-for (var i = 0, n = nodes.length; i < n; i++) { 
+for (var i = 1, n = nodes.length; i < n; i++) { 
+
     if (enabled) {
-            resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id,  toJSON( [ { "command": "echo", "params": "snat-enabled >> /root/test" } ]), true, "root"));; 
+            resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id,  toJSON( [ { "command": "echo", "params": "snat-enabled-for"+masterIP" >> /root/test" } ]), true, "root"));; 
     } else {
-            resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, toJSON( [ { "command": "echo", "params": "snat-disabled >> /root/test" } ]), true, "root"));;
+            resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, toJSON( [ { "command": "echo", "params": "snat-disabled-for"+masterIP" >> /root/test" } ]), true, "root"));;
  
     }
 }
