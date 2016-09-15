@@ -14,12 +14,12 @@ for (var i = 1, n = nodes.length; i < n; i++) {
     groups[group] = [];
     groups[group].push(nodes[i].nodeGroup)
 }
+print (groups);
 
 if (groups['lb'] ) selected = groups['lb'] 
     else if (groups['bl'] )  selected = groups['bl'] 
             else selected = groups['cp']
             
-print (selected);
 
 /*for (var i = 1, n = selected.length; i < n; i++) { 
 
