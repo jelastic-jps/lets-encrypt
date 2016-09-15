@@ -28,6 +28,8 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       }
 } 
 
+print (dnatEnableParams + dnatDisableParams)
+
 return {
     result: 0,
     responses: resp
