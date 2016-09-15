@@ -61,6 +61,16 @@
       {
         "id": "install-ssl-certificates",
         "onCall": [
+        {
+              "executeScript": {
+              "type": "js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/dnat-enabler.js",
+              "params": {
+                "enabled": "true"
+              },
+              "user": "root"
+            }
+          },
           {
             "executeScript": {
               "type": "js",
@@ -71,7 +81,17 @@
               "nodeMission": "cp",
               "user": "root"
             }
-          }
+          },
+          {
+              "executeScript": {
+              "type": "js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/dnat-enabler.js",
+              "params": {
+                "enabled": "false"
+              },
+              "user": "root"
+            }
+          },          
         ]
       },
       {
