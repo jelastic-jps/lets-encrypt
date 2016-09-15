@@ -16,9 +16,9 @@ for (var i = 1, n = nodes.length; i < n; i++) {
     groups[group].push(nodes[i].nodeGroup)
 }
 
-if (groups['lb'] ) selected = groups['lb'] 
-    else if (groups['bl'] )  selected = groups['bl'] 
-            else selected = groups['cp']
+//if (groups[`lb`] ) selected = groups[`lb`] 
+//    else if (groups['bl'] )  selected = groups['bl'] 
+//            else selected = groups['cp']
 
 for (var i = 1, n = selected.length; i < n; i++) { 
 
