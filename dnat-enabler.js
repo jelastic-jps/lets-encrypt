@@ -6,7 +6,7 @@ enabled = getParam("enabled"),
 IPs = [], resp = [];
 
 for (var i = 0; i < nodes.length; i++) { 
-      if (enabled == "true") 
+      if (enabled) 
             resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, [ { "command": "echo", "params": "snat-enabled >> /root/test" } ], true, "root"));;
       else 
             resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "echo snat-disabled >> /root/test", true, "root"));;
