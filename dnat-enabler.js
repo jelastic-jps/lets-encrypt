@@ -14,7 +14,7 @@ for (var i = 1, n = nodes.length; i < n; i++) {
     groups[group] = [];
     groups[group].push(nodes[i].nodeGroup)
 }
-print('test');
+print(groups[group]);
 
 if (groups['lb'] ) selected = groups['lb'] 
     else if (groups['bl'] )  selected = groups['bl'] 
