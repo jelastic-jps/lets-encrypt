@@ -15,7 +15,7 @@ if(groups.toString().indexOf("bl") > -1) { selectedGroup = 'bl';selectedGroupLen
    else if(groups.toString().indexOf("lb") > -1) { selectedGroup = 'lb'; selectedGroupLenght = '${nodes.lb.length}'; }
       else { selectedGroup ='cp' ; selectedGroupLenght = '${nodes.lb.length}'; }
 
-if(selectedGroupLenght == 1) exit;
+if(selectedGroupLenght == 1) return {result: 0, responses: "alone node in entry point layer" };
        
 for (var i = 0, n = nodes.length; i < n; i++) { 
       if(nodes[i].nodeGroup != selectedGroup) continue;
