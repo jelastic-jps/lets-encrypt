@@ -14,7 +14,7 @@ for (var i = 0, n = nodes.length; i < n; i++) {
     }
     
     
-print (groups+'xxx'+groups.indexOf('bl'));
+print (groups + 'xxx' + groups.indexOf('bl'));
     
 if(groups.indexOf("bl") > -1) selectedGroup = 'bl'
    else if(groups.indexOf("lb") > -1) selectedGroup = 'lb'
