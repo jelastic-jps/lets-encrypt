@@ -19,8 +19,8 @@ if(selectedGroupLenght == 1) return {result: 0, responses: "alone node in entry 
        
 for (var i = 0, n = nodes.length; i < n; i++) { 
       
-      if(nodes[i].nodeGroup != selectedGroup) continue;
-      if(!masterIP){ masterIP = nodes[i].address; continue; }
+      if(nodes[i].nodeGroup != selectedGroup) continue
+      if(!masterIP){ masterIP = nodes[i].address; continue }
 print (masterIP);
 
       if (action == 'add') {
