@@ -16,7 +16,8 @@ if(groups.toString().indexOf("bl") > -1) { selectedGroup = 'bl';selectedGroupLen
       else { selectedGroup ='cp' ; selectedGroupLenght = '${nodes.lb.length}'; }
 
 if(selectedGroupLenght == 1) return {result: 0, responses: "alone node in entry point layer" };
-       
+
+masterIP='';       
 for (var i = 0, n = nodes.length; i < n; i++) { 
       
       if(nodes[i].nodeGroup != selectedGroup) continue
