@@ -6,8 +6,8 @@ enabled = getParam("enabled"),
 IPs = [], resp = [];
 
 for (var i = 0; i < nodes.length; i++) { 
-      resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "mkdir /tmp/xxx", true, "root"));; 
-      if (enabled = "true") resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "echo snat-enabled >> /root/test", true, "root"));; 
+resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, [ { "command": "echo", "params": "snat-enabled >> /root/test" } ], true, "root"));; 
+      if (enabled = "true") resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, [ { "command": "echo", "params": "snat-enabled >> /root/test" } ], true, "root"));; 
       if (enabled = "false") resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "echo snat-disabled >> /root/test", true, "root"));;
 }
 
