@@ -22,7 +22,7 @@ if(groups.toString().indexOf("bl") > -1) selectedGroup = 'bl'
             else selected = groups['cp']
             
 */
-print (${nodes.cp.length});
+print (${nodes.selectedGroup.length});
 
 //for (var i = 1, n = nodes[selectedGroup].length; i < n; i++) { 
 
