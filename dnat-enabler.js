@@ -13,12 +13,15 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       groups.push(nodes[i].nodeGroup)
     }
     
-if(groups.indexOf("bl") > -1) selectedGroup = 'bl'
+    
+print (groups);
+    
+/*if(groups.indexOf("bl") > -1) selectedGroup = 'bl'
    else if(groups.indexOf("lb") > -1) selectedGroup = 'lb'
       else  selectedGroup ='cp'
 
 print (selectedGroup);
-
+/*
 /*if (groups['lb'] ) selected = groups['lb'] 
     else if (groups['bl'] )  selected = groups['bl'] 
             else selected = groups['cp']
