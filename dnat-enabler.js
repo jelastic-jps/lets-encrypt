@@ -6,8 +6,7 @@ enabled = Boolean(getParam("enabled")),
 masterIP = nodes[0].address,
 dnatEnableParams = ' -t nat -I PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP,
 dnatDisableParams = ' -t nat -D PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP,
-groups = {}, group,
-selected,
+groups = {}, group, selected,
 IPs = [], resp = [];
 
 for (var i = 1, n = nodes.length; i < n; i++) { 
@@ -20,7 +19,7 @@ for (var i = 1, n = nodes.length; i < n; i++) {
 //    else if (groups['bl'] )  selected = groups['bl'] 
 //            else selected = groups['cp']
 
-for (var i = 1, n = selected.length; i < n; i++) { 
+/*for (var i = 1, n = selected.length; i < n; i++) { 
 
     if (enabled) {
             resp.push(jelastic.env.control.ExecCmdById(envName, session, selected[i].id,  toJSON( [ { "command": "iptables", "params": dnatEnableParams } ]), true, "root"));; 
@@ -28,8 +27,9 @@ for (var i = 1, n = selected.length; i < n; i++) {
             resp.push(jelastic.env.control.ExecCmdById(envName, session, selected[i].id, toJSON( [ { "command": "iptables", "params": dnatDisableParams } ]), true, "root"));;
  
     }
-}
+} */
 
+resp.push("OK");
 
 return {
     result: 0,
