@@ -6,7 +6,7 @@ nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes
 
 IPs = [], resp = [];
 
-for (var i = 0, n = nodes.length; i < n;) { 
+for (var i = 0, n = nodes.length; i < n; i++) { 
   /*    if (true) 
             resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id,  toJSON( [ { "command": "echo", "params": "snat-enabled >> /root/test" } ]), true, "root"));; 
         else 
