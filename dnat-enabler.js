@@ -13,9 +13,10 @@ for (var i = 1, n = nodes.length; i < n; i++) {
    if (!groups[group]) 
     groups[group] = [];
     groups[group].push(nodes[i].nodeGroup)
+    console.log(groups[group]);
 }
 
-if (groups[`lb`] ) selected = groups[`lb`] 
+if (groups['lb'] ) selected = groups['lb'] 
     else if (groups['bl'] )  selected = groups['bl'] 
             else selected = groups['cp']
 
