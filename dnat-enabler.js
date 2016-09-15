@@ -2,7 +2,7 @@
 
 var envName = '${env.envName}', 
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes,
-enabled = getParam("enabled"),
+enabled = Boolean(getParam("enabled")),
 
 IPs = [], resp = [];
 
