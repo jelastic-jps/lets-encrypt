@@ -2,7 +2,7 @@
 
 var envName = '${env.envName}', 
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes,
-enabled = Boolean(getParam("enabled")),
+enabled = getParam("action"),
 masterIP = nodes[0].address,
 groups = [], selectedGroup, selectedGroupLenght
 IPs = [], resp = [];
@@ -20,10 +20,8 @@ if(selectedGroupLenght == 1) return {result: 0, responses: "alone node in entry 
 for (var i = 0, n = nodes.length; i < n; i++) { 
       if(nodes[i].nodeGroup != selectedGroup) continue;
       if(!masterIP) masterIP = nodes[i].address;
-      print (masterIP);
-
 /* 
-    if (enabled) {
+    if (action == 'add') {
             dnatEnableParams = ' -t nat -I PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443',
             resp.push(jelastic.env.control.ExecCmdById(envName, session, selected[i].id,  toJSON( [ { "command": "iptables", "params": dnatEnableParams } ]), true, "root"));; 
     } else {
@@ -31,8 +29,8 @@ for (var i = 0, n = nodes.length; i < n; i++) {
             resp.push(jelastic.env.control.ExecCmdById(envName, session, selected[i].id, toJSON( [ { "command": "iptables", "params": dnatDisableParams } ]), true, "root"));;
     }
 */
-
 } 
+print (masterIP);
 
 
 return {
