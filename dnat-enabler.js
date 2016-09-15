@@ -11,10 +11,10 @@ IPs = [], resp = [];
 
 for (var i = 1, n = nodes.length; i < n; i++) { 
    if (!groups[group]) 
-    groups[group] = [];
-    groups[group].push(nodes[i].nodeGroup)
+    groups = [];
+    groups.push(nodes[i].nodeGroup)
 }
-resp.push(groups[group]);
+resp.push(groups);
 
 
 if (groups['lb'] ) selected = groups['lb'] 
