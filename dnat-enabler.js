@@ -24,8 +24,8 @@ if(groups.toString().indexOf("bl") > -1) selectedGroup = 'bl'
 */
 
 var xxxx = '${nodes.' + '.cp.' + '.length}';
-
-print (xxxx);
+var zzz = ${xxxx};
+print (zzz);
 
 //for (var i = 1, n = nodes[selectedGroup].length; i < n; i++) { 
 
