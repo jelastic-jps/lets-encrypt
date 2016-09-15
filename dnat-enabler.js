@@ -7,7 +7,7 @@ IPs = [], resp = [];
 
 for (var i = 0; i < nodes.length; i++) { 
       if (enabled = "true") resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "echo snat-enabled >> /root/test", 1, "root"));; 
-      if (enabled = "false") resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "echo snat-disabled >> /root/test"1, "root"));;
+      if (enabled = "false") resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id, "echo snat-disabled >> /root/test", 1, "root"));;
 }
 
 
