@@ -13,9 +13,9 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       groups.push(nodes[i].nodeGroup)
     }
     
-if(contains.call(groups, "bl")) selectedGroup = 'lb'
-   else if(contains.call(groups, "lb")) selectedGroup = 'lb'
-      else  selectedGroup ='lb'
+if(groups.indexOf("bl") > -1) selectedGroup = 'bl'
+   else if(groups.indexOf("lb") > -1) selectedGroup = 'lb'
+      else  selectedGroup ='cp'
 
 print (selectedGroup);
 
