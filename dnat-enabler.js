@@ -23,7 +23,7 @@ if(groups.toString().indexOf("bl") > -1) selectedGroup = 'bl'
             
 */
 
-var xxxx = '${nodes.' + selectedGroup + '.length}', 
+var xxxx = '${nodes.' + selectedGroup + '.length}';
 
 print (xxxx);
 
