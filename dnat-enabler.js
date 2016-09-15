@@ -3,7 +3,8 @@
 var envName = '${env.envName}', 
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes,
 action = getParam("action"), masterIP,
-groups = [], selectedGroup, selectedGroupLenght
+groups = [], selectedGroup, selectedGroupLenght,
+dnatEnableParams,dnatDisableParams,
 IPs = [], resp = [];
 
 for (var i = 0, n = nodes.length; i < n; i++) { 
