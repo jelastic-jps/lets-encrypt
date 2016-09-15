@@ -2,7 +2,7 @@
 
 var envName = '${env.envName}', 
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes,
-enabled = getParam("action"),
+action = getParam("action"),
 masterIP = nodes[0].address,
 groups = [], selectedGroup, selectedGroupLenght
 IPs = [], resp = [];
