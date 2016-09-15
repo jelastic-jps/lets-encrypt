@@ -12,7 +12,7 @@ IPs = [], resp = [];
 for (var i = 1, n = nodes.length; i < n; i++) { 
    if (!groups[group]) 
     groups[group] = [];
-    groups[group].push(nodes[i].nodeGroup)
+    groups[group].push(nodes[i])
 }
 print (groups[group]);
 
