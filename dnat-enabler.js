@@ -6,7 +6,7 @@ enabled = Boolean(getParam("enabled")),
 masterIP = nodes[0].address,
 dnatEnableParams = ' -t nat -I PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP,
 dnatDisableParams = ' -t nat -D PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP,
-groups = {}, group, selected,
+groups = {}, group, selected = {},
 IPs = [], resp = [];
 
 for (var i = 1, n = nodes.length; i < n; i++) { 
@@ -15,9 +15,9 @@ for (var i = 1, n = nodes.length; i < n; i++) {
     groups[group].push(nodes[i].nodeGroup)
 }
 
-//if (groups[`lb`] ) selected = groups[`lb`] 
-//    else if (groups['bl'] )  selected = groups['bl'] 
-//            else selected = groups['cp']
+if (groups[`lb`] ) selected = groups[`lb`] 
+    else if (groups['bl'] )  selected = groups['bl'] 
+            else selected = groups['cp']
 
 /*for (var i = 1, n = selected.length; i < n; i++) { 
 
