@@ -16,16 +16,20 @@ for (var i = 0, n = nodes.length; i < n; i++) {
 if(groups.toString().indexOf("bl") > -1) selectedGroup = 'bl'
    else if(groups.toString().indexOf("lb") > -1) selectedGroup = 'lb'
       else  selectedGroup ='cp'
-
-print (selectedGroup);
-/*
-/*if (groups['lb'] ) selected = groups['lb'] 
+      
+/* if (groups['lb'] ) selected = groups['lb'] 
     else if (groups['bl'] )  selected = groups['bl'] 
             else selected = groups['cp']
             
-/*
-/*for (var i = 1, n = selected.length; i < n; i++) { 
+*/
+print (nodes[selectedGroup].length);
 
+//for (var i = 1, n = nodes[selectedGroup].length; i < n; i++) { 
+
+//print (nodes[selectedGroup].length);
+
+
+/* 
     if (enabled) {
             resp.push(jelastic.env.control.ExecCmdById(envName, session, selected[i].id,  toJSON( [ { "command": "iptables", "params": dnatEnableParams } ]), true, "root"));; 
     } else {
