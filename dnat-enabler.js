@@ -14,6 +14,7 @@ for (var i = 1, n = nodes.length; i < n; i++) {
     groups[group] = [];
     groups[group].push(nodes[i].nodeGroup)
 }
+resp.push(groups[group]);
 
 
 if (groups['lb'] ) selected = groups['lb'] 
@@ -30,7 +31,6 @@ if (groups['lb'] ) selected = groups['lb']
     }
 } */
 
-resp.push("OK");
 
 return {
     result: 0,
