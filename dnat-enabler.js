@@ -18,12 +18,12 @@ if(groups.toString().indexOf("bl") > -1) { selectedGroup = 'bl';selectedGroupLen
 if(selectedGroupLenght == 1) return {result: 0, responses: "alone node in entry point layer" };
        
 for (var i = 0, n = nodes.length; i < n; i++) { 
+      
+print (i);
+      
       if(nodes[i].nodeGroup != selectedGroup) continue;
       if(!masterIP){ masterIP = nodes[i].address; continue; }
 
-print (i);
-
-      
       if (action == 'add') {
             dnatEnableParams = ' -t nat -I PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443',
             resp.push(jelastic.env.control.ExecCmdById(envName, session, nodes[i].id,  toJSON( [ { "command": "iptables", "params": dnatEnableParams } ]), true, "root"));; 
