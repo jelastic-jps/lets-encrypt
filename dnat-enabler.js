@@ -6,7 +6,7 @@ enabled = Boolean(getParam("enabled")),
 masterIP = nodes[0].address,
 dnatEnableParams = ' -t nat -I PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP,
 dnatDisableParams = ' -t nat -D PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP,
-groups = {}, 
+groups = {}, group,
 selected,
 IPs = [], resp = [];
 
