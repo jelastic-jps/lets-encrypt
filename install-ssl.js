@@ -45,6 +45,7 @@ callArgs.push({
     }
 });
 
+call : callArgs;
 
 manageDnat('remove');
 
