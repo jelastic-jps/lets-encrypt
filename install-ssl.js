@@ -39,8 +39,9 @@ function manageDnat(action)
 
 manageDnat('add');
 
-var scriptBody = new Transport().get(url);
-var execParams = ' ' + scriptBody + ' > /root/generate-ssl-cert.sh';
+//var scriptBody = new Transport().get(url);
+//var execParams = ' ' + scriptBody + ' > /root/generate-ssl-cert.sh';
+var execParams = 'wget ' + url + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
 //print('xxx' + scriptBody);
 resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "echo", "params": execParams } ]), true, "root"));; 
 //var createSettingsParams = 'domain=\'${env.domain}\'; email=\'${user.email}\' ; appid=\'${env.appid}\' ; appdomain=\'${env.domain}\' >  /opt/letsencrypt/settings' 
