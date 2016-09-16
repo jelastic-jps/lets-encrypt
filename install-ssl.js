@@ -43,6 +43,8 @@ callArgs.push({
     }
 });
 
+print(callArgs);
+
 manageDnat('remove');
 
 return {
