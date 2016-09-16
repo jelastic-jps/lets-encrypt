@@ -32,9 +32,10 @@ function manageDnat(action)
       } 
 
  }
+
 manageDnat('add');
 
-callArgs = [];
+var callArgs = [];
 callArgs.push({
     procedure : "generate-ssl-certificates",
     params : {
@@ -43,8 +44,6 @@ callArgs.push({
 });
 
 manageDnat('remove');
-
-});
 
 return {
     result: 0,
