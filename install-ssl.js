@@ -1,5 +1,6 @@
 //@auth
 var envName = '${env.envName}', 
+envDomain = '${env.domain},
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
 masterIP, groupsMap = {}, resp = [];
 
@@ -32,8 +33,13 @@ function manageDnat(action)
 
  }
 manageDnat('add');
-//call install SSL
-manageDnat('remove');
+callArgs = [];
+callArgs.push({
+    procedure : "generate-ssl-certificates",
+    params : {
+        domain : envDomain
+    }
+});manageDnat('remove');
 
 });
 
