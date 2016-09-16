@@ -1,6 +1,6 @@
 //@auth
 var envName = '${env.envName}', 
-envDomain = '${env.domain},
+envDomain = '${env.domain}',
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
 masterIP, groupsMap = {}, resp = [];
 
