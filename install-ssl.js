@@ -33,13 +33,16 @@ function manageDnat(action)
 
  }
 manageDnat('add');
+
 callArgs = [];
 callArgs.push({
     procedure : "generate-ssl-certificates",
     params : {
         domain : envDomain
     }
-});manageDnat('remove');
+});
+
+manageDnat('remove');
 
 });
 
