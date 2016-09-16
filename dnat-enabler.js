@@ -32,14 +32,5 @@ for (var i = 0, n = layerNodes.length; i < n; i++) {
 
 return {
     result: 0,
-    responses: resp,
-    response: resp.toString(),
-    onAfterReturn : {
-      call : {
-         procedure: 'log',
-            params: {
-            message: resp.toString()
-         }
-      }
-   }
+    responses: resp
 }
