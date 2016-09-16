@@ -34,6 +34,8 @@ function manageDnat(action)
  }
 
 manageDnat('add');
+manageDnat('remove');
+
 
 var callArgs = [];
 callArgs.push({
@@ -43,7 +45,6 @@ callArgs.push({
     }
 });
 
-print(callArgs);
 
 manageDnat('remove');
 
