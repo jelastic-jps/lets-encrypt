@@ -25,6 +25,7 @@ for (var i = 0, n = layerNodes.length; i < n; i++) {
 }
 
 for (var i = 0, n = layerNodes.length; i < n; i++) { 
+      if(layerNodes[i].ismaster) continue;
       var dnatParams = ' -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
       resp.push(jelastic.env.control.ExecCmdById(envName, session, layerNodes[i].id,  toJSON( [ { "command": "iptables", "params": dnatParams } ]), true, "root"));; 
 } 
