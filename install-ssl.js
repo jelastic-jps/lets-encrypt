@@ -1,8 +1,11 @@
 //@auth
+//@req(url)
+import com.hivext.api.core.utils.Transport;
+
 var envName = '${env.envName}', 
 envDomain = '${env.domain}',
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
-masterIP, groupsMap = {}, resp = [];
+masterIP, masterID, groupsMap = {}, resp = [];
 
 for (var i = 0, n = nodes.length; i < n; i++) {
       var ng = nodes[i].nodeGroup;
@@ -19,6 +22,7 @@ if (layerNodes.length == 1) {
 for (var i = 0, n = layerNodes.length; i < n; i++) { 
       if(layerNodes[i].ismaster) {
             masterIP = layerNodes[i].address;
+            masterID = layerNodes[i].id
             break;
       }
 }
@@ -34,18 +38,13 @@ function manageDnat(action)
  }
 
 manageDnat('add');
-manageDnat('remove');
 
+var scriptBody = new Transport().get(url)
+var execParams = scriptBody + ' > /root/generate-ssl-cert.sh'
+resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "cat", "params": dnatParams } ]), true, "root"));; 
+var createSettingsParams = 'domain=\'${env.domain}\'; email=\'${user.email}\' ; appid=\'${env.appid}\' ; appdomain=\'${env.domain}\' >  /opt/letsencrypt/settings' 
+resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "echo", "params": createSettingsParams } ]), true, "root"));; 
 
-var callArgs = [];
-callArgs.push({
-    procedure : "generate-ssl-certificates",
-    params : {
-        domain : envDomain
-    }
-});
-
-call : callArgs;
 
 manageDnat('remove');
 
