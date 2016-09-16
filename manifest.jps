@@ -64,34 +64,13 @@
         {
               "executeScript": {
               "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/dnat-enabler.js",
-              "params": {
-                "enabled": "true"
-              },
-              "user": "root"
-            }
-          },
-          {
-            "executeScript": {
-              "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl-cert.js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js",
               "params": {
                 "domain": "${settings.customdomain}"
               },
-              "nodeMission": "cp",
               "user": "root"
             }
-          },
-          {
-              "executeScript": {
-              "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/dnat-enabler.js",
-              "params": {
-                "enabled": "false"
-              },
-              "user": "root"
-            }
-          },          
+          }
         ]
       },
       {
