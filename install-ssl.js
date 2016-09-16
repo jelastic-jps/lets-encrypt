@@ -30,6 +30,8 @@ for (var i = 0, n = layerNodes.length; i < n; i++) {
       resp.push(jelastic.env.control.ExecCmdById(envName, session, layerNodes[i].id,  toJSON( [ { "command": "iptables", "params": dnatParams } ]), true, "root"));; 
 } 
 
+});
+
 return {
     result: 0,
     responses: resp
