@@ -106,6 +106,12 @@
             }
           }
         ]
+      },
+      {
+        "id": "log",
+        "onCall": {
+          "log": "${this.message}"
+        }
       }    
     ],
     "settings": {
