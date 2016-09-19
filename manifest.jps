@@ -31,7 +31,7 @@
               "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl.js",
               "params": {
                 "domain": "${settings.customdomain}",
-                "url-le-script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh"
+                "url-le-script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
                 "url-gen-script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
               },
               "user": "root"
