@@ -16,58 +16,23 @@
     "onInstall": [
       {
         "call": [
-          "install-letsencrypt",
-          "install-ssl-certificates",
-          "upload-ssl-certificates"
+          "generate-ssl",
+          "install-ssl"
           ]
       }
     ],
     "procedures": [
       {
-        "id": "install-letsencrypt",
-        "onCall": [
-          {
-            "executeShellCommands": [
-              {
-                "nodeMission": "cp",
-                "commands": [
-                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh\" -o ${SERVER_SCRIPTS}/install-le.sh 2>&1",
-                  "/bin/bash ${SERVER_SCRIPTS}/install-le.sh 2>&1"
-                ],
-                "user": "root"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "generate-ssl-certificates",
-        "onCall": [
-          {
-            "executeShellCommands": [
-              {
-                "nodeMission": "cp",
-                "commands": [
-                  "printf \"domain='${env.domain}' \n email='${user.email}' \n  appid='${env.appid}' \n appdomain='${env.domain}'\" >  /opt/letsencrypt/settings",
-                  "curl -sSf \"https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh\" -o ${SERVER_SCRIPTS}/generate-ssl-cert.sh 2>&1",
-                  "/bin/bash ${SERVER_SCRIPTS}/generate-ssl-cert.sh>> /var/log/letsencrypt.log 2>&1"
-                ],
-                "user": "root"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "install-ssl-certificates",
+        "id": "generate-ssl",
         "onCall": [
         {
               "executeScript": {
               "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl.js",
               "params": {
                 "domain": "${settings.customdomain}",
-                "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
+                "url-le-script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh"
+                "url-gen-script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
               },
               "user": "root"
             }
@@ -75,12 +40,12 @@
         ]
       },
       {
-        "id": "upload-ssl-certificates",
+        "id": "install-ssl",
         "onCall": [
           {
             "executeScript": {
               "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/multi-node/upload-ssl-cert.js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/multi-node/install-ssl.js",
               "nodeMission": "cp",
               "user": "root"
             }
