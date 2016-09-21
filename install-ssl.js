@@ -2,9 +2,10 @@
 //@req(urlLeScript, urlGenScript)
 
 var envName = '${env.envName}', 
-envDomain = '${env.domain}',
 nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
-masterIP, masterID, groupsMap = {}, resp = [];
+masterIP, masterID, groupsMap = {}, resp = [], envDomain;
+if (!domain) envDomain = '${env.domain}'
+else envDomain = domain; 
 
 for (var i = 0, n = nodes.length; i < n; i++) {
       var ng = nodes[i].nodeGroup;
