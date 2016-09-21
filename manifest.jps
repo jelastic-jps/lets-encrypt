@@ -16,37 +16,23 @@
     "onInstall": [
       {
         "call": [
-          "generate-ssl",
-          "install-ssl"
+          "install-ssl"    
           ]
       }
     ],
     "procedures": [
       {
-        "id": "generate-ssl",
+        "id": "install-ssl",
         "onCall": [
         {
               "executeScript": {
               "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl.js",
+              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js",
               "params": {
                 "domain": "${settings.customdomain}",
                 "urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
                 "urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
               },
-              "user": "root"
-            }
-          }
-        ]
-      },
-      {
-        "id": "install-ssl",
-        "onCall": [
-          {
-            "executeScript": {
-              "type": "js",
-              "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/multi-node/install-ssl.js",
-              "nodeMission": "cp",
               "user": "root"
             }
           }
