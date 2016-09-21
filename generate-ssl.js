@@ -48,8 +48,8 @@ var execParamsMain = '/root/generate-ssl-cert.sh'
 resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"));; 
 //read certificates
 var cert_key = jelastic.env.file.Read(envName, session, "/tmp/privkey.url", null, null,masterID);
-var fullchain = jelastic.env.file.Read(envName, session, "/tmp/fullchain.url", null, NODE_GROUP, masterID);
-var cert = jelastic.env.file.Read(envName, session, "/tmp/cert.url", null, NODE_GROUP, masterID);
+var fullchain = jelastic.env.file.Read(envName, session, "/tmp/fullchain.url", null, null, masterID);
+var cert = jelastic.env.file.Read(envName, session, "/tmp/cert.url", null, null, masterID);
 
 manageDnat('remove');
 
