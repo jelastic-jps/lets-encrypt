@@ -19,6 +19,9 @@ if (layerNodes.length == 1) {
 }
 
 for (var i = 0, n = layerNodes.length; i < n; i++) { 
+      if(!layerNodes[i].extIPs) {
+        jelastic.env.control.AttachExtIp(envName, session, layerNodes[i].id);
+      }
       if(layerNodes[i].ismaster) {
             masterIP = layerNodes[i].address;
             masterID = layerNodes[i].id
@@ -35,6 +38,13 @@ function manageDnat(action)
       } 
 
  }
+
+lenghtCP = computeNodes.length;
+for (var i = 0; i < lenghtCP; i += 1) {
+    if(!oEnvInfo.nodes[i].extIPs) {
+        jelastic.env.control.AttachExtIp(oEnvInfo.env.envName, SESSION, oEnvInfo.nodes[i].id);
+    }
+
 
 manageDnat('add');
 
