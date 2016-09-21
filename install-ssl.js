@@ -40,13 +40,6 @@ function manageDnat(action)
 
  }
 
-lenghtCP = computeNodes.length;
-for (var i = 0; i < lenghtCP; i += 1) {
-    if(!oEnvInfo.nodes[i].extIPs) {
-        jelastic.env.control.AttachExtIp(oEnvInfo.env.envName, SESSION, oEnvInfo.nodes[i].id);
-    }
-
-
 manageDnat('add');
 
 var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
