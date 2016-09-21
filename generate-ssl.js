@@ -44,6 +44,8 @@ var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod
 resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"));; 
 var createSettingsParams = '\"domain=\'${env.domain}\' \n email=\'${user.email}\' \n appid=\'${env.appid}\' \n appdomain=\'${env.domain}\'\" >  /opt/letsencrypt/settings' 
 resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"));; 
+var execParamsMain = '/root/generate-ssl-cert.sh'
+resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"));; 
 
 manageDnat('remove');
 
