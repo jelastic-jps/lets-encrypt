@@ -46,10 +46,12 @@ var createSettingsParams = '\"domain=\'${env.domain}\' \n email=\'${user.email}\
 resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"));; 
 var execParamsMain = '/root/generate-ssl-cert.sh'
 resp.push(jelastic.env.control.ExecCmdById(envName, session, masterID,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"));; 
+//read certificates
+var cert_key = jelastic.env.file.Read(envName, session, "/tmp/privkey.url", null, null,masterID);
+var fullchain = jelastic.env.file.Read(envName, session, "/tmp/fullchain.url", null, NODE_GROUP, masterID);
+var cert = jelastic.env.file.Read(envName, session, "/tmp/cert.url", null, NODE_GROUP, masterID);
 
 manageDnat('remove');
 
-return {
-    result: 0,
-    responses: resp
-}
+return jelastic.env.binder.BindSSL(envName, session, cert_key.body, cert.body, fullchain.body);
+
