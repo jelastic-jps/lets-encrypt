@@ -5,10 +5,11 @@ if (token != "${TOKEN}") {
   return {"result": 8, "error": "wrong token"}
 }
 
-nodes = jelastic.env.control.GetEnvInfo(envName, signature).nodes, 
+var envDomain = getParam("domain") || '${env.domain}';
+
+var nodes = jelastic.env.control.GetEnvInfo(envName, signature).nodes, 
 masterIP, masterID, groupsMap = {}, resp = [], envDomain;
-if (!domain) envDomain = '${env.domain}'
-else envDomain = domain; 
+
 
 for (var i = 0, n = nodes.length; i < n; i++) {
       var ng = nodes[i].nodeGroup;
