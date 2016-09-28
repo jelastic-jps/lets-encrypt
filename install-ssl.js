@@ -7,6 +7,8 @@ if (token != "${TOKEN}") {
 
 var envDomain = getParam("domain") || '${ENV_DOMAIN}';
 
+return jelastic.env.control.GetEnvInfo(envName, signature);
+
 var nodes = jelastic.env.control.GetEnvInfo(envName, signature).nodes, 
 masterIP, masterID, groupsMap = {}, resp = [], envDomain;
 
