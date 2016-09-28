@@ -40,7 +40,7 @@
                         "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/run-script.js",
                         "scriptName": "update-ssl",
                         "scriptType": "js",
-                        "next": "update-ssl-call"
+                        "next": null
                     }
                 }
             }
