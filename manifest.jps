@@ -37,7 +37,7 @@
                     "type": "js",
                     "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-custom-script.js",
                     "params": {
-                        "url": "https://raw.githubusercontent.com/jelastic-jps/get-push-deploy-with-maven/master/run-script.js",
+                        "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/run-script.js",
                         "scriptName": "update-ssl",
                         "scriptType": "js",
                         "next": "update-ssl-call"
