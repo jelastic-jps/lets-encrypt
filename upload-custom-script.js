@@ -24,6 +24,18 @@ if (resp.result != 0) return resp;
 //get app domain
 var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
+//eval the script 
+var resp = hivext.dev.scripting.Eval(scriptName, {
+    token: token,
+    domain: '${settings.customdomain}',
+    urlLeScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh',
+    urlGenScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh'
+});
+if (resp.result != 0) return resp;
+    
+//     "cmd": "wget -qO http://${this.domain}/install-ssl-script?token=${this.token}&domain=${settings.customdomain}&urlLeScript=https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh&urlGenScript=https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh >> /var/log/run.log"
+
+
 return {
     result: 0,
     onAfterReturn : {
