@@ -29,7 +29,8 @@ var resp = hivext.dev.scripting.Eval(scriptName, {
     token: token,
     domain: '${settings.customdomain}',
     urlLeScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh',
-    urlGenScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh'
+    urlGenScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh',
+    envName: '${env.envName}'
 });
 if (resp.result != 0) return resp;
     
