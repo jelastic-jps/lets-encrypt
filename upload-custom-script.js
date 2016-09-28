@@ -18,4 +18,3 @@ jelastic.dev.scripting.DeleteScript(scriptName);
 var resp = hivext.dev.scripting.CreateScript(scriptName, scriptType, scriptBody);
 if (resp.result != 0) return resp;
 
-return {"result": 0, "message": "Script uploaded"}
