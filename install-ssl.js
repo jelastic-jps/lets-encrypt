@@ -10,7 +10,7 @@ var envDomain = getParam("domain") || "${ENV_DOMAIN}";
 //var session = jelastic.system.admin.SigninAsUser(appid, signature, '${USER_EMAIL}').session;
 //var testresp = jelastic.env.control.GetEnvInfo(envName, session);
 //
-var testresp = jelastic.env.control.GetEnvInfo("${ENV_APPID}/58bdf83fea6af021e0c94ba13730fd6b", session);
+var testresp = jelastic.env.control.GetEnvInfo("58bdf83fea6af021e0c94ba13730fd6b/${ENV_APPID}", session);
 
 
 print (testresp);
