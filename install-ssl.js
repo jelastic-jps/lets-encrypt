@@ -1,4 +1,4 @@
-//@url('/install-ssl')
+//@url('/install-ssl-script')
 //@req(token, envName, urlLeScript, urlGenScript)
 
 if (token != "${TOKEN}") {
