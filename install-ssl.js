@@ -50,7 +50,7 @@ var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /roo
 resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"));; 
 var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
 resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"));; 
-var createSettingsParams = '\"domain=\'+envDomain+'\' \n email=\'${USER_EMAIL}\' \n appid=\'${ENV_APPID}\' \n appdomain=\'${ENV_DOMAIN}\'\" >  /opt/letsencrypt/settings' 
+var createSettingsParams = '\"domain=\''+envDomain+'\' \n email=\'${USER_EMAIL}\' \n appid=\'${ENV_APPID}\' \n appdomain=\'${ENV_DOMAIN}\'\" >  /opt/letsencrypt/settings' 
 resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"));; 
 var execParamsMain = '/root/generate-ssl-cert.sh'
 resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"));; 
