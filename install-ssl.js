@@ -1,3 +1,4 @@
+//auth
 //@url('/install-ssl-script')
 //@req(token, envName, urlLeScript, urlGenScript)
 
@@ -9,7 +10,7 @@ var envDomain = getParam("domain") || '${ENV_DOMAIN}';
 
 return jelastic.env.control.GetEnvInfo(envName, signature);
 
-var nodes = jelastic.env.control.GetEnvInfo(envName, signature).nodes, 
+var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
 masterIP, masterID, groupsMap = {}, resp = [], envDomain;
 
 
