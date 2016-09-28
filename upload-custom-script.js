@@ -1,5 +1,5 @@
 //@auth
-//@required('url', 'scriptName', 'scriptType', 'next')
+//@required('url', 'scriptName', 'scriptType')
 
 import com.hivext.api.core.utils.Transport;
 import com.hivext.api.utils.Random;
