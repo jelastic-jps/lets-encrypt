@@ -7,9 +7,11 @@ if (token != "${TOKEN}") {
 }
 
 var envDomain = getParam("domain") || '${ENV_DOMAIN}';
-var session = jelastic.system.admin.SigninAsUser(appid, signature, '${USER_EMAIL}');
+var session = jelastic.system.admin.SigninAsUser(appid, signature, '${USER_EMAIL}').session;
 var testresp = jelastic.env.control.GetEnvInfo(envName, session);
 print (testresp);
+
+return 0;
 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
 masterIP, masterID, groupsMap = {}, resp = [], envDomain;
