@@ -11,7 +11,7 @@ var envDomain = getParam("domain") || "${ENV_DOMAIN}";
 //var testresp = jelastic.env.control.GetEnvInfo(envName, session);
 //
 //var testresp = jelastic.env.control.GetEnvInfo("58bdf83fea6af021e0c94ba13730fd6b/${ENV_APPID}", session); //58bdf83fea6af021e0c94ba13730fd6b
-var testresp = jelastic.env.control.GetEnvInfo("370029fbcf808b89d6f2628b2da0004c/${ENV_APPID}", session);
+var testresp = jelastic.env.control.GetEnvInfo("${ENV_APPID}/370029fbcf808b89d6f2628b2da0004c", session);
 
 
 
