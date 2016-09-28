@@ -8,7 +8,7 @@ if (token != "${TOKEN}") {
 
 var envDomain = getParam("domain") || '${ENV_DOMAIN}';
 
-var testresp = jelastic.env.control.GetEnvInfo(envName, session);
+var testresp = jelastic.env.control.GetEnvInfo(envName, signature);
 print (testresp);
 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
