@@ -5,11 +5,14 @@ import com.hivext.api.core.utils.Transport;
 import com.hivext.api.utils.Random;
 
 //reading script from URL
-var scriptBody = new Transport().get(url)
+var scriptBody = new Transport().get(url);
 
 //inject token
 var token = Random.getPswd(64);
 scriptBody = scriptBody.replace("${TOKEN}", token);
+scriptBody = scriptBody.replace("${ENV_DOMAIN}", "${env.domain}");
+scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
+scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
 
 //delete the script if it exists already
 jelastic.dev.scripting.DeleteScript(scriptName);
