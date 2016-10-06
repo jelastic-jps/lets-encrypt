@@ -30,6 +30,10 @@ for (var i = 0, n = nodes.length; i < n; i++) {
 //reading script from URL
 var scriptBody = new Transport().get(url);
 
+print(urlLeScript)
+print(urlLeScript.toString())
+
+
 //inject token
 var token = Random.getPswd(64);
 scriptBody = scriptBody.replace("${TOKEN}", token);
@@ -37,7 +41,7 @@ scriptBody = scriptBody.replace("${ENV_DOMAIN}", '${settings.customdomain}');
 scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
 scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
 scriptBody = scriptBody.replace("${ENV_NAME}", envName);
-scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript + "");
+scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript + "");
 scriptBody = scriptBody.replace("${NODE_GROUP}", group);
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP);
