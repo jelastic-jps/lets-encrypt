@@ -19,8 +19,8 @@ envAppid = getParam("envAppid") || "${ENV_APPID}";
 
 
 function manageDnat(action)
-  var dnatParams = ' -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
-  resp.push(jelastic.env.control.ExecCmdByGroup(envName, signature, group,  toJSON( [ { "command": "iptables", "params": dnatParams } ]), true, "root"));; 
+  var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
+  resp.push(jelastic.env.control.ExecCmdByGroup(envName, signature, group,  toJSON( [ { "command": "ip", "params": dnatParams } ]), true, "root"));; 
 }
 
 manageDnat('add');
