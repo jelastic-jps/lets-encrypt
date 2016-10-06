@@ -24,7 +24,9 @@
 					"params": {
 						"url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js?47",
 						"scriptName": "install-ssl-script",
-						"scriptType": "js"
+						"scriptType": "js",
+						"urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
+    						"urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
 					}
 				}
 			}
