@@ -24,13 +24,25 @@ if (resp.result != 0) return resp;
 //get app domain
 var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
+//get nodeGroup 
+var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
+group = 'cp';
+
+for (var i = 0, n = nodes.length; i < n; i++) {
+      if (nodes[i].nodeGroup == 'lb' || nodes[i].nodeGroup == 'bl') {
+          group = nodes[i].nodeGroup;
+          break;
+      }
+}
+
 //eval the script 
 var resp = hivext.dev.scripting.Eval(scriptName, {
     token: token,
     domain: '${settings.customdomain}',
     urlLeScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh',
     urlGenScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh',
-    envName: '${env.envName}'
+    envName: '${env.envName}',
+    group: group
 });
 return resp;
     
