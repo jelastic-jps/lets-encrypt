@@ -41,7 +41,7 @@ scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
-scriptBody = scriptBody.replace("${MASTER_ID}", masterId);
+scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
 
 
 //delete the script if it exists already
