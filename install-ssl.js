@@ -24,44 +24,44 @@ function manageDnat(action) {
 
 manageDnat('add');
 
-println(resp)
+//println(resp)
 
 //download 
 var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
 resp = jelastic.env.control.ExecCmdById(envAppid, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
 
-println(resp)
+//println(resp)
 
 var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
 resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"); 
 
-println(resp)
+//println(resp)
 
 //exec
 var createSettingsParams = '\"domain=\''+envDomain+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
 resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
 
-println(resp)
+//println(resp)
 
 var execParamsMain = '/root/generate-ssl-cert.sh'
 resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"); 
 
-println(resp)
+//println(resp)
 
 //read certificates
 var cert_key = jelastic.env.file.Read(envName, signature, "/tmp/privkey.url", null, null, masterId);
 var fullchain = jelastic.env.file.Read(envName, signature, "/tmp/fullchain.url", null, null, masterId);
 var cert = jelastic.env.file.Read(envName, signature, "/tmp/cert.url", null, null, masterId);
 
-println(cert_key)
-println(fullchain)
-println(cert)
+//println(cert_key)
+//println(fullchain)
+//println(cert)
 
 manageDnat('remove');
 
-println(8)
+//println(8)
 resp = jelastic.env.binder.BindSSL(envName, signature, cert_key.body, cert.body, fullchain.body);
-println(resp)
+//println(resp)
 
 return {
   result:0
