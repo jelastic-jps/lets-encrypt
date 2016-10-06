@@ -47,6 +47,7 @@ scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
 
+print(scriptBody)
 
 //delete the script if it exists already
 jelastic.dev.scripting.DeleteScript(scriptName);
