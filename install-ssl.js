@@ -14,52 +14,56 @@ urlLeScript = getParam("urlLeScript") || "${LE_INSTALL}",
 urlGenScript = getParam("urlGenScript") || "${LE_GENERATE_SSL}",   
 group = getParam("group") || "${NODE_GROUP}",
 email = getParam("email") || "${USER_EMAIL}",
-envAppid = getParam("envAppid") || "${ENV_APPID}";
+envAppid = getParam("envAppid") || "${ENV_APPID}",
+resp;
 
 function manageDnat(action) {
   var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
-  jelastic.env.control.ExecCmdByGroup(envName, signature, group, { "command": "ip", "params": dnatParams }, true, false, "root"); 
+  resp = jelastic.env.control.ExecCmdByGroup(envName, signature, group, { "command": "ip", "params": dnatParams }, true, false, "root"); 
 }
 
-println(1)
+println(resp)
 
 manageDnat('add');
 
-
-println(2)
-
 //download 
 var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
-jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
+resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
 
-println(3)
+println(resp)
 
 var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
-jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"); 
+resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"); 
 
-println(4)
+println(resp)
 
 //exec
 var createSettingsParams = '\"domain=\''+envDomain+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
-jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
+resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
 
-println(5)
+println(resp)
 
 var execParamsMain = '/root/generate-ssl-cert.sh'
-jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"); 
+resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"); 
 
-println(6)
+println(resp)
 
 //read certificates
 var cert_key = jelastic.env.file.Read(envName, signature, "/tmp/privkey.url", null, null, masterId);
 var fullchain = jelastic.env.file.Read(envName, signature, "/tmp/fullchain.url", null, null, masterId);
 var cert = jelastic.env.file.Read(envName, signature, "/tmp/cert.url", null, null, masterId);
 
-println(7)
+println(cert_key)
+println(fullchain)
+println(cert)
 
 manageDnat('remove');
 
 println(8)
-return jelastic.env.binder.BindSSL(envName, signature, cert_key.body, cert.body, fullchain.body);
-println(9)
+resp = jelastic.env.binder.BindSSL(envName, signature, cert_key.body, cert.body, fullchain.body);
+println(resp)
+
+return {
+  result:0
+}
 
