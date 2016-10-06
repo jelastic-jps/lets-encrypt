@@ -33,7 +33,7 @@ var scriptBody = new Transport().get(url);
 //inject token
 var token = Random.getPswd(64);
 scriptBody = scriptBody.replace("${TOKEN}", token);
-scriptBody = scriptBody.replace("${ENV_DOMAIN}", '${settings.customdomain}');
+scriptBody = scriptBody.replace("${ENV_DOMAIN}", '${settings.customdomain}' || "${env.domain}");
 scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
 scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
 scriptBody = scriptBody.replace("${ENV_NAME}", envName);
