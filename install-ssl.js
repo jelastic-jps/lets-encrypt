@@ -16,15 +16,12 @@ group = getParam("group") || "${NODE_GROUP}",
 email = getParam("email") || "${USER_EMAIL}",
 envAppid = getParam("envAppid") || "${ENV_APPID}";
 
-
-
 function manageDnat(action) {
   var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
-  resp.push(jelastic.env.control.ExecCmdByGroup(envName, signature, group,  toJSON( [ { "command": "ip", "params": dnatParams } ]), true, "root"));; 
+  jelastic.env.control.ExecCmdByGroup(envName, signature, group,  toJSON( [ { "command": "ip", "params": dnatParams } ]), true, "root"); 
 }
 
 manageDnat('add');
-
 
 //download 
 var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
