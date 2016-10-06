@@ -4,6 +4,7 @@
 import com.hivext.api.core.utils.Transport;
 import com.hivext.api.utils.Random;
 
+var envName = '${env.envName}';
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
@@ -32,10 +33,10 @@ var scriptBody = new Transport().get(url);
 //inject token
 var token = Random.getPswd(64);
 scriptBody = scriptBody.replace("${TOKEN}", token);
-scriptBody = scriptBody.replace("${ENV_DOMAIN}", "${env.domain}");
+scriptBody = scriptBody.replace("${ENV_DOMAIN}", '${settings.customdomain}');
 scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
 scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
-scriptBody = scriptBody.replace("${ENV_NAME}", '${env.envName}');
+scriptBody = scriptBody.replace("${ENV_NAME}", envName);
 scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript);
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript);
 scriptBody = scriptBody.replace("${NODE_GROUP}", group);
@@ -55,12 +56,7 @@ var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
 //eval the script 
 var resp = hivext.dev.scripting.Eval(scriptName, {
-    token: token,
-    domain: '${settings.customdomain}',
-    urlLeScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh',
-    urlGenScript: 'https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh',
-    envName: '${env.envName}',
-    group: group
+    token: token
 });
 return resp;
     
