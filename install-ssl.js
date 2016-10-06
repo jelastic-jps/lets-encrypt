@@ -22,13 +22,13 @@ function manageDnat(action) {
   resp = jelastic.env.control.ExecCmdByGroup(envAppid, signature, group, { "command": "ip", "params": dnatParams }, true, false, "root"); 
 }
 
-println(resp)
-
 manageDnat('add');
+
+println(resp)
 
 //download 
 var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
-resp = jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
+resp = jelastic.env.control.ExecCmdById(envAppid, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
 
 println(resp)
 
