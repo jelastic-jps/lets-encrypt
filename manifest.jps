@@ -1,61 +1,70 @@
 {
-	"jpsVersion": "0.6",
-	"jpsType": "update",
-	"application": {
-		"id": "letsencrypt-ssl-addon",
-		"name": "LetsEncrypt SSL",
-		"version": "1.0",
-		"homepage": "http://jelastic.com/",
-		"logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
-		"description": {
-			"text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG)."
-		},
-		"onInstall": [{
-			"call": [
-				"upload-custom-script"
-			]
-		}],
-		"procedures": [{
-			"id": "upload-custom-script",
-			"onCall": {
-				"execScript": {
-					"type": "js",
-					"script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-custom-script.js?47",
-					"params": {
-						"url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js?47",
-						"scriptName": "install-ssl-script",
-						"scriptType": "js",
-						"urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
-    						"urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
-					}
-				}
-			}
-		}, {
-			"id": "log",
-			"onCall": {
-				"log": "${this.message}"
-			}
-		}],
-		"settings": {
-			"fields": [{
-				"type": "radio-fieldset",
-				"name": "ext_domain",
-				"default": "currentDomain",
-				"values": {
-					"currentDomain": "Generate SSL for current domain i.e. ${env.domain}",
-					"customDomain": "Generate SSL for custom domain"
-				},
-				"showIf": {
-					"customDomain": [{
-						"type": "string",
-						"name": "customdomain",
-						"caption": {
-							"en": "Custom domain"
-						},
-						"required": true
-					}]
-				}
-			}]
-		}
-	}
+  "jpsVersion": "0.6",
+  "jpsType": "update",
+  "application": {
+    "id": "letsencrypt-ssl-addon",
+    "name": "LetsEncrypt SSL",
+    "version": "1.0",
+    "homepage": "http://jelastic.com/",
+    "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
+    "description": {
+      "text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG)."
+    },
+    "onInstall": [
+      {
+        "call": [
+          "upload-custom-script"
+        ]
+      }
+    ],
+    "procedures": [
+      {
+        "id": "upload-custom-script",
+        "onCall": {
+          "execScript": {
+            "type": "js",
+            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-custom-script.js?47",
+            "params": {
+              "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js?47",
+              "scriptName": "install-ssl-script",
+              "scriptType": "js",
+              "urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
+              "urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh"
+            }
+          }
+        }
+      },
+      {
+        "id": "log",
+        "onCall": {
+          "log": "${this.message}"
+        }
+      }
+    ],
+    "settings": {
+      "fields": [
+        {
+          "type": "radio-fieldset",
+          "name": "ext_domain",
+          "default": "currentDomain",
+          "values": {
+            "currentDomain": "Generate SSL for current domain i.e. ${env.domain}",
+            "customDomain": "Generate SSL for custom domain"
+          },
+          "showIf": {
+            "customDomain": [
+              {
+                "type": "string",
+                "name": "customdomain",
+                "caption": {
+                  "en": "Custom domain"
+                },
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
 }
