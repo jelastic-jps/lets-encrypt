@@ -7,6 +7,7 @@ if (token != "${TOKEN}") {
 }
 
 var envDomain = getParam("domain") || "${ENV_DOMAIN}";
+var masterId = getParam("masterId") || "${MASTER_ID}"
 
 /*
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
@@ -43,20 +44,20 @@ manageDnat('add');
 
 //download 
 var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
-resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"));; 
+resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"));; 
 var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
-resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"));; 
+resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"));; 
 
 //exec
 var createSettingsParams = '\"domain=\''+envDomain+'\' \n email=\'${USER_EMAIL}\' \n appid=\'${ENV_APPID}\' \n appdomain=\'${ENV_DOMAIN}\'\" >  /opt/letsencrypt/settings' 
-resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"));; 
+resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"));; 
 var execParamsMain = '/root/generate-ssl-cert.sh'
-resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterID,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"));; 
+resp.push(jelastic.env.control.ExecCmdById(envName, signature, masterId,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"));; 
 
 //read certificates
-var cert_key = jelastic.env.file.Read(envName, signature, "/tmp/privkey.url", null, null, masterID);
-var fullchain = jelastic.env.file.Read(envName, signature, "/tmp/fullchain.url", null, null, masterID);
-var cert = jelastic.env.file.Read(envName, signature, "/tmp/cert.url", null, null, masterID);
+var cert_key = jelastic.env.file.Read(envName, signature, "/tmp/privkey.url", null, null, masterId);
+var fullchain = jelastic.env.file.Read(envName, signature, "/tmp/fullchain.url", null, null, masterId);
+var cert = jelastic.env.file.Read(envName, signature, "/tmp/cert.url", null, null, masterId);
 
 manageDnat('remove');
 
