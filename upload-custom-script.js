@@ -19,12 +19,8 @@ for (var i = 0, n = nodes.length; i < n; i++) {
 
 var masterId, masterIP;
 for (var i = 0, n = nodes.length; i < n; i++) {
-      if (nodes[i].nodeGroup != group) {
-            continue;
-      }
-      if (!nodes[i].extIPs) {
-            jelastic.env.control.AttachExtIp(envName, session, nodes[i].id);
-      }
+      if (nodes[i].nodeGroup != group) continue;
+      if (!nodes[i].extIPs) jelastic.env.control.AttachExtIp(envName, session, nodes[i].id);   
       if (nodes[i].ismaster) { 
             masterId = nodes[i].id;
             masterIP = nodes[i].address;
@@ -46,8 +42,6 @@ scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
-
-print(scriptBody)
 
 //delete the script if it exists already
 jelastic.dev.scripting.DeleteScript(scriptName);
