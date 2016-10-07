@@ -13,9 +13,9 @@ iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
 
 #Request for certificates - test certs
-/opt/letsencrypt/letsencrypt-auto certonly --standalone --test-cert --break-my-certs --domain $domain --standalone-supported-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
+#/opt/letsencrypt/letsencrypt-auto certonly --standalone --test-cert --break-my-certs --domain $domain --standalone-supported-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
 #Request for certificates - valid certs
-#/opt/letsencrypt/letsencrypt-auto certonly --standalone  --domain $domain --standalone-supported-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
+/opt/letsencrypt/letsencrypt-auto certonly --standalone  --domain $domain --standalone-supported-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
 
 
 iptables -t nat -D PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
