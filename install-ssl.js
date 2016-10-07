@@ -43,16 +43,9 @@ var cert_key = jelastic.env.file.Read(envName, session, "/tmp/privkey.url", null
 var fullchain = jelastic.env.file.Read(envName, session, "/tmp/fullchain.url", null, null, masterId);
 var cert = jelastic.env.file.Read(envName, session, "/tmp/cert.url", null, null, masterId);
 
-println(cert_key)
-println(fullchain)
-println(cert)
-
 manageDnat('remove');
 
-println(8)
 resp = jelastic.env.binder.BindSSL(envName, session, cert_key.body, cert.body, fullchain.body);
-println(resp)
-
 return {
   result:0
 }
