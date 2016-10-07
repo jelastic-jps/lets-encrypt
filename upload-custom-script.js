@@ -44,6 +44,9 @@ scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
 
 //delete the script if it exists already
+
+scriptName = envName + '-' + scriptName;
+
 jelastic.dev.scripting.DeleteScript(scriptName);
 
 //create a new script 
