@@ -19,7 +19,7 @@ resp;
 
 function manageDnat(action) {
   var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
-  resp = jelastic.env.control.ExecCmdByGroup(envAppid, session, group, [{ "command": "ip", "params": dnatParams }], true, false, "root"); 
+  resp = jelastic.env.control.ExecCmdByGroup(envAppid, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
 }
 
 manageDnat('add');
