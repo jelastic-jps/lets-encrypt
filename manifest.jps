@@ -23,9 +23,9 @@
         "onCall": {
           "execScript": {
             "type": "js",
-            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-custom-script.js?47",
+            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-custom-script.js",
             "params": {
-              "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js?47",
+              "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js",
               "scriptName": "install-ssl-script",
               "scriptType": "js",
               "urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
