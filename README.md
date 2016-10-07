@@ -1,3 +1,5 @@
+## THIS PACKAGE IS UNDER DEVELOPMENT
+
 [![Let's Encrypt](images/letsencrypt-logo-horizontal.png)](../../../lets-encrypt)
 ## Jelastic Let's Encrypt Add-on
 
@@ -5,6 +7,7 @@ This repository provides [Let's Encrypt](https://letsencrypt.org/about/) add-on 
 
 **Let's Encrypt** is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the [Internet Security Research Group (ISRG)](https://letsencrypt.org/isrg/).
 
+<!--
 **Type of nodes this add-on can be applied to**: 
 - Application server (cp).
 
@@ -29,3 +32,4 @@ In order to get this solution instantly deployed, click the "Get It Hosted Now" 
 To deploy this package to Jelastic Private Cloud, import [this JPS manifest](../../raw/master/manifest.jps) within your dashboard ([detailed instruction](https://docs.jelastic.com/environment-export-import#import)).
 
 For more information on what Jelastic add-on is and how to apply it, follow the [Jelastic Add-ons](https://github.com/jelastic-jps/jpswiki/wiki/Jelastic-Addons) reference.
+-->
