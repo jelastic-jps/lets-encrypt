@@ -6,6 +6,8 @@ if (token != "${TOKEN}") {
   return {"result": 8, "error": "wrong token"}
 }
 
+if (!session) session = signature;
+
 var envDomain = getParam("domain") || "${ENV_DOMAIN}",
 envName = getParam("envName") || "${ENV_NAME}",
 masterId = getParam("masterId") || "${MASTER_ID}",
