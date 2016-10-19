@@ -43,6 +43,9 @@ var createSettingsParams = '\"domain=\''+envDomain+'\' \n email=\''+email+'\' \n
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
 
 print (urlUpdateScript);
+return {
+  result:0
+}
 
 var execParamsMain = '/root/generate-ssl-cert.sh'
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"); 
