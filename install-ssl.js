@@ -33,7 +33,7 @@ resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ 
 var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"); 
 
-var execUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs.sh && /root/update-ssl-certs.sh && echo "0 04 * * * /root/update-ssl-certs.sh + 'envDomain' + 'envName' + 'token'" >> /var/spool/cron/root';
+var execUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs.sh && /root/update-ssl-certs.sh && echo "0 04 * * * /root/update-ssl-certs.sh + 'appid' + 'envName' + 'token'" >> /var/spool/cron/root';
 resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
 
 //exec
