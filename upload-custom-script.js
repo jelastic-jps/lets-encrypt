@@ -1,5 +1,5 @@
 //@auth
-//@required('url', 'scriptName', 'scriptType', urlLeScript, urlGenScript)
+//@required('url', 'scriptName', 'scriptType', urlLeScript, urlGenScript, urlUpdateScript)
 
 import com.hivext.api.core.utils.Transport;
 import com.hivext.api.utils.Random;
@@ -39,6 +39,7 @@ scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
 scriptBody = scriptBody.replace("${ENV_NAME}", envName);
 scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
+scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdateScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
