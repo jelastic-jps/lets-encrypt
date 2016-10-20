@@ -34,8 +34,8 @@ resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ 
 var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"); 
 
-//var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs.sh && chmod +x /root/update-ssl-certs.sh && echo \"0 04 * * * /root/update-ssl-certs.sh + 'appid' + 'envName' + 'token'\" >> /var/spool/cron/root';
-var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs.sh && chmod +x /root/update-ssl-certs.sh';
+var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs.sh && chmod +x /root/update-ssl-certs.sh && echo \"0 04 * * * /root/update-ssl-certs.sh' + ' ' + appid + ' ' + envName + ' ' + token +'\"' >> /var/spool/cron/root';
+//var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs.sh && chmod +x /root/update-ssl-certs.sh';
 resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsUpdateScript } ]), true, "root"); 
 
 //exec
