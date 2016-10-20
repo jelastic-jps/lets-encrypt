@@ -6,6 +6,7 @@ import com.hivext.api.utils.Random;
 
 var envName = '${env.envName}';
 var customDomain = '${settings.customdomain}';
+var envDomain =  "${env.domain}"
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
@@ -37,7 +38,7 @@ scriptBody = scriptBody.replace("${TOKEN}", token);
 scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
 scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
 scriptBody = scriptBody.replace("${ENV_NAME}", envName);
-scriptBody = scriptBody.replace("${ENV_DOMAIN}", customDomain.toString() | "${env.domain}");
+scriptBody = scriptBody.replace("${ENV_DOMAIN}", customDomain.toString() | envDomain.toString());
 scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
 scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdateScript.toString());
