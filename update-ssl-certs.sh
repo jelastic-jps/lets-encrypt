@@ -14,5 +14,5 @@ _cur_date_unixtime=$(date "+%s");
 _delta_time=$(( $_exp_date_unixtime - $_cur_date_unixtime  ));
 [[ $_delta_time -le $seconds_before_expire ]] && {
     echo "$(date) - update required" >> /var/log/letsencrypt.log;
-    wget -qO- "http://${env_domain}/${env_name}_-install-ssl-script?token=$token"
+    wget -qO- "http://${env_domain}/${env_name}-install-ssl-script?token=$token"
 }
