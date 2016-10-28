@@ -2,7 +2,7 @@
 
 DAYS_BEFORE_EXPIRE=14
 
-url=$1
+auto_update_url=$1
 
 seconds_before_expire=$(( $DAYS_BEFORE_EXPIRE * 24 * 60 * 60 ));
 wget=$(which wget);
@@ -13,5 +13,5 @@ _cur_date_unixtime=$(date "+%s");
 _delta_time=$(( $_exp_date_unixtime - $_cur_date_unixtime  ));
 [[ $_delta_time -le $seconds_before_expire ]] && {
     echo "$(date) - update required" >> /var/log/letsencrypt.log;
-    wget -qO- ${url}
+    wget -qO- ${auto_update_url}
 }
