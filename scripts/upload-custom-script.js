@@ -29,11 +29,12 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       }
 }
 
+var scriptUrl = envName + '-' + scriptName,
+    token = Random.getPswd(64);
+
 //reading script from URL
 var scriptBody = new Transport().get(url);
 
-//inject token
-var token = Random.getPswd(64);
 scriptBody = scriptBody.replace("${TOKEN}", token);
 scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
 scriptBody = scriptBody.replace("${ENV_APPID}", "${env.appid}");
@@ -46,25 +47,23 @@ scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdateScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
+scriptBody = scriptBody.replace("${SCRIPT_URL}", scriptUrl.toString());
 
                                                                
 //delete the script if it exists already
-
-scriptName = envName + '-' + scriptName;
-
-jelastic.dev.scripting.DeleteScript(scriptName);
+jelastic.dev.scripting.DeleteScript(scriptUrl);
 
 //create a new script 
-var resp = jelastic.dev.scripting.CreateScript(scriptName, scriptType, scriptBody);
+var resp = jelastic.dev.scripting.CreateScript(scriptUrl, scriptType, scriptBody);
 if (resp.result != 0) return resp;
 
 //get app domain
 var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
 //eval the script 
-var resp = jelastic.dev.scripting.Eval(scriptName, {
+var resp = jelastic.dev.scripting.Eval(scriptUrl, {
     token: token,
-    updateScriptDomain: domain
+    autoUpdateUrl: 'http://'+ domain + '/' + scriptUrl + '?token=' + token;
 });
 
 return resp;
