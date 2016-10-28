@@ -3,7 +3,7 @@
 //@req(token)
 
 if (token != "${TOKEN}") {
-  return {"result": 8, "error": "wrong token"}
+  return {result: 8, error: "wrong token", response: {result: 8}}
 }
 
 if (!session) session = signature;
