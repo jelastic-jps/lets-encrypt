@@ -8,6 +8,7 @@ if (token != "${TOKEN}") {
 if (!session) session = signature;
 
 var envDomain = getParam("domain") || "${ENV_DOMAIN}",
+customDomain = getParam("customDomain") || "${CUSTOM_DOMAIN}",
 envName = getParam("envName") || "${ENV_NAME}",
 masterId = getParam("masterId") || "${MASTER_ID}",
 masterIP = getParam("masterIP") || "${MASTER_IP}",
@@ -38,7 +39,7 @@ var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/update-ssl-certs
 resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsUpdateScript } ]), true, "root"); 
 
 //exec
-var createSettingsParams = '\"domain=\''+envDomain+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
+var createSettingsParams = '\"domain=\''+(customDomain || envDomain)+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
 
 var execParamsMain = '/root/generate-ssl-cert.sh'
@@ -52,6 +53,7 @@ var cert = jelastic.env.file.Read(envName, session, "/tmp/cert.url", null, null,
 manageDnat('remove');
 
 resp = jelastic.env.binder.BindSSL(envName, session, cert_key.body, cert.body, fullchain.body);
+
 return {
   result:0
 }
