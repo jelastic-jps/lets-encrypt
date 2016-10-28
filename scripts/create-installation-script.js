@@ -1,5 +1,5 @@
 //@auth
-//@required(url, scriptName, scriptType, urlLeScript, urlGenScript, urlUpdateScript)
+//@required(url, scriptName, scriptType, urlLeScript, urlGenScript, urlUpdateScript, cronTime)
 
 import com.hivext.api.core.utils.Transport;
 import com.hivext.api.development.Scripting;
@@ -50,6 +50,7 @@ scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
 scriptBody = scriptBody.replace("${SCRIPT_URL}", scriptName.toString());
+scriptBody = scriptBody.replace("${CRON_TIME}", cronTime.toString());
 
                                                                
 //delete the script if it exists already
