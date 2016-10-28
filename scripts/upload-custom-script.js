@@ -70,7 +70,12 @@ var resp = jelastic.dev.scripting.Eval(scriptName, {
     autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
 });
 
-return resp;
+return {
+      response: resp,
+      result:0,
+      token: token
+}
+//return token;
 
 /*
 return {
