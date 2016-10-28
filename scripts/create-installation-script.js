@@ -89,17 +89,17 @@ resp = scripting.eval({
         application : {
 		id: "sendEmail",
 		name: "Let's Encrypt SSL",
-            targetNodes: {
-                  nodeType: group
-            },
+            	targetNodes: {
+                	nodeType: group
+            	},
 		success: {
-	            email: text
+	        	email: text
 		}
 	  }
     }
 });
 
-return new Transport().get(url);
+return resp;
 
 /*
 return {
