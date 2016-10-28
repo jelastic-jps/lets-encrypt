@@ -9,6 +9,9 @@ var customDomain = '${settings.customdomain}';
 var envDomain =  "${env.domain}";
 var token = Random.getPswd(64);
 
+println("${settings.ext_domain}")
+println("${settings.customdomain}")
+
 //changing scriptName to env specific
 scriptName = envName + '-' + scriptName;
 
