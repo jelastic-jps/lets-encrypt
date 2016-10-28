@@ -6,7 +6,7 @@ import com.hivext.api.utils.Random;
 
 var envName = '${env.envName}';
 var customDomain = '${settings.customdomain}';
-var envDomain =  "${env.domain}"
+var envDomain =  "${env.domain}";
 var token = Random.getPswd(64);
 
 //changing scriptName to env specific
