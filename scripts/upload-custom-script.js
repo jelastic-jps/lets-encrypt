@@ -62,7 +62,7 @@ if (resp.result != 0) return resp;
 var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
 //eval the script 
-var resp = jelastic.dev.scripting.Eval(scriptUrl, {
+var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
     autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
 });
