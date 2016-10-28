@@ -49,7 +49,7 @@ resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ 
 println(resp)
 
 //exec
-var createSettingsParams = '\"domain=\''+(customDomain || envDomain)+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
+var createSettingsParams = '\"domain=\''+(envDomain)+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
 
 println(resp)
