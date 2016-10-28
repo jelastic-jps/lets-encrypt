@@ -19,6 +19,7 @@ urlUpdateScript = getParam("urlUpdateScript") || "${UPDATE_SSL}",
 group = getParam("group") || "${NODE_GROUP}",
 email = getParam("email") || "${USER_EMAIL}",
 envAppid = getParam("envAppid") || "${ENV_APPID}",
+cronTime = getParam("cronTime") || "${CRON_TIME}",
 resp;
 
 function manageDnat(action) {
@@ -51,7 +52,7 @@ var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
   fileName = urlUpdateScript.split('/').pop();
   execParams = ' ' + urlUpdateScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
-  execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"0 04 * * * /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
+  execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
   resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 }
 
