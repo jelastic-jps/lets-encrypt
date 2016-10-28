@@ -10,7 +10,7 @@ var envDomain =  "${env.domain}"
 var token = Random.getPswd(64);
 
 //changing scriptName to env specific
-scriptName = envName + '-' + scriptName,
+scriptName = envName + '-' + scriptName;
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
