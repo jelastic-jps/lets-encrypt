@@ -64,7 +64,7 @@ var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 //eval the script 
 var resp = jelastic.dev.scripting.Eval(scriptUrl, {
     token: token,
-    autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token;
+    autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
 });
 
 return resp;
