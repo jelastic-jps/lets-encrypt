@@ -30,12 +30,12 @@ function manageDnat(action) {
 manageDnat('add');
 
 //download and execute Let's Encrypt package installation script 
-var fileName = urlLeScript.split('/').pop();
+var fileName = urlLeScript.split('/').pop().split('?').shift();
 var execParams = ' ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 
 //download SSL generation script
-fileName = urlGenScript.split('/').pop();
+fileName = urlGenScript.split('/').pop().split('?').shift();
 execParams = ' ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 
@@ -50,7 +50,7 @@ resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ {
 //download and configure cron job for auto update script 
 var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
-  fileName = urlUpdateScript.split('/').pop();
+  fileName = urlUpdateScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdateScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
   resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
