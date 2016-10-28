@@ -37,7 +37,7 @@ resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ {
 
 var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/auto-update-ssl-cert.sh && chmod +x /root/auto-update-ssl-cert.sh';
 var autoUpdateUrl = getParam('autoUpdateUrl');
-if (autoUpdateUrl) execParamsUpdateScript += ' && echo \"0 04 * * * /root/auto-update-ssl-cert.sh' + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
+if (autoUpdateUrl) execParamsUpdateScript += ' && crontab -l | grep -v "auto-update-ssl-cert.sh" | crontab - && echo \"0 04 * * * /root/auto-update-ssl-cert.sh' + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
 resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsUpdateScript } ]), true, "root"); 
 
 //exec
