@@ -28,24 +28,32 @@ function manageDnat(action) {
 
 manageDnat('add');
 
-//download 
-var execParamsLe = ' ' + urlLeScript + ' -O /root/install-le.sh && chmod +x /root/install-le.sh && /root/install-le.sh >> /var/log/letsencrypt.log';
-resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsLe } ]), true, "root"); 
+//download and execute Let's Encrypt package installation script 
+var fileName = urlLeScript.split('/').pop();
+var execParams = ' ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
+resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 
-var execParamsGe = ' ' + urlGenScript + ' -O /root/generate-ssl-cert.sh && chmod +x /root/generate-ssl-cert.sh';
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsGe } ]), true, "root"); 
+//download SSL generation script
+fileName = urlGenScript.split('/').pop();
+execParams = ' ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
+resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 
-var execParamsUpdateScript = ' ' + urlUpdateScript + ' -O /root/auto-update-ssl-cert.sh && chmod +x /root/auto-update-ssl-cert.sh';
+//write configs for SSL generation
+execParams = '\"domain=\''+(envDomain)+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
+resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": execParams } ]), true, "root"); 
+
+//execute SSL generation script 
+execParams = '/root/' + fileName;
+resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
+
+//download and configure cron job for auto update script 
 var autoUpdateUrl = getParam('autoUpdateUrl');
-if (autoUpdateUrl) execParamsUpdateScript += ' && crontab -l | grep -v "auto-update-ssl-cert.sh" | crontab - && echo \"0 04 * * * /root/auto-update-ssl-cert.sh' + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
-resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParamsUpdateScript } ]), true, "root"); 
-
-//exec
-var createSettingsParams = '\"domain=\''+(envDomain)+'\' \n email=\''+email+'\' \n appid=\''+envAppid+'\' \n appdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": createSettingsParams } ]), true, "root"); 
-
-var execParamsMain = '/root/generate-ssl-cert.sh'
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParamsMain } ]), true, "root"); 
+if (autoUpdateUrl) {
+  fileName = urlUpdateScript.split('/').pop();
+  execParams = ' ' + urlUpdateScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
+  execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"0 04 * * * /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
+  resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
+}
 
 //read certificates
 var cert_key = jelastic.env.file.Read(envName, session, "/tmp/privkey.url", null, null, masterId);
