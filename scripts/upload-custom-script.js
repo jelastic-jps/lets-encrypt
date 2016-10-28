@@ -5,12 +5,9 @@ import com.hivext.api.core.utils.Transport;
 import com.hivext.api.utils.Random;
 
 var envName = '${env.envName}';
-var customDomain = '${settings.customdomain}';
+var customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}' : '';
 var envDomain =  "${env.domain}";
 var token = Random.getPswd(64);
-
-println("${settings.ext_domain}")
-println("${settings.customdomain}")
 
 //changing scriptName to env specific
 scriptName = envName + '-' + scriptName;
@@ -70,12 +67,7 @@ var resp = jelastic.dev.scripting.Eval(scriptName, {
     autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
 });
 
-return {
-      response: resp,
-      result:0,
-      token: token
-}
-//return token;
+return resp;
 
 /*
 return {
