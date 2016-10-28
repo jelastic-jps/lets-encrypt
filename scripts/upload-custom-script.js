@@ -7,6 +7,10 @@ import com.hivext.api.utils.Random;
 var envName = '${env.envName}';
 var customDomain = '${settings.customdomain}';
 var envDomain =  "${env.domain}"
+var token = Random.getPswd(64);
+
+//changing scriptName to env specific
+scriptName = envName + '-' + scriptName,
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
@@ -29,9 +33,6 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       }
 }
 
-var scriptUrl = envName + '-' + scriptName,
-    token = Random.getPswd(64);
-
 //reading script from URL
 var scriptBody = new Transport().get(url);
 
@@ -47,14 +48,14 @@ scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdateScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
-scriptBody = scriptBody.replace("${SCRIPT_URL}", scriptUrl.toString());
+scriptBody = scriptBody.replace("${SCRIPT_URL}", scriptName.toString());
 
                                                                
 //delete the script if it exists already
-jelastic.dev.scripting.DeleteScript(scriptUrl);
+jelastic.dev.scripting.DeleteScript(scriptName);
 
 //create a new script 
-var resp = jelastic.dev.scripting.CreateScript(scriptUrl, scriptType, scriptBody);
+var resp = jelastic.dev.scripting.CreateScript(scriptName, scriptType, scriptBody);
 if (resp.result != 0) return resp;
 
 //get app domain
@@ -63,7 +64,7 @@ var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 //eval the script 
 var resp = jelastic.dev.scripting.Eval(scriptUrl, {
     token: token,
-    autoUpdateUrl: 'http://'+ domain + '/' + scriptUrl + '?token=' + token;
+    autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token;
 });
 
 return resp;
