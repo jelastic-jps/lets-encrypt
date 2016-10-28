@@ -66,8 +66,39 @@ var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
     autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
 });
+if (resp.result != 0) return resp;
 
-return resp;
+var scripting =  hivext.local.exp.wrapRequest(new Scripting({
+    serverUrl : "http://" + window.location.host.replace("app", "appstore") + "/"
+}));
+
+//sending success message 
+var array = url.split("/");
+array = array.slice(0, array.length - 2); 
+array.push("html/success.html"); 
+url = array.join("/")
+
+var text = new Transport().get(url);
+resp = scripting.eval({
+    script : "InstallApp",
+    targetAppid : '${env.appid}',
+    session: session, 
+    manifest : {
+        jpsType : "update",
+        application : {
+		id: "sendEmail",
+		name: "Let's Encrypt SSL",
+            targetNodes: {
+                  nodeType: group
+            },
+		success: {
+	            email: text
+		}
+	  }
+    }
+});
+
+return new Transport().get(url);
 
 /*
 return {
