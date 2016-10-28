@@ -55,15 +55,16 @@ scriptName = envName + '-' + scriptName;
 jelastic.dev.scripting.DeleteScript(scriptName);
 
 //create a new script 
-var resp = hivext.dev.scripting.CreateScript(scriptName, scriptType, scriptBody);
+var resp = jelastic.dev.scripting.CreateScript(scriptName, scriptType, scriptBody);
 if (resp.result != 0) return resp;
 
 //get app domain
 var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
 //eval the script 
-var resp = hivext.dev.scripting.Eval(scriptName, {
-    token: token
+var resp = jelastic.dev.scripting.Eval(scriptName, {
+    token: token,
+    updateDomain: domain
 });
 
 return resp;
