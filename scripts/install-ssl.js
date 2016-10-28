@@ -1,5 +1,4 @@
 //auth
-//@url('/install-ssl-script')
 //@req(token)
 
 if (token != "${TOKEN}") {
