@@ -23,14 +23,14 @@
         "onCall": {
           "execScript": {
             "type": "js",
-            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/upload-custom-script.js",
+            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/upload-custom-script.js",
             "params": {
-              "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-ssl.js",
+              "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/install-ssl.js",
               "scriptName": "install-ssl-script",
               "scriptType": "js",
-              "urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/install-le.sh",
-              "urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/generate-ssl-cert.sh",
-              "urlUpdateScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/update-ssl-certs.sh"
+              "urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/install-le.sh",
+              "urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/generate-ssl-cert.sh",
+              "urlUpdateScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/update-ssl-certs.sh"
             }
           }
         }
@@ -49,8 +49,8 @@
           "name": "ext_domain",
           "default": "currentDomain",
           "values": {
-            "currentDomain": "Generate SSL for current domain i.e. ${env.domain}",
-            "customDomain": "Generate SSL for custom domain"
+            "currentDomain": "Environment Name Domain",
+            "customDomain": "Custom Domain"
           },
           "showIf": {
             "customDomain": [
@@ -58,7 +58,7 @@
                 "type": "string",
                 "name": "customdomain",
                 "caption": {
-                  "en": "Custom domain"
+                  "en": "Domain"
                 },
                 "required": true
               }
