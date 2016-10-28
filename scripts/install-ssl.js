@@ -23,7 +23,7 @@ resp;
 
 function manageDnat(action) {
   var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
-  resp = jelastic.env.control.ExecCmdByGroup(envAppid, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
+  resp = jelastic.env.control.ExecCmdByGroup(envName, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
 }
 
 manageDnat('add');
@@ -31,7 +31,7 @@ manageDnat('add');
 //download and execute Let's Encrypt package installation script 
 var fileName = urlLeScript.split('/').pop();
 var execParams = ' ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
-resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
+resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 
 //download SSL generation script
 fileName = urlGenScript.split('/').pop();
@@ -52,7 +52,7 @@ if (autoUpdateUrl) {
   fileName = urlUpdateScript.split('/').pop();
   execParams = ' ' + urlUpdateScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"0 04 * * * /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
-  resp = jelastic.env.control.ExecCmdById(envAppid, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
+  resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 }
 
 //read certificates
