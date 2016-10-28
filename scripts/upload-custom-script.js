@@ -64,7 +64,7 @@ var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 //eval the script 
 var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
-    updateDomain: domain
+    updateScriptDomain: domain
 });
 
 return resp;
