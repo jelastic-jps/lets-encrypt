@@ -46,7 +46,7 @@
       "fields": [
         {
           "type": "radio-fieldset",
-          "name": "ext_domain",
+          "name": "extDomain",
           "default": "currentDomain",
           "values": {
             "currentDomain": "Environment Name Domain",
@@ -56,7 +56,7 @@
             "customDomain": [
               {
                 "type": "string",
-                "name": "customdomain",
+                "name": "customDomain",
                 "caption": {
                   "en": "Domain"
                 },
