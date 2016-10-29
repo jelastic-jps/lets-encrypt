@@ -23,7 +23,7 @@ cronTime = getParam("cronTime") || "${CRON_TIME}",
 resp, debug = [];
 
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
-if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").trim().split(" ").join(" -d ");
+if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
 
 //download and execute Let's Encrypt package installation script 
 var fileName = urlLeScript.split('/').pop().split('?').shift();
