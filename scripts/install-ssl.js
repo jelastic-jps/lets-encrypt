@@ -21,6 +21,21 @@ envAppid = getParam("envAppid") || "${ENV_APPID}",
 cronTime = getParam("cronTime") || "${CRON_TIME}",
 resp, debug = [];
 
+if (getParam("uninstall")){
+  //remove auto-update cron job
+  fileName = urlUpdateScript.split('/').pop().split('?').shift();
+  execParams = 'crontab -l | grep -v "' + fileName + '" | crontab - ';
+  resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
+  debug.push(resp);
+  
+  //remove ssl certificate
+  resp = jelastic.env.binder.RemoveSSL(envName, session);
+  debug.push(resp);
+  
+  resp.debug = debug;
+  return resp;
+}
+
 //temporary workaround for scheduled auto-updates
 if (getParam("auto-update")) {
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
@@ -37,7 +52,6 @@ if (getParam("auto-update")) {
     return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
   }
 }
-
 
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
