@@ -104,7 +104,7 @@ resp = scripting.eval({
         		execScript: {
 				type: "js",
 				script: "import com.hivext.api.core.utils.Transport;\n" + 
-					"return eval(new Transport().get('" + autoUpdateUrl + "&unistall=1" + '))"
+					"return eval(new Transport().get('" + autoUpdateUrl + "&unistall=1'))"
 			}
       		}
 	 }
