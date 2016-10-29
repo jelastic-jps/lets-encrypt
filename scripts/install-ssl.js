@@ -40,7 +40,7 @@ execParams = ' ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 
 //write configs for SSL generation
-execParams = '\"domain=\''+(customDomain || envDomain)+'\' \nemail=\''+email+'\' \nappid=\''+envAppid+'\' \nappdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
+execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": execParams } ]), true, "root"); 
 
 //execute SSL generation script 
