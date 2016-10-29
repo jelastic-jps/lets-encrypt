@@ -92,11 +92,25 @@ resp = scripting.eval({
     manifest : {
         jpsType : "update",
         application : {
-		id: "sendEmail",
 		name: "Let's Encrypt SSL",
-            	targetNodes: {
-                	nodeGroup: group
-            	},
+		
+	"categories": [
+		"apps/dev-tools"
+	],
+	"targetNodes": {
+	    "nodeGroup": ["cp", "nosqldb", "sqldb", "bl"]
+	},
+
+	"logo": "http://blog.jelastic.com/wp-content/uploads/2015/11/cs-scheme1.png",
+	"version": "1.0",
+	"homepage": "http://docs.jelastic.com",
+	"description": {
+	    "en": "Let's Encrypt"
+	},
+	"short": {
+	    "en": "Let's Encrypt"
+	},		
+		
 		success: {
 	        	email: new Transport().get(successHtml)
 		},
