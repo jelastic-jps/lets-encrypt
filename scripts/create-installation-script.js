@@ -85,7 +85,7 @@ var successHtml = array.join("/")
 array = url.split("/"); 
 array.pop(); 
 array.push("uninstall.js?_r" + Math.random()); 
-var uninstallScript = array.join("/");
+var unInstallScript = array.join("/");
     
 //adding add-on for the further actions via dashboard 
 resp = scripting.eval({
@@ -106,7 +106,7 @@ resp = scripting.eval({
 		onUninstall: {
         		execScript: {
 				type: "js",
-				script: uninstallScript
+				script: unInstallScript
 			}
       		}
 	 }
