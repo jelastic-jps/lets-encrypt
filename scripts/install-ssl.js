@@ -31,29 +31,30 @@ var execParams = ' ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /ro
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 debug.push(resp);
 
-//download SSL generation script
+//download ssl generation script
 fileName = urlGenScript.split('/').pop().split('?').shift();
 execParams = ' ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
 debug.push(resp);
 
-//write configs for SSL generation
+//write configs for ssl generation
 execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\n\" >  /opt/letsencrypt/settings' 
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": execParams } ]), true, "root"); 
 debug.push(resp);
 
 
-//execute SSL generation script 
+//execute ssl generation script 
 manageDnat('add');
 execParams = '/root/' + fileName;
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
+//getting "out" for the further error processing
+var out = resp.responses[0].out;
+//just cutting "out" for debug logging becuase it's too long in ssl generation output  
+resp.responses[0].out = out.substring(out.length - 400);
 debug.push(resp);
 manageDnat('remove');
 
-//checking errors after the SSL generation process 
-var out = resp.responses[0].out;
-//just cutting "out" for debug logging becuase it's too long in ssl generation process  
-resp.responses[0].out = out.substring(out.length - 400);
+//checking errors in ssl generation output  
 var ind1 = out.indexOf("The following errors");
 if (ind1 != -1){
   var ind2 = out.indexOf("appid =", ind1);
