@@ -103,8 +103,8 @@ if (ind1 != -1){
 var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
   autoUpdateUrl += "&auto-update=1";
-  fileName = urlUpdateScript.split('/').pop().split('?').shift();
-  execParams = ' ' + urlUpdateScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
+  fileName = urlUpdScript.split('/').pop().split('?').shift();
+  execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
   resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
   debug.push(resp);
