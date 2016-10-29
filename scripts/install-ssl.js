@@ -52,6 +52,8 @@ manageDnat('remove');
 
 //checking errors after the SSL generation process 
 var out = resp.responses[0].out;
+//just cutting "out" for debug becuase it's too long  
+resp.responses[0].out = out.substring(out.length - 400);
 var ind1 = out.indexOf("The following errors");
 if (ind1 != -1){
   var ind2 = out.indexOf("appid =", ind1);
