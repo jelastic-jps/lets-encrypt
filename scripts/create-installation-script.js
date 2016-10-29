@@ -9,12 +9,12 @@ var envName = '${env.envName}',
     customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}' : '',
     envDomain =  "${env.domain}",
     token = Random.getPswd(64),
-    
-    scriptName = envName + "-install-ssl-script",
-    urlInstScript = baseDir + "/install-ssl-script.js?_r" + Math.random(),
-    urlLeScript = baseDir + "/install-le.sh?_r" + Math.random(),
-    urlGenScript = baseDir + "/generate-ssl-cert.sh?_r" + Math.random(),
-    urlUpdcript = baseDir + "/auto-update-ssl-cert.sh?_r" + Math.random();    
+    rnd = "?_r=" + Math.random(),
+    scriptName = envName + "-install-ssl",
+    urlInstScript = baseDir + "/install-ssl.js" + rnd,
+    urlLeScript = baseDir + "/install-le.sh" + rnd,
+    urlGenScript = baseDir + "/generate-ssl-cert.sh" + rnd,
+    urlUpdcript = baseDir + "/auto-update-ssl-cert.sh" + rnd;    
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
@@ -81,7 +81,7 @@ var scripting =  hivext.local.exp.wrapRequest(new Scripting({
 //getting url of the success message text
 var array = baseDir.split("/");
 array.pop();
-array.push("html/success.html?_r" + Math.random()); 
+array.push("html/success.html" + rnd); 
 var successHtml = array.join("/")
     
 //adding add-on for the further actions via dashboard 
@@ -103,7 +103,8 @@ resp = scripting.eval({
 		onUninstall: {
         		execScript: {
 				type: "js",
-				script: urlInstScript + "&unistall=1"
+				script: "import com.hivext.api.core.utils.Transport;\n" + 
+					"return eval(new Transport().get('" + urlInstScript + "&unistall=1&token="+token+"'))"
 			}
       		}
 	 }
