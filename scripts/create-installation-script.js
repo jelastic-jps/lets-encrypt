@@ -96,8 +96,14 @@ resp = scripting.eval({
             	},
 		success: {
 	        	email: text
-		}
-	  }
+		},
+		onUninstall: {
+        		execScript: {
+				type: "js",
+				script: "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/unistall.js?101"
+			}
+      		}
+	 }
     }
 });
 
