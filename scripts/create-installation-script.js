@@ -1,17 +1,20 @@
 //@auth
-//@required(url, scriptName, scriptType, urlLeScript, urlGenScript, urlUpdateScript, cronTime)
+//@required(baseDir, cronTime)
 
 import com.hivext.api.core.utils.Transport;
 import com.hivext.api.development.Scripting;
 import com.hivext.api.utils.Random;
 
-var envName = '${env.envName}';
-var customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}' : '';
-var envDomain =  "${env.domain}";
-var token = Random.getPswd(64);
-
-//changing scriptName to env specific
-scriptName = envName + '-' + scriptName;
+var envName = '${env.envName}',
+    customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}' : '',
+    envDomain =  "${env.domain}",
+    token = Random.getPswd(64),
+    
+    scriptName = envName + "-install-ssl-script",
+    urlInstScript = baseDir + "/install-ssl-script.js?_r" + Math.random(),
+    urlLeScript = baseDir + "/install-le.sh?_r" + Math.random(),
+    urlGenScript = baseDir + "/generate-ssl-cert.sh?_r" + Math.random(),
+    urlUpdcript = baseDir + "/auto-update-ssl-cert.sh?_r" + Math.random();    
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
@@ -34,8 +37,8 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       }
 }
 
-//reading script from URL
-var scriptBody = new Transport().get(url);
+//getting script body
+var scriptBody = new Transport().get(urlInstScript);
 
 scriptBody = scriptBody.replace("${TOKEN}", token);
 scriptBody = scriptBody.replace("${USER_EMAIL}", "${user.email}");
@@ -45,7 +48,7 @@ scriptBody = scriptBody.replace("${ENV_DOMAIN}", envDomain.toString());
 scriptBody = scriptBody.replace("${CUSTOM_DOMAIN}", customDomain.toString());
 scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
-scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdateScript.toString());
+scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
@@ -57,7 +60,7 @@ scriptBody = scriptBody.replace("${CRON_TIME}", cronTime.toString());
 jelastic.dev.scripting.DeleteScript(scriptName);
 
 //create a new script 
-var resp = jelastic.dev.scripting.CreateScript(scriptName, scriptType, scriptBody);
+var resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 if (resp.result != 0) return resp;
 
 //get app domain
@@ -75,17 +78,11 @@ var scripting =  hivext.local.exp.wrapRequest(new Scripting({
     serverUrl : "http://" + window.location.host.replace("app", "appstore") + "/"
 }));
 
-//getting url of success message 
-var array = url.split("/");
-array = array.slice(0, array.length - 2); 
-array.push("html/success.html"); 
+//getting url of the success message text
+var array = baseDir.split("/");
+array.pop();
+array.push("html/success.html?_r" + Math.random()); 
 var successHtml = array.join("/")
-
-//getting url of uninstall script 
-array = url.split("/"); 
-array.pop(); 
-array.push("uninstall-ssl.js?_r" + Math.random()); 
-var unInstallScript = array.join("/");
     
 //adding add-on for the further actions via dashboard 
 resp = scripting.eval({
@@ -106,7 +103,7 @@ resp = scripting.eval({
 		onUninstall: {
         		execScript: {
 				type: "js",
-				script: unInstallScript
+				script: urlInstScript + "&unistall=1"
 			}
       		}
 	 }
