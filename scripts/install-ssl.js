@@ -20,13 +20,14 @@ var envDomain = "${ENV_DOMAIN}",
     envAppid = "${ENV_APPID}",
     cronTime = "${CRON_TIME}",
     resp, 
-    debug = [];
+    debug = [],
+    ExecCmdById = elastic.env.control.ExecCmdById;
 
 if (getParam("uninstall")){
   //remove auto-update cron job
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = 'crontab -l | grep -v "' + fileName + '" | crontab - ';
-  resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
+  resp = ExecCmdById("bash", execParams); 
   debug.push(resp);
   
   //remove ssl certificate
@@ -60,27 +61,31 @@ if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").jo
 //download and execute Let's Encrypt package installation script 
 var fileName = urlLeScript.split('/').pop().split('?').shift();
 var execParams = ' ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
+resp = ExecCmdById("wget", execParams); 
 debug.push(resp);
 
 //download ssl generation script
 fileName = urlGenScript.split('/').pop().split('?').shift();
 execParams = ' ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
+resp = ExecCmdById("wget", execParams); 
 debug.push(resp);
 
 //write configs for ssl generation
 execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\n\" >  /opt/letsencrypt/settings' 
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": execParams } ]), true, "root"); 
+resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
 
 
 //execute ssl generation script 
-manageDnat('add');
-execParams = '/root/' + fileName;
-resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
+resp = manageDnat('add');
 debug.push(resp);
-manageDnat('remove');
+
+execParams = '/root/' + fileName;
+resp = ExecCmdById("bash", execParams); 
+debug.push(resp);
+
+resp = manageDnat('remove');
+debug.push(resp);
 
 if (resp.responses) {
   //getting "error" and "out" for the further errors processing
@@ -117,7 +122,7 @@ if (autoUpdateUrl) {
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
-  resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "wget", "params": execParams } ]), true, "root"); 
+  resp = ExecCmdById("wget", execParams); 
   debug.push(resp);
 }
 
@@ -144,7 +149,10 @@ return resp;
 //managing certificate challenge validation by routing all requests to master node with let's encrypt engine   
 function manageDnat(action) {
   var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
-  resp = jelastic.env.control.ExecCmdByGroup(envName, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
-  debug.push(resp);
+  return jelastic.env.control.ExecCmdByGroup(envName, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
+}
+
+function ExecCmdById(cmd, params){
+  return jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": cmd, "params": params } ]), true, "root");  
 }
 
