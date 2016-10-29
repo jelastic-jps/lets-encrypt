@@ -1,4 +1,3 @@
-//auth
 //@url('/${SCRIPT_URL}')
 //@req(token)
 
@@ -6,7 +5,7 @@ if (token != "${TOKEN}") {
   return {result: 8, error: "wrong token", response: {result: 8}}
 }
 
-if (!session) session = signature;
+if (!this.session) this.session = signature;
 
 var envDomain = getParam("domain") || "${ENV_DOMAIN}",
 customDomain = getParam("customDomain") || "${CUSTOM_DOMAIN}",
