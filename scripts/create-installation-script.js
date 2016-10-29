@@ -68,7 +68,7 @@ var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
     autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
 });
-if (resp.result != 0) return resp;
+if (resp.result != 0 || resp.response.result != 0) return resp;
 
 var scripting =  hivext.local.exp.wrapRequest(new Scripting({
     serverUrl : "http://" + window.location.host.replace("app", "appstore") + "/"
