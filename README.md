@@ -1,7 +1,6 @@
-## THIS PACKAGE IS UNDER DEVELOPMENT
 
-[![Let's Encrypt](images/letsencrypt-logo-horizontal.png)](../../../lets-encrypt)
-## Jelastic Let's Encrypt Add-on
+<img src="https://fedoramagazine.org/wp-content/uploads/2015/12/LetsEncrypt-Free-SSL-for-All.png" alt="Let's Encrypt Free SSL in Jelastic" width="350">
+## Jelastic Let's Encrypt Add-on (beta)
 
 This repository provides [Let's Encrypt](https://letsencrypt.org/about/) add-on for Jelastic Platform.
 
