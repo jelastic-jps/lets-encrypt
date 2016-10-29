@@ -47,7 +47,7 @@ if (getParam("auto-update")) {
     var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
     var array = urlUpdScript.split("/");
     array = array.slice(0, array.length - 2); 
-    array.push("html/update-required.html?_r" + Math.random()); 
+    array.push("html/update-required.html?_r=" + Math.random()); 
     var body = new Transport().get(array.join("/"));
     var from = envDomain;
     return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
