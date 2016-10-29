@@ -37,12 +37,10 @@ if (getParam("uninstall")){
   return resp;
 }
 
-//temporary workaround for scheduled auto-updates
 if (getParam("auto-update")) {
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
-  if (version > 5.0) {
-    this.session = this.signature;
-  } else {
+  if (version < 5.1) {
+    //temporary for scheduled auto-updates at platfroms with version < 5.1
     var user = jelastic.users.account.GetUserInfo(appid, signature);
     var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
     var array = urlUpdScript.split("/");
@@ -51,6 +49,8 @@ if (getParam("auto-update")) {
     var body = new Transport().get(array.join("/"));
     var from = envDomain;
     return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
+  } else {
+    this.session = this.signature;
   }
 }
 
@@ -73,7 +73,6 @@ debug.push(resp);
 execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\n\" >  /opt/letsencrypt/settings' 
 resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
-
 
 //execute ssl generation script 
 resp = manageDnat('add');
