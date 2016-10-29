@@ -75,6 +75,7 @@ debug.push(resp);
 
 return {
    result : resp.result,
+   response: debug.join('\n'), 
    onAfterReturn : {
       call : {
          procedure: 'log',
