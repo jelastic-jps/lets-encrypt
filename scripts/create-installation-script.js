@@ -18,7 +18,7 @@ var envName = '${env.envName}',
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
-group = 'cp';
+    group = 'cp';
 
 for (var i = 0, n = nodes.length; i < n; i++) {
       if (nodes[i].nodeGroup == 'lb' || nodes[i].nodeGroup == 'bl') {
@@ -94,6 +94,7 @@ resp = scripting.eval({
     manifest : {
         jpsType : "update",
         application : {
+		id: "lets-encrypt-addon",
 		name: "Let's Encrypt SSL",
 		logo: "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
 		description: "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit.",
@@ -103,8 +104,7 @@ resp = scripting.eval({
 		onUninstall: {
         		execScript: {
 				type: "js",
-				script: "import com.hivext.api.core.utils.Transport;\n" + 
-					"return eval(new Transport().get('" + autoUpdateUrl + "&unistall=1'))"
+				script: "return jelastic.dev.scripting.Eval('" + scriptName + "', {token: '" + token + "', uninstall: 1});"
 			}
       		}
 	 }
