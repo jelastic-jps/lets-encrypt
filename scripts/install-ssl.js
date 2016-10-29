@@ -78,7 +78,7 @@ return {
    onAfterReturn : {
       call : {
          procedure: 'log',
-            params: {
+         params: {
             message: debug
          }
       }
