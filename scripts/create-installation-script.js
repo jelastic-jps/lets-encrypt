@@ -84,7 +84,7 @@ var successHtml = array.join("/")
 //getting url of uninstall script 
 array = url.split("/"); 
 array.pop(); 
-array.push("uninstall.js?_r" + Math.random()); 
+array.push("uninstall-ssl.js?_r" + Math.random()); 
 var unInstallScript = array.join("/");
     
 //adding add-on for the further actions via dashboard 
