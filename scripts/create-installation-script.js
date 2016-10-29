@@ -92,7 +92,7 @@ resp = scripting.eval({
 		id: "sendEmail",
 		name: "Let's Encrypt SSL",
             	targetNodes: {
-                	nodeType: group
+                	nodeGroup: group
             	},
 		success: {
 	        	email: text
