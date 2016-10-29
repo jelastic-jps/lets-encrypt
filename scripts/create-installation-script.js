@@ -86,16 +86,17 @@ var successHtml = array.join("/")
     
 //adding add-on for the further actions via dashboard 
 resp = scripting.eval({
-    script : "installAddon",
+    script : "installApp",
     targetAppid : '${env.appid}',
     session: session, 
+    nodeGroup:group,
     manifest : {
         jpsType : "update",
         application : {
 		name: "Let's Encrypt SSL",
-		targetNodes: {
-	    		nodeGroup: group
-		},
+//		targetNodes: {
+//	    		nodeGroup: group
+//		},
 		logo: "https://github.com/jelastic-jps/lets-encrypt/blob/dev/images/le-logo-lockonly.png",
 		description:  "Let's Encrypt SSL Add-on",
 		success: {
