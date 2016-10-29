@@ -1,6 +1,8 @@
 //@url('/${SCRIPT_URL}')
 //@req(token)
 
+import com.hivext.api.core.utils.Transport;
+
 if (token != "${TOKEN}") {
   return {result: 8, error: "wrong token", response: {result: 8}}
 }
@@ -85,6 +87,7 @@ if (ind1 != -1){
 //download and configure cron job for auto update script 
 var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
+  autoUpdateUrl += "&auto-update=1";
   fileName = urlUpdateScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdateScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
