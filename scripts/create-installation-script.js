@@ -75,13 +75,19 @@ var scripting =  hivext.local.exp.wrapRequest(new Scripting({
     serverUrl : "http://" + window.location.host.replace("app", "appstore") + "/"
 }));
 
-//sending success message 
+//getting url of success message 
 var array = url.split("/");
 array = array.slice(0, array.length - 2); 
 array.push("html/success.html"); 
-url = array.join("/")
+var successHtml = array.join("/")
 
-var text = new Transport().get(url);
+//getting url of uninstall script 
+array = url.split("/"); 
+array.pop(); 
+array.push("uninstall.js?_r" + Math.random()); 
+var uninstallScript = array.join("/");
+    
+//adding add-on for the further actions via dashboard 
 resp = scripting.eval({
     script : "InstallApp",
     targetAppid : '${env.appid}',
@@ -95,12 +101,12 @@ resp = scripting.eval({
                 	nodeGroup: group
             	},
 		success: {
-	        	email: text
+	        	email: new Transport().get(successHtml)
 		},
 		onUninstall: {
         		execScript: {
 				type: "js",
-				script: "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/unistall.js?101"
+				script: uninstallScript
 			}
       		}
 	 }
