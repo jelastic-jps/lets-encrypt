@@ -18,7 +18,24 @@ email = getParam("email") || "${USER_EMAIL}",
 envAppid = getParam("envAppid") || "${ENV_APPID}",
 cronTime = getParam("cronTime") || "${CRON_TIME}",
 resp, debug = [];
-if (!this.session) this.session = this.signature;
+
+//temporary workaround for scheduled auto-updates
+if (getParam("auto-update")) {
+  var version = jelastic.system.service.GetVersion().version.split("-").shift();
+  if (version > 5.0) {
+    this.session = this.signature;
+  } else {
+    var user = jelastic.users.account.GetUserInfo(appid, signature);
+    var title = "Action required: update your Let's Encrypt SSL certificate";
+    var array = urlUpdateScript.split("/");
+    array = array.slice(0, array.length - 2); 
+    array.push("html/update-required.html"); 
+    var body = new Transport().get(array.join("/"));
+    var from = envDomain;
+    return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
+  }
+}
+
 
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
