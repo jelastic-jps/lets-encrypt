@@ -20,8 +20,7 @@ var envDomain = "${ENV_DOMAIN}",
     envAppid = "${ENV_APPID}",
     cronTime = "${CRON_TIME}",
     resp, 
-    debug = [],
-    ExecCmdById = elastic.env.control.ExecCmdById;
+    debug = [];
 
 if (getParam("uninstall")){
   //remove auto-update cron job
