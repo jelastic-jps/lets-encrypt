@@ -5,8 +5,6 @@ if (token != "${TOKEN}") {
   return {result: 8, error: "wrong token", response: {result: 8}}
 }
 
-if (!this.session) this.session = signature;
-
 var envDomain = getParam("domain") || "${ENV_DOMAIN}",
 customDomain = getParam("customDomain") || "${CUSTOM_DOMAIN}",
 envName = getParam("envName") || "${ENV_NAME}",
@@ -20,6 +18,7 @@ email = getParam("email") || "${USER_EMAIL}",
 envAppid = getParam("envAppid") || "${ENV_APPID}",
 cronTime = getParam("cronTime") || "${CRON_TIME}",
 resp, debug = [];
+if (!this.session) this.session = this.signature;
 
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
