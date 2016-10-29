@@ -22,6 +22,9 @@ envAppid = getParam("envAppid") || "${ENV_APPID}",
 cronTime = getParam("cronTime") || "${CRON_TIME}",
 resp, debug = [];
 
+//multi domain support - any following separator can be used: ' ' or ';' or ',' 
+if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").trim().split(" ").join(" -d ");
+
 function manageDnat(action) {
   var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
   resp = jelastic.env.control.ExecCmdByGroup(envName, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
