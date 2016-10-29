@@ -67,9 +67,10 @@ if (resp.result != 0) return resp;
 var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
 
 //eval the script 
+var autoUpdateUrl = "http://"+ domain + "/" + scriptName + "?token=" + token;
 var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
-    autoUpdateUrl: 'http://'+ domain + '/' + scriptName + '?token=' + token
+    autoUpdateUrl: autoUpdateUrl
 });
 if (resp.result != 0) return resp;
 if (resp.response.result != 0) return resp.response;
@@ -89,16 +90,13 @@ resp = scripting.eval({
     script : "installApp",
     targetAppid : '${env.appid}',
     session: session, 
-    nodeGroup:group,
+    nodeGroup: group,
     manifest : {
         jpsType : "update",
         application : {
 		name: "Let's Encrypt SSL",
-//		targetNodes: {
-//	    		nodeGroup: group
-//		},
-		logo: "https://github.com/jelastic-jps/lets-encrypt/blob/dev/images/le-logo-lockonly.png",
-		description:  "Let's Encrypt SSL Add-on",
+		logo: "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
+		description: "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit.",
 		success: {
 	        	email: new Transport().get(successHtml)
 		},
@@ -106,7 +104,7 @@ resp = scripting.eval({
         		execScript: {
 				type: "js",
 				script: "import com.hivext.api.core.utils.Transport;\n" + 
-					"return eval(new Transport().get('" + urlInstScript + "&unistall=1&token="+token+"'))"
+					"return eval(new Transport().get('" + autoUpdateUrl + "&unistall=1" + '))"
 			}
       		}
 	 }
