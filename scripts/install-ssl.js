@@ -43,7 +43,7 @@ resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ {
 debug.push(resp);
 
 //write configs for SSL generation
-execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\" >  /opt/letsencrypt/settings' 
+execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\n\" >  /opt/letsencrypt/settings' 
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": execParams } ]), true, "root"); 
 debug.push(resp);
 
