@@ -4,7 +4,7 @@
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
-chown -R jelastic:jelastic /etc/letsencrypt/
+#chown -R jelastic:jelastic /etc/letsencrypt/
 
 cd /opt/letsencrypt
 git pull origin master
