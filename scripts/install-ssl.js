@@ -87,16 +87,25 @@ debug.push(resp);
 manageDnat('remove');
 
 //checking errors in ssl generation output  
-var ind1 = out.indexOf("The following errors");
-if (ind1 != -1){
-  var ind2 = out.indexOf("appid =", ind1);
-  var error = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2);
-  return {
-    result: 99,
-    error: error,
-    response: error,
-    debug: debug
+var errors = {
+  "Error creating new cert": "\",",
+  "The following errors": "appid ="
+}
+
+for (var start in errors) {
+  var end = errors[start];
+  var ind1 = out.indexOf(start);
+  if (ind1 != -1){
+    var ind2 = out.indexOf(end, ind1);
+    var error = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2);
+    return {
+      result: 99,
+      error: error,
+      response: error,
+      debug: debug
+    }
   }
+
 }
 
 //download and configure cron job for auto update script 
