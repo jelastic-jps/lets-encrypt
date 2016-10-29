@@ -42,16 +42,15 @@ execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "printf", "params": execParams } ]), true, "root"); 
 debug.push(resp);
 
-manageDnat('add');
 
 //execute SSL generation script 
+manageDnat('add');
 execParams = '/root/' + fileName;
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
 debug.push(resp);
-
 manageDnat('remove');
 
-//checking errors of the SSL generation process 
+//checking errors after the SSL generation process 
 var out = resp.responses[0].out;
 var ind1 = out.indexOf("Reporting to user: The following errors");
 if (ind1 != -1){
