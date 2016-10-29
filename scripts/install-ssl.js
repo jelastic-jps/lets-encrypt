@@ -88,7 +88,7 @@ manageDnat('remove');
 
 //checking errors in ssl generation output  
 var errors = {
-  "An unexpected error": "appid =",
+  "An unexpected error": "Please see",
   "The following errors": "appid ="
 }
 
