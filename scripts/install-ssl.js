@@ -79,8 +79,8 @@ debug.push(resp);
 manageDnat('add');
 execParams = '/root/' + fileName;
 resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
-//getting "out" for the further error processing
-var out = resp.responses[0].out;
+//getting "error" and "out" for the further errors processing
+var out = resp.responses[0].error + resp.responses[0].out;
 //just cutting "out" for debug logging becuase it's too long in ssl generation output  
 resp.responses[0].out = out.substring(out.length - 400);
 debug.push(resp);
@@ -88,7 +88,7 @@ manageDnat('remove');
 
 //checking errors in ssl generation output  
 var errors = {
-  "An unexpected error": "% Total",
+  "An unexpected error": "appid =",
   "The following errors": "appid ="
 }
 
