@@ -12,30 +12,18 @@
     },
     "onInstall": [
       {
-        "call": [
-          "upload-custom-script"
-        ]
+        "execScript": {
+          "type": "js",
+          "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/create-installation-script.js",
+          "params": {
+            "scriptType": "js",
+            "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts", 
+            "cronTime": "0 3 * * * *" 
+          }
+        }
       }
     ],
     "procedures": [
-      {
-        "id": "upload-custom-script",
-        "onCall": {
-          "execScript": {
-            "type": "js",
-            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/create-installation-script.js",
-            "params": {
-              "url": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/install-ssl.js",
-              "scriptName": "install-ssl-script",
-              "scriptType": "js",
-              "urlLeScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/install-le.sh",
-              "urlGenScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/generate-ssl-cert.sh",
-              "urlUpdateScript": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/auto-update-ssl-cert.sh",
-              "cronTime": "0 3 * * * *" 
-            }
-          }
-        }
-      },
       {
         "id": "log",
         "onCall": {
