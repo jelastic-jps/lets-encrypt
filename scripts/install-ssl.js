@@ -26,7 +26,7 @@ if (getParam("auto-update")) {
     this.session = this.signature;
   } else {
     var user = jelastic.users.account.GetUserInfo(appid, signature);
-    var title = "Action required: update your Let's Encrypt SSL certificate";
+    var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
     var array = urlUpdateScript.split("/");
     array = array.slice(0, array.length - 2); 
     array.push("html/update-required.html"); 
