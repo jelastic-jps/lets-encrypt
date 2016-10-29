@@ -97,7 +97,7 @@ resp = scripting.eval({
 		id: "lets-encrypt-addon",
 		name: "Let's Encrypt SSL",
 		logo: "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
-		description: "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit.",
+		description: "Let's Encrypt SSL Certificate",
 		success: {
 	        	email: new Transport().get(successHtml)
 		},
