@@ -101,6 +101,22 @@ resp = scripting.eval({
 		success: {
 	        	email: new Transport().get(successHtml)
 		},
+		procedures: [{
+			id: "update",
+			onCall: {
+				execScript: {
+					type: "js",
+					script: "return jelastic.dev.scripting.Eval('" + scriptName + "', {token: '" + token + "'});"
+				}	
+			}
+		}],
+		buttons: [{
+        		confirmText: "Do you want to update SSL certificate?",
+        		loadingText: "Updating...",
+        		procedure: "update",
+        		caption: "Update",
+        		successText: "SSL certificate has been updated successfully!"
+      		}],
 		onUninstall: {
         		execScript: {
 				type: "js",
