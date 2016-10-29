@@ -7,23 +7,24 @@ if (token != "${TOKEN}") {
   return {result: 8, error: "wrong token", response: {result: 8}}
 }
 
-var envDomain = getParam("domain") || "${ENV_DOMAIN}",
-customDomain = getParam("customDomain") || "${CUSTOM_DOMAIN}",
-envName = getParam("envName") || "${ENV_NAME}",
-masterId = getParam("masterId") || "${MASTER_ID}",
-masterIP = getParam("masterIP") || "${MASTER_IP}",
-urlLeScript = getParam("urlLeScript") || "${LE_INSTALL}",
-urlGenScript = getParam("urlGenScript") || "${LE_GENERATE_SSL}",   
-urlUpdateScript = getParam("urlUpdateScript") || "${UPDATE_SSL}",     
-group = getParam("group") || "${NODE_GROUP}",
-email = getParam("email") || "${USER_EMAIL}",
-envAppid = getParam("envAppid") || "${ENV_APPID}",
-cronTime = getParam("cronTime") || "${CRON_TIME}",
-resp, debug = [];
+var envDomain = "${ENV_DOMAIN}",
+    customDomain = "${CUSTOM_DOMAIN}",
+    envName = "${ENV_NAME}",
+    masterId = "${MASTER_ID}",
+    masterIP = "${MASTER_IP}",
+    urlLeScript = "${LE_INSTALL}",
+    urlGenScript = "${LE_GENERATE_SSL}",   
+    urlUpdScript = "${UPDATE_SSL}",     
+    group = "${NODE_GROUP}",
+    email = "${USER_EMAIL}",
+    envAppid = "${ENV_APPID}",
+    cronTime = "${CRON_TIME}",
+    resp, 
+    debug = [];
 
 if (getParam("uninstall")){
   //remove auto-update cron job
-  fileName = urlUpdateScript.split('/').pop().split('?').shift();
+  fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = 'crontab -l | grep -v "' + fileName + '" | crontab - ';
   resp = jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": "bash", "params": execParams } ]), true, "root"); 
   debug.push(resp);
@@ -44,9 +45,9 @@ if (getParam("auto-update")) {
   } else {
     var user = jelastic.users.account.GetUserInfo(appid, signature);
     var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
-    var array = urlUpdateScript.split("/");
+    var array = urlUpdScript.split("/");
     array = array.slice(0, array.length - 2); 
-    array.push("html/update-required.html"); 
+    array.push("html/update-required.html?_r" + Math.random()); 
     var body = new Transport().get(array.join("/"));
     var from = envDomain;
     return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
