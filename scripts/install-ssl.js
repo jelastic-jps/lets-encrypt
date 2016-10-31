@@ -74,20 +74,22 @@ execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+
 resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
 
-//execute ssl generation script 
+//redirect incoming requests to master node  
 resp = manageDnat('add');
 debug.push(resp);
 
+//execute ssl generation script 
 execParams = '/root/' + fileName;
-resp = ExecCmdById("bash", execParams); 
+var execResp = resp = ExecCmdById("bash", execParams); 
 debug.push(resp);
 
+//removing redirect
 resp = manageDnat('remove');
 debug.push(resp);
 
-if (resp.responses) {
+if (execResp.responses) {
   //getting "error" and "out" for the further errors processing
-  var out = resp.responses[0].error + resp.responses[0].out;
+  var out = execResp.responses[0].error + execResp.responses[0].out;
   //just cutting "out" for debug logging becuase it's too long in ssl generation output  
   resp.responses[0].out = out.substring(out.length - 400);
 
