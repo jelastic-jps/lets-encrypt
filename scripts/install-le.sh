@@ -8,3 +8,8 @@ rpm -ivh https://downloads.hpdd.intel.com/public/e2fsprogs/1.42.12.wc1/el7/RPMS/
 git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt;
 
 /opt/letsencrypt/letsencrypt-auto --os-packages-only
+
+
+JEM_SSL_MODULE_LATEST_URL="https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module"
+JEM_SSL_MODULE_PATH="/usr/lib/jelastic/modules/ssl.module"
+wget "https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module" -O $JEM_SSL_MODULE_PATH
