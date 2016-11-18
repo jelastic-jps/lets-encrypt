@@ -4,11 +4,15 @@
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "LetsEncrypt SSL",
+    "categories": [
+        "apps/dev-and-admin-tools"
+    ],
     "version": "1.0",
-    "homepage": "http://jelastic.com/",
+    "homepage": "https://github.com/jelastic-jps",
     "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
     "description": {
-      "text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG)."
+      "text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG).<br><u>Supported stacks:</u> all Jelastic certified containers<br><u>Unsupported stacks:</u> GlassFish4, Jetty9, JBoss/WildFly, Apache-Python, Docker.<br>Support is coming soon ...",
+      "short": "Free Let’s Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
     },
     "onInstall": [
       {
@@ -16,8 +20,8 @@
           "type": "js",
           "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/create-installation-script.js",
           "params": {
-            "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts", 
-            "cronTime": "0 3 * * * *" 
+            "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts",
+            "cronTime": "0 3 * * * *"
           }
         }
       }
