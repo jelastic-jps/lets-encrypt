@@ -106,7 +106,7 @@ resp = scripting.eval({
 			onCall: {
 				execScript: {
 					type: "js",
-					script: "return jelastic.dev.scripting.Eval('" + scriptName + "', {token: '" + token + "'});"
+					script: "return jelastic.dev.scripting.Eval('@" + appid + "/" + scriptName + "', {token: '" + token + "'});"
 				}	
 			}
 		}],
@@ -120,7 +120,7 @@ resp = scripting.eval({
 		onUninstall: {
         		execScript: {
 				type: "js",
-				script: "return jelastic.dev.scripting.Eval('" + scriptName + "', {token: '" + token + "', uninstall: 1});"
+				script: "return jelastic.dev.scripting.Eval('@" + appid + "/" + scriptName + "', {token: '" + token + "', uninstall: 1});"
 			}
       		}
 	 }
