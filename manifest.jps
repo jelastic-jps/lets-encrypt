@@ -18,7 +18,7 @@
       {
         "execScript": {
           "type": "js",
-          "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/create-installation-script.js",
+          "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/create-installation-script.js?12354",
           "params": {
             "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts",
             "cronTime": "0 3 * * * *"
@@ -41,8 +41,8 @@
           "name": "extDomain",
           "default": "currentDomain",
           "values": {
-            "currentDomain": "Environment Name Domain",
-            "customDomain": "Custom Domain"
+            "currentDomain": "Environment Name Domain - obtaining test (invalid) SSL certs for testing purposes only",
+            "customDomain": "Custom Domain - obtaining valid SSL certs for production use"
           },
           "showIf": {
             "customDomain": [
