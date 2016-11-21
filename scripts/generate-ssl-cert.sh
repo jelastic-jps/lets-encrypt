@@ -13,8 +13,8 @@ iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
 
 #Parameters for test certificates
-test_params = '';
-[ "$test" == "true" ] && { test_params = '--test-cert --break-my-certs '; }
+test_params='';
+[ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
 
 #Request for certificates
 /opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
