@@ -1,34 +1,56 @@
+# Free SSL Let’s Encrypt Add-On
 
-<img src="https://fedoramagazine.org/wp-content/uploads/2015/12/LetsEncrypt-Free-SSL-for-All.png" alt="Let's Encrypt Free SSL in Jelastic" width="350">
-## Jelastic Let's Encrypt Add-on (beta)
 
-This repository provides [Let's Encrypt](https://letsencrypt.org/about/) add-on for Jelastic Platform.
+Let’s Encrypt Add-on for Automatic SSL Configuration of Your Jelastic Environment
 
-**Let's Encrypt** is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the [Internet Security Research Group (ISRG)](https://letsencrypt.org/isrg/).
 
-<!--
-**Type of nodes this add-on can be applied to**: 
-- Application server (cp).
+![Let’s Encrypt Add-on](/images/letsencrypt-jelastic-ssl.png)
 
-### What it can be used for?
-With a help of our bookmarklet, Let's Encrypt is installed on selected app server available in the environment. The key principles behind Let’s Encrypt are:<br />
-    **Free**: Anyone who owns a domain name can use Let’s Encrypt to obtain a trusted certificate at zero cost.<br />
-    **Automatic**: Software running on a web server can interact with Let’s Encrypt to painlessly obtain a certificate, securely configure it for use, and automatically take care of renewal.<br />
-    **Secure**: Let’s Encrypt will serve as a platform for advancing TLS security best practices, both on the CA side and by helping site operators properly secure their servers.<br />
-    **Transparent**: All certificates issued or revoked will be publicly recorded and available for anyone to inspect.<br />
-    **Open**: The automatic issuance and renewal protocol will be published as an open standard that others can adopt.<br />
-    **Cooperative**: Much like the underlying Internet protocols themselves, Let’s Encrypt is a joint effort to benefit the community, beyond the control of any one organization.
 
-	
-For more information on what Let's Encrypt can be used for, follow the [Let's Encrypt](https://letsencrypt.org) reference.
 
-### Deployment
+**[Let’s Encrypt](https://letsencrypt.org/)** is a free and open Certificate Authority, that simplifies and automates processes of browser-trusted SSL certificates issuing and appliance. This is achieved through obtaining a browser-trusted SSL certificate from Let's Encrypt and attaching it to environment entry point (i.e. either compute node or load balancer). Upon integrating such certificate into your application, it will start supporting secure connection via the _HTTPS_ protocol.
 
-In order to get this solution instantly deployed, click the "Get It Hosted Now" button, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.cloud) and press Install.
 
-[![GET IT HOSTED](https://raw.githubusercontent.com/jelastic-jps/jpswiki/master/images/getithosted.png)](https://jelastic.com/install-application/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Flets-encrypt%2Fraw%2Fmaster%2Fmanifest.jps)
+## SSL Configuration with Jelastic Let’s Encrypt Add-On
 
-To deploy this package to Jelastic Private Cloud, import [this JPS manifest](../../raw/master/manifest.jps) within your dashboard ([detailed instruction](https://docs.jelastic.com/environment-export-import#import)).
 
-For more information on what Jelastic add-on is and how to apply it, follow the [Jelastic Add-ons](https://github.com/jelastic-jps/jpswiki/wiki/Jelastic-Addons) reference.
--->
+This solution can be installed to any environment with Jelastic certified containers (i.e. except of [Docker-](https://docs.jelastic.com/dockers-overview) and [cartridge](https://docs.jelastic.com/supported-cartridges)-based instances).
+
+
+Herewith, the Let’s Encrypt add-on allows to configure SSL for:
+- **_Internal environment address_** (i.e. the one that contains platform domain name); can be used for testing purposes
+- **_Custom domains_**, including multiple ones (each of them should be preliminarily bound to external IP of the corresponding node - either master application server instance or load balancer - via [A Record](https://docs.jelastic.com/a-records-domain-names)); provides trusted SSL certificates for production applications
+
+
+To get deeper insights on how the Let’s Encrypt service works, refer to the [official documentation](https://letsencrypt.org/how-it-works/).
+
+
+## How to Install Let’s Encrypt Add-On to Jelastic Environment
+
+
+For the Let’s Encrypt SSL appliance, copy link to the **_manifest.jps_** file above and [import](https://docs.jelastic.com/environment-import) it to the required Jelastic Platform.
+
+![Let’s Encrypt Installation](/images/install-letsencrypt-ssl.png)
+
+To complete installation, define target environment with the corresponding drop-down list and choose one of the following options:
+- **Environment Name Domain** - creates a dummy (invalid) SSL certificate for your environment internal URL (_env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}_) to be used in testing 
+- **Custom Domain** - allows to list the previously attached to the environment external domain(s) (if specifying multiple ones, separate them with either comma, space or semicolon)
+
+
+Click on **Install** to initiate installation of the appropriate SSL certificates.
+
+
+## How to Renew SSL Certificate
+
+
+After Let’s Encrypt add-on installation, the attached SSL certificate will remain valid for _90_ days. When this period expires, you'll need to renew your certificate(s) - the appropriate notification will be preliminary sent to you via email (14 days before expiration). To execute this operation, use the **Update** button within add-on’s panel.
+
+
+![Let’s Encrypt Update](/images/update-sll-certificate.png)
+
+
+
+Within the upcoming releases, this operation will be completely automated to request and apply the appropriate SSL certificates upon expiration.
+
+
+Also, your SSL certificates can be updated by add-on re-installation for the same domain name(s). Herewith, adding new or specifying different domain name(s) during this procedure will cause the complete replacement of used certificates.
