@@ -7,6 +7,9 @@
     "categories": [
         "apps/dev-and-admin-tools"
     ],
+    "targetNodes": {
+        "nodeGroup": ["cp", "bl"]
+    },
     "version": "1.0",
     "homepage": "https://github.com/jelastic-jps",
     "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
