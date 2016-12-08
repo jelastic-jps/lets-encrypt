@@ -33,7 +33,7 @@ certdir=$(sed -nr '/^[[:digit:]-]{10} [[:digit:]:]{8},[[:digit:]]+:.*:[[:alnum:]
 echo appid = $appid
 echo appdomain = $appdomain
 #Upload 3 certificate files
-uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/privkey.pem" -F "fid=fullchain.pem" -F "file=@${certdir}/fullchain.pem" -F "fid=cert.pem" -F "file=@${certdir}/cert.pem" http://app.$appdomain/xssu/rest/upload)
+uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/privkey.pem" -F "fid=fullchain.pem" -F "file=@${certdir}/fullchain.pem" -F "fid=cert.pem" -F "file=@${certdir}/cert.pem" http://app.$primarydomain/xssu/rest/upload)
 
 #Save urls to certificate files
 echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/privkey.url
