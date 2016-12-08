@@ -70,7 +70,7 @@ resp = ExecCmdById("wget", execParams);
 debug.push(resp);
 
 //write configs for ssl generation
-var primarydDomain = window.location.host;
+var primaryDomain = window.location.host;
 execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
 resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
