@@ -16,16 +16,12 @@
         "glassfish3",
         "glassfish4",
         "jetty6",
-        "jetty8",
-        "railo4",
         "apache2",
         "nginxphp",
         "apache2-ruby",
         "nginx-ruby",
-        "nodejs",
         "nginx",
-        "haproxy",
-        "varnish"
+        "haproxy"
       ]
     },
     "version": "1.0",
