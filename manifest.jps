@@ -1,5 +1,5 @@
 {
-  "jpsVersion": "0.9",
+  "jpsVersion": "0.6",
   "jpsType": "update",
   "application": {
     "id": "letsencrypt-ssl-addon",
@@ -61,8 +61,8 @@
           "name": "extDomain",
           "default": "currentDomain",
           "values": {
-            "currentDomain": "Environment Name Domain",
-            "customDomain": "Custom Domain"
+            "currentDomain": "Environment Name Domain - obtaining test (invalid) SSL certs for testing purposes only",
+            "customDomain": "Custom Domain - obtaining valid SSL certs for production use"
           },
           "showIf": {
             "customDomain": [
