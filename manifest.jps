@@ -14,6 +14,7 @@
         "tomcat8",
         "tomee",
         "glassfish3",
+        "glassfish4",
         "jetty6",
         "jetty8",
         "railo4",
