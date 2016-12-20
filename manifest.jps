@@ -1,14 +1,31 @@
 {
-  "jpsVersion": "0.6",
+  "jpsVersion": "0.9",
   "jpsType": "update",
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "LetsEncrypt SSL",
     "categories": [
-        "apps/dev-and-admin-tools"
+      "apps/dev-and-admin-tools"
     ],
     "targetNodes": {
-        "nodeGroup": ["cp", "bl"]
+      "nodeType": [
+        "tomcat6",
+        "tomcat7",
+        "tomcat8",
+        "tomee",
+        "glassfish3",
+        "jetty6",
+        "jetty8",
+        "railo4",
+        "apache2",
+        "nginxphp",
+        "apache2-ruby",
+        "nginx-ruby",
+        "nodejs",
+        "nginx",
+        "haproxy",
+        "varnish"
+      ]
     },
     "version": "1.0",
     "homepage": "https://github.com/jelastic-jps",
@@ -44,8 +61,8 @@
           "name": "extDomain",
           "default": "currentDomain",
           "values": {
-            "currentDomain": "Environment Name Domain - obtaining test (invalid) SSL certs for testing purposes only",
-            "customDomain": "Custom Domain - obtaining valid SSL certs for production use"
+            "currentDomain": "Environment Name Domain",
+            "customDomain": "Custom Domain"
           },
           "showIf": {
             "customDomain": [
