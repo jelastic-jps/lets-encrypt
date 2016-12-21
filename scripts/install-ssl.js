@@ -41,16 +41,12 @@ if (getParam("uninstall")){
 //auto-update logic 
 if (getParam("auto-update")) {
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
-  if (version < 4.9.5) {
-    //temporary for scheduled auto-updates at platfroms with version < 4.9.5
-    var user = jelastic.users.account.GetUserInfo(appid, signature);
+  if (version < '4.9.5') {
+    //temporary for scheduled auto updates at platfroms with version < 4.9.5
     var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
-    var array = urlUpdScript.split("/");
-    array = array.slice(0, array.length - 2); 
-    array.push("html/update-required.html?_r=" + Math.random()); 
+    var array = urlUpdScript.split("/"); array.pop(); array.pop(); array.push("html/update-required.html?_r=" + Math.random()); 
     var body = new Transport().get(array.join("/"));
-    var from = envDomain;
-    return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
+    return jelastic.message.email.SendToUser(appid, signature, email, title, body, envDomain);
   } else {
     this.session = this.signature;
   }
