@@ -97,7 +97,7 @@
 			}]
 		},
 		"success" : {
-			"text": "<div>Let's Encrypt SSL Certificate has been successfully installed!</div><div>Useful links:</div><div><a href='https://docs.jelastic.com/custom-domains'>Bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/a-records-domain-names'>Bind custom domain via A record</a></div>"
+			"text": "<div>Useful links:</div><div><a href='https://docs.jelastic.com/custom-domains'>Bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/a-records-domain-names'>Bind custom domain via A record</a></div>"
 		}
 	}
 }
