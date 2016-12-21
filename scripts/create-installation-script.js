@@ -1,5 +1,5 @@
 //@auth
-//@required(baseDir, cronTime)
+//@required(baseDir, cronTime, token)
 
 import com.hivext.api.core.utils.Transport;
 import com.hivext.api.development.Scripting;
@@ -8,7 +8,6 @@ import com.hivext.api.utils.Random;
 var envName = '${env.envName}',
     customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}' : '',
     envDomain =  "${env.domain}",
-    token = Random.getPswd(64),
     rnd = "?_r=" + Math.random(),
     scriptName = envName + "-install-ssl",
     urlInstScript = baseDir + "/install-ssl.js" + rnd,
