@@ -20,7 +20,8 @@ var envDomain = "${ENV_DOMAIN}",
     envAppid = "${ENV_APPID}",
     cronTime = "${CRON_TIME}",
     resp, 
-    debug = [];
+    debug = [],
+    emailTitle = ": Let's Encrypt SSL certificate at " + envDomain;
 
 //uninstall logic
 if (getParam("uninstall")){
@@ -40,15 +41,14 @@ if (getParam("uninstall")){
 
 //auto-update logic 
 if (getParam("auto-update")) {
+  this.session = this.signature;
+  
+  //temporary for scheduled auto updates at platfroms with version < 4.9.5
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
   if (version < '4.9.5') {
-    //temporary for scheduled auto updates at platfroms with version < 4.9.5
-    var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
+    var title = "Action Required" + emailTitle;
     var array = urlUpdScript.split("/"); array.pop(); array.pop(); array.push("html/update-required.html?_r=" + Math.random()); 
-    var body = new Transport().get(array.join("/"));
-    return jelastic.message.email.SendToUser(appid, signature, email, title, body, envDomain);
-  } else {
-    this.session = this.signature;
+    return SendEmail(title, new Transport().get(array.join("/")));
   }
 }
 
@@ -104,12 +104,14 @@ if (execResp.responses) {
     if (ind1 != -1){
       var ind2 = out.indexOf(end, ind1);
       var error = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2);
-      return {
+      resp = {
         result: 99,
         error: error,
         response: error,
         debug: debug
       }
+      SendResp(resp);
+      return resp;
     }
   }
 }
@@ -148,6 +150,7 @@ if (cert_key.body && fullchain.body && cert.body){
 }
 
 resp.debug = debug;
+SendResp(resp);
 return resp;
 
 //managing certificate challenge validation by routing all requests to master node with let's encrypt engine   
@@ -160,3 +163,14 @@ function ExecCmdById(cmd, params){
   return jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": cmd, "params": params } ]), true, "root");  
 }
 
+function SendResp(resp){
+  if (resp.result != 0){
+    return SendEmail("Error" + emailTitle, resp.error);
+  } else {
+    return SendEmail("Successful " + (getParam("auto-update") ? "Update" : "Installation") + emailTitle, "Congratulations!");
+  }
+}
+
+function SendEmail(title, message){
+  return jelastic.message.email.SendToUser(appid, session, email, title, message, envDomain);
+}
