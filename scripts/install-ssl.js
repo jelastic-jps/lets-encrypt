@@ -127,8 +127,8 @@ if (autoUpdateUrl) {
   debug.push(resp);
   
   //save auto-update url
-  resp = ExecCmdById("printf", autoUpdateUrl + ' > /root/auto-update-script.url'); 
-  debug.push(resp);
+  //resp = ExecCmdById("printf", autoUpdateUrl + ' > /root/auto-update-script.url'); 
+  //debug.push(resp);
 }
 
 //read certificates
