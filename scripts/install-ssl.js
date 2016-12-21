@@ -22,6 +22,7 @@ var envDomain = "${ENV_DOMAIN}",
     resp, 
     debug = [];
 
+//uninstall logic
 if (getParam("uninstall")){
   //remove auto-update cron job
   fileName = urlUpdScript.split('/').pop().split('?').shift();
@@ -37,10 +38,11 @@ if (getParam("uninstall")){
   return resp;
 }
 
+//auto-update logic 
 if (getParam("auto-update")) {
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
-  if (version < 5.1) {
-    //temporary for scheduled auto-updates at platfroms with version < 5.1
+  if (version < 4.9.5) {
+    //temporary for scheduled auto-updates at platfroms with version < 4.9.5
     var user = jelastic.users.account.GetUserInfo(appid, signature);
     var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
     var array = urlUpdScript.split("/");
@@ -116,7 +118,7 @@ if (execResp.responses) {
   }
 }
 
-//download and configure cron job for auto update script 
+//configure cron job for auto update 
 var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
   //save autoUpdateUrl for Unistall and Update button actions
