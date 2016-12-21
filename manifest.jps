@@ -3,7 +3,7 @@
 	"jpsType": "update",
 	"application": {
 		"id": "letsencrypt-ssl-addon",
-		"name": "LetsEncrypt SSL",
+		"name": "Let's Encrypt Free SSL",
 		"categories": [
 			"apps/dev-and-admin-tools"
 		],
@@ -24,12 +24,12 @@
 				"haproxy"
 			]
 		},
-		"version": "1.0",
-		"homepage": "https://github.com/jelastic-jps",
+		"version": "1.1",
+		"homepage": "https://github.com/jelastic-jps/lets-encrypt",
 		"logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
 		"description": {
-			"text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG).<br><u>Supported stacks:</u> all Jelastic certified containers<br><u>Unsupported stacks:</u> GlassFish4, Jetty9, JBoss/WildFly, Apache-Python, Docker.<br>Support is coming soon ...",
-			"short": "Free Let’s Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
+			"text": "Let's Encrypt is a free, automated, and open certificate authority (CA).<br><u>Supported stacks:</u> All Jelastic certified container templates except Jetty9, JBoss/WildFly, Node.js (???), Apache-Python and custom Docker containers.",
+			"short": "Free Let's Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
 		},
 		"onInstall": [{
 			"execScript": {
@@ -95,6 +95,9 @@
 					}]
 				}
 			}]
+		},
+		"success" : {
+			"text": "<div>Let's Encrypt SSL Certificate has been successfully installed!</div><div>Useful links:</div><div><a href='https://docs.jelastic.com/custom-domains'>Bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/a-records-domain-names'>Bind custom domain via A record</a></div>"
 		}
 	}
 }
