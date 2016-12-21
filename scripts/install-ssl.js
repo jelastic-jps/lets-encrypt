@@ -46,9 +46,8 @@ if (getParam("auto-update")) {
   //temporary for scheduled auto updates at platfroms with version < 4.9.5
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
   if (version < '4.9.5') {
-    var title = "Action Required" + emailTitle;
     var array = urlUpdScript.split("/"); array.pop(); array.pop(); array.push("html/update-required.html?_r=" + Math.random()); 
-    return SendEmail(title, new Transport().get(array.join("/")));
+    return SendEmail("Action Required" + emailTitle, new Transport().get(array.join("/")));
   }
 }
 
