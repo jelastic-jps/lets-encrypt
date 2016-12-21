@@ -125,6 +125,10 @@ if (autoUpdateUrl) {
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
   resp = ExecCmdById("wget", execParams); 
   debug.push(resp);
+  
+  //save auto-update url
+  resp = ExecCmdById("printf", autoUpdateUrl + ' > /root/auto-update-script.url'); 
+  debug.push(resp);
 }
 
 //read certificates
