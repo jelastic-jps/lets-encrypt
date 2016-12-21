@@ -119,16 +119,17 @@ if (execResp.responses) {
 //download and configure cron job for auto update script 
 var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
+  //save autoUpdateUrl for Unistall and Update button actions
+  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", autoUpdateUrl);
+  debug.push(resp);
+  
+  //create the auto update cron 
   autoUpdateUrl += "&auto-update=1";
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
   resp = ExecCmdById("wget", execParams); 
   debug.push(resp);
-  
-  //save auto-update url
-  //resp = ExecCmdById("printf", autoUpdateUrl + ' > /root/auto-update-script.url'); 
-  //debug.push(resp);
 }
 
 //read certificates
