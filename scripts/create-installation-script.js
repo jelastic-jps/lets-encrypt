@@ -75,9 +75,12 @@ var resp = jelastic.dev.scripting.Eval(scriptName, {
 if (resp.result != 0) return resp;
 if (resp.response.result != 0) return resp.response;
 
+/*
 var scripting =  hivext.local.exp.wrapRequest(new Scripting({
     serverUrl : "http://" + window.location.host.replace("app", "appstore") + "/"
 }));
+
+
 
 //getting url of the success message text
 var array = baseDir.split("/");
@@ -126,6 +129,7 @@ resp = scripting.eval({
 	 }
     }
 });
+*/
 
 return resp;
 
