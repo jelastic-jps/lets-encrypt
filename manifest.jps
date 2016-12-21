@@ -1,80 +1,100 @@
 {
-  "jpsVersion": "0.6",
-  "jpsType": "update",
-  "application": {
-    "id": "letsencrypt-ssl-addon",
-    "name": "LetsEncrypt SSL",
-    "categories": [
-      "apps/dev-and-admin-tools"
-    ],
-    "targetNodes": {
-      "nodeType": [
-        "tomcat6",
-        "tomcat7",
-        "tomcat8",
-        "tomee",
-        "glassfish3",
-        "glassfish4",
-        "jetty6",
-        "apache2",
-        "nginxphp",
-        "apache2-ruby",
-        "nginx-ruby",
-        "nginx",
-        "haproxy"
-      ]
-    },
-    "version": "1.0",
-    "homepage": "https://github.com/jelastic-jps",
-    "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
-    "description": {
-      "text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG).<br><u>Supported stacks:</u> all Jelastic certified containers<br><u>Unsupported stacks:</u> GlassFish4, Jetty9, JBoss/WildFly, Apache-Python, Docker.<br>Support is coming soon ...",
-      "short": "Free Let’s Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
-    },
-    "onInstall": [
-      {
-        "execScript": {
-          "type": "js",
-          "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/create-installation-script.js",
-          "params": {
-            "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts",
-            "cronTime": "0 3 * * * *"
-          }
-        }
-      }
-    ],
-    "procedures": [
-      {
-        "id": "log",
-        "onCall": {
-          "log": "${this.message}"
-        }
-      }
-    ],
-    "settings": {
-      "fields": [
-        {
-          "type": "radio-fieldset",
-          "name": "extDomain",
-          "default": "currentDomain",
-          "values": {
-            "currentDomain": "Environment Name Domain - obtaining test (invalid) SSL certs for testing purposes only",
-            "customDomain": "Custom Domain - obtaining valid SSL certs for production use"
-          },
-          "showIf": {
-            "customDomain": [
-              {
-                "type": "string",
-                "name": "customDomain",
-                "caption": {
-                  "en": "Domain"
-                },
-                "required": true
-              }
-            ]
-          }
-        }
-      ]
-    }
-  }
+	"jpsVersion": "0.6",
+	"jpsType": "update",
+	"application": {
+		"id": "letsencrypt-ssl-addon",
+		"name": "LetsEncrypt SSL",
+		"categories": [
+			"apps/dev-and-admin-tools"
+		],
+		"targetNodes": {
+			"nodeType": [
+				"tomcat6",
+				"tomcat7",
+				"tomcat8",
+				"tomee",
+				"glassfish3",
+				"glassfish4",
+				"jetty6",
+				"apache2",
+				"nginxphp",
+				"apache2-ruby",
+				"nginx-ruby",
+				"nginx",
+				"haproxy"
+			]
+		},
+		"version": "1.0",
+		"homepage": "https://github.com/jelastic-jps",
+		"logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
+		"description": {
+			"text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG).<br><u>Supported stacks:</u> all Jelastic certified containers<br><u>Unsupported stacks:</u> GlassFish4, Jetty9, JBoss/WildFly, Apache-Python, Docker.<br>Support is coming soon ...",
+			"short": "Free Let’s Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
+		},
+		"onInstall": [{
+			"execScript": {
+				"type": "js",
+				"script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/create-installation-script.js",
+				"params": {
+					"baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts",
+					"cronTime": "0 3 * * * *"
+				}
+			}
+		}],
+		"procedures": [{
+			"id": "log",
+			"onCall": {
+				"log": "${this.message}"
+			}
+		}, {
+			"id": "callScript",
+			"onCall": {
+				"execScript": {
+					"type": "js",
+					"script": "var url = jelastic.dev.apps.GetApp('${env.appid}').description + '&${this.action}=1'; var resp = new com.hivext.api.core.utils.Transport().get(url); return eval('(' + resp + ')');"
+				}
+			}
+		}],
+		"buttons": [{
+			"confirmText": "Do you want to update SSL certificate?",
+			"loadingText": "Updating...",
+			"procedure": "callScript",
+			"settings": {
+				"action": "update"
+			},
+			"caption": "Update",
+			"successText": "SSL certificate has been updated successfully!"
+		}],
+		"onUninstall": {
+			"call": [
+				{
+					"procedure": "callScript",
+					"params": {
+						"action": "uninstall"
+					}
+				}
+			]
+		},
+		"settings": {
+			"fields": [{
+				"type": "radio-fieldset",
+				"name": "extDomain",
+				"default": "currentDomain",
+				"values": {
+					"currentDomain": "Environment Name Domain - obtaining test (invalid) SSL certs for testing purposes only",
+					"customDomain": "Custom Domain - obtaining valid SSL certs for production use"
+				},
+				"showIf": {
+					"customDomain": [{
+						"type": "string",
+						"name": "customDomain",
+						"caption": {
+							"en": "Domain"
+						},
+						"required": true
+					}]
+				}
+			}]
+		}
+	}
 }
