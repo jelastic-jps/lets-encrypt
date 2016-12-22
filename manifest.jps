@@ -59,9 +59,6 @@
 			"confirmText": "Do you want to update SSL certificate?",
 			"loadingText": "Updating...",
 			"procedure": "callScript",
-			"settings": {
-				"action": "update"
-			},
 			"caption": "Update",
 			"successText": "SSL certificate has been updated successfully!"
 		}],
