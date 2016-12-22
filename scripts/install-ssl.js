@@ -22,7 +22,7 @@ var envDomain = "${ENV_DOMAIN}",
     scriptName = "${SCRIPT_NAME}",
     resp, 
     debug = [],
-    emailTitle = ": Let's Encrypt SSL certificate at " + envDomain;
+    emailTitle = ": Let's Encrypt SSL at " + envDomain;
 
 //uninstall logic
 if (getParam("uninstall")){
