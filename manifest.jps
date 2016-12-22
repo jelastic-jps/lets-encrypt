@@ -37,7 +37,7 @@
 				"script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts/create-installation-script.js",
 				"params": {
 					"baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/dev/scripts",
-					"cronTime": "0 3 * * * *"
+					"cronTime": "0 3 * * *"
 				}
 			}
 		}],
