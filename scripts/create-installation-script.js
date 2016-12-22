@@ -53,6 +53,7 @@ scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
 scriptBody = scriptBody.replace("${SCRIPT_URL}", scriptName.toString());
+scriptBody = scriptBody.replace("${SCRIPT_NAME}", scriptName.toString());
 scriptBody = scriptBody.replace("${CRON_TIME}", cronTime.toString());
 
                                                                
@@ -64,10 +65,9 @@ var resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 if (resp.result != 0) return resp;
 
 //eval the script 
-var autoUpdateUrl = "https://"+ window.location.host + "/" + scriptName + "?appid=" + appid + "&token=" + token;
 var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
-    autoUpdateUrl: autoUpdateUrl
+    install: 1
 });
 
 return resp;
