@@ -19,6 +19,7 @@ var envDomain = "${ENV_DOMAIN}",
     email = "${USER_EMAIL}",
     envAppid = "${ENV_APPID}",
     cronTime = "${CRON_TIME}",
+    scriptName = "${SCRIPT_NAME}",
     resp, 
     debug = [],
     emailTitle = ": Let's Encrypt SSL certificate at " + envDomain;
@@ -119,7 +120,8 @@ if (execResp.responses) {
 var autoUpdateUrl = getParam('autoUpdateUrl');
 if (autoUpdateUrl) {
   //save autoUpdateUrl for Unistall and Update button actions
-  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", autoUpdateUrl);
+  var params = toJSON({script: "@" + appid + "/" + scriptName, token: token});
+  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
   debug.push(resp);
   
   //create the auto update cron 
