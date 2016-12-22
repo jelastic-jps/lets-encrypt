@@ -51,7 +51,7 @@
 			"onCall": {
 				"execScript": {
 					"type": "js",
-					"script": "var url = jelastic.dev.apps.GetApp('${env.appid}').description + '&${this.action}=1&session='+session; var resp = new com.hivext.api.core.utils.Transport().get(url); resp = eval('(' + resp + ')'); return resp.response || resp;"
+					"script": "var p = eval('(' + jelastic.dev.apps.GetApp('${env.appid}').description + ')'); p['${this.action}']=1; return jelastic.dev.scripting.Eval(p.script, p)"
 				}
 			}
 		}],
