@@ -117,15 +117,14 @@ if (execResp.responses) {
 }
 
 //configure cron job for auto update 
-var autoUpdateUrl = getParam('autoUpdateUrl');
-if (autoUpdateUrl) {
-  //save autoUpdateUrl for Unistall and Update button actions
+if (getParam("install")) {
+  //save params for Unistall and Update button actions
   var params = toJSON({script: "@" + appid + "/" + scriptName, token: token});
   resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
   debug.push(resp);
   
   //create the auto update cron 
-  autoUpdateUrl += "&auto-update=1";
+  var autoUpdateUrl = "https://"+ window.location.host + "/" + scriptName + "?appid=" + appid + "&token=" + token + "&auto-update=1";
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
