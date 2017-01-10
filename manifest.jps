@@ -28,8 +28,10 @@
 		"homepage": "https://github.com/jelastic-jps/lets-encrypt",
 		"logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
 		"description": {
-			"text": "Let's Encrypt is a free, automated, and open certificate authority (CA).<br><u>Supported stacks:</u> All Jelastic certified container templates except Jetty9, JBoss/WildFly, Node.js (???), Apache-Python and custom Docker containers.",
-			"short": "Free Let's Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
+			"text": "Let's Encrypt is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.
+				<br><u>Supported stacks:</u> All Jelastic certified container templates except of Jetty 8/9, JBoss/WildFly, Node.js, Apache-Python, Varnish and Docker containers (coming soon). Herewith, Tomcat 8/9, GlassFish 4 and HAProxy servers are supported only starting with 4.9.5 Jelastic Platform version.
+				<br><b>Note</b> that Public IP address(es) will be automatically attached to all nodes within the entry point environment layer (i.e. either application server or load balancer).",
+			"short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
 		},
 		"onInstall": [{
 			"execScript": {
@@ -78,8 +80,8 @@
 				"name": "extDomain",
 				"default": "currentDomain",
 				"values": {
-					"currentDomain": "Environment Name Domain - obtaining test (invalid) SSL certs for testing purposes only",
-					"customDomain": "Custom Domain - obtaining valid SSL certs for production use"
+					"currentDomain": "Environment Domain Name - to get test (invalid) SSL certificate for your environment internal URL; consider this option for testing purposes only",
+					"customDomain": "Custom Domain - to get valid SSL certificate(s) for previously attached external domain(s); suitable to be used in production"
 				},
 				"showIf": {
 					"customDomain": [{
@@ -94,7 +96,7 @@
 			}]
 		},
 		"success" : {
-			"text": "<div>Useful links:</div><div><a href='https://docs.jelastic.com/custom-domains'>Bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/a-records-domain-names'>Bind custom domain via A record</a></div>"
+			"text": "<div>Useful links:</div><div><a href='https://docs.jelastic.com/custom-domains'>Bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/a-records-domain-names'>Bind custom domain via A Record</a></div>"
 		}
 	}
 }
