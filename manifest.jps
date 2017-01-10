@@ -78,8 +78,8 @@
 				"name": "extDomain",
 				"default": "currentDomain",
 				"values": {
-					"currentDomain": "Environment Domain Name - to get test (invalid) SSL certificate for your environment internal URL; for testing purposes only",
-					"customDomain": "Custom Domain - to get valid SSL certificate for previously attached external domain(s); can be used in production"
+					"currentDomain": "Environment Domain Name - to get test (invalid) SSL certificate for your environment internal URL to be used in testing",
+					"customDomain": "Custom Domain - to get valid SSL certificate for previously attached external domain(s) and use it in production"
 				},
 				"showIf": {
 					"customDomain": [{
