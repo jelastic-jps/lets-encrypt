@@ -28,7 +28,7 @@
 		"homepage": "https://github.com/jelastic-jps/lets-encrypt",
 		"logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
 		"description": {
-			"text": "<b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.<br><br><u>Supported stacks:</u> All Jelastic certified container templates except of Jetty 8/9, JBoss/WildFly, Node.js, Apache-Python, Varnish and Docker containers (coming soon).<br><br><u>Note</u> that Public IP address(es) will be automatically attached to all nodes within the entry point environment layer (i.e. either application server or load balancer).",
+			"text": "<div><b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.</div><br><div><u>Supported stacks:</u> All Jelastic certified container templates except of Jetty 8/9, JBoss/WildFly, Node.js, Apache-Python, Varnish and Docker containers (coming soon)<div><br></div><b>Note</b> that Public IP address(es) will be automatically attached to all nodes within the entry point environment layer (i.e. either application server or load balancer).<br></div>",
 			"short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
 		},
 		"onInstall": [{
@@ -56,11 +56,11 @@
 			}
 		}],
 		"buttons": [{
-			"confirmText": "Do you want to update SSL certificate?",
+			"confirmText": "Do you want to update attached SSL certificate(s)?",
 			"loadingText": "Updating...",
 			"procedure": "callScript",
 			"caption": "Update",
-			"successText": "SSL certificate has been updated successfully!"
+			"successText": "SSL certificate files have been successfully updated!"
 		}],
 		"onUninstall": {
 			"call": [
@@ -78,8 +78,8 @@
 				"name": "extDomain",
 				"default": "currentDomain",
 				"values": {
-					"currentDomain": "Environment Domain Name - to get test (invalid) SSL certificate for your environment internal URL; consider this option for testing purposes only",
-					"customDomain": "Custom Domain - to get valid SSL certificate(s) for previously attached external domain(s); suitable to be used in production"
+					"currentDomain": "Environment Domain Name - to get test (invalid) SSL certificate for your environment internal URL; for testing purposes only",
+					"customDomain": "Custom Domain - to get valid SSL certificate for previously attached external domain(s); can be used in production"
 				},
 				"showIf": {
 					"customDomain": [{
@@ -94,7 +94,7 @@
 			}]
 		},
 		"success" : {
-			"text": "<div>Useful links:</div><div><a href='https://docs.jelastic.com/custom-domains'>Bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/a-records-domain-names'>Bind custom domain via A Record</a></div>"
+			"text": "<div>Your Let’s Encrypt SSL certificate(s) will remain valid for 90 days. To avoid their expiration, use the Update option at add-on’s panel (you'll get the appropriate email notification beforehand).</div><div>Starting with 4.9.5 Jelastic version, this operation is handled by the system automatically.</div><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate'>How to renew SSL certificate</div><div><a href='https://docs.jelastic.com/custom-domain-via-cname'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord'>How to bind custom domain via A Record</a></div>"
 		}
 	}
 }
