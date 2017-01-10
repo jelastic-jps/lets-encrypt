@@ -14,10 +14,11 @@ Let’s Encrypt Add-on for Automatic SSL Configuration of Your Jelastic Environm
 ## SSL Configuration with Jelastic Let’s Encrypt Add-On
 
 
-This solution can be installed to any environment with Jelastic certified containers (i.e. except of [Docker-](https://docs.jelastic.com/dockers-overview) and [cartridge](https://docs.jelastic.com/supported-cartridges)-based instances).
+This solution can be installed to any environment with Jelastic certified containers except of Jetty 8/9, JBoss/WildFly, Node.js, Apache-Python, Varnish and [Docker containers](https://docs.jelastic.com/dockers-overview) (support coming soon).
 
+Herewith, pay attention that Tomcat 8/9, GlassFish 4 and HAProxy servers are supported only starting with 4.9.5 Jelastic Platform version.
 
-Herewith, the Let’s Encrypt add-on allows to configure SSL for:
+The Let’s Encrypt add-on allows to configure SSL for:
 - **_Internal environment address_** (i.e. the one that contains platform domain name); can be used for testing purposes
 - **_Custom domains_**, including multiple ones (each of them should be preliminarily bound to external IP of the corresponding node - either master application server instance or load balancer - via [A Record](https://docs.jelastic.com/a-records-domain-names)); provides trusted SSL certificates for production applications
 
