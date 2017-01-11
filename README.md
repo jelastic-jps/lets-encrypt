@@ -44,10 +44,10 @@ Click on **Install** to initiate installation of the appropriate SSL certificate
 ## How to Renew SSL Certificate
 
 
-Your Let’s Encrypt SSL certificate(s) will remain valid for _90_ days. After this period expires, they need to be renewed (you'll get the appropriate notification via email 14 days before expiration).
+Your Let’s Encrypt SSL certificate(s) will remain valid for _90_ days. After this period expires, they need to be renewed (you'll get the appropriate email notification 14 days before expiration).
 
 Depending on the Platform version your application is running at, this operation is performed in one of the following ways:
-- _for Jelastic of 4.9.5 version and higher_ - the appropriate SSL certificates are requested and applied automatically. By default, their validity is checked once per day at 3 AM with a special cron job (to change this period, adjust the corresponding _"0 3 * * *"_ setting within this package manifest file)
+- _for Jelastic of 4.9.5 version and higher_ - the required updated SSL certificates are requested and applied automatically. By default, their validity is checked once per day at 3 AM with a special cron job (to change this period, adjust the corresponding _"0 3 * * *"_ setting within this package manifest file)
 - _for preceding Jelastic versions_ - you need to handle this operation by your own upon receiving the appropriate notification.
 
 To renew certificate files manually, use the **Update** button within add-on’s panel.
