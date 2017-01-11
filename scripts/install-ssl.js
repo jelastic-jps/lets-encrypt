@@ -57,13 +57,13 @@ if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").jo
 
 //download and execute Let's Encrypt package installation script 
 var fileName = urlLeScript.split('/').pop().split('?').shift();
-var execParams = ' ' + urlLeScript + '--no-check-certificate -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
+var execParams = ' --no-check-certificate ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
 resp = ExecCmdById("wget", execParams); 
 debug.push(resp);
 
 //download ssl generation script
 fileName = urlGenScript.split('/').pop().split('?').shift();
-execParams = ' ' + urlGenScript + '--no-check-certificate -O /root/' + fileName + ' && chmod +x /root/' + fileName;
+execParams = ' --no-check-certificate ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
 resp = ExecCmdById("wget", execParams); 
 debug.push(resp);
 
