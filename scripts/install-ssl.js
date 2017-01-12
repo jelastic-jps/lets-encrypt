@@ -19,9 +19,12 @@ var envDomain = "${ENV_DOMAIN}",
     email = "${USER_EMAIL}",
     envAppid = "${ENV_APPID}",
     cronTime = "${CRON_TIME}",
+    scriptName = "${SCRIPT_NAME}",
     resp, 
-    debug = [];
+    debug = [],
+    emailTitle = ": Let's Encrypt SSL at " + envDomain;
 
+//uninstall logic
 if (getParam("uninstall")){
   //remove auto-update cron job
   fileName = urlUpdScript.split('/').pop().split('?').shift();
@@ -37,20 +40,15 @@ if (getParam("uninstall")){
   return resp;
 }
 
+//auto-update logic 
 if (getParam("auto-update")) {
+  this.session = this.signature;
+  
+  //temporary for scheduled auto updates at platfroms with version < 4.9.5
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
-  if (version < 5.1) {
-    //temporary for scheduled auto-updates at platfroms with version < 5.1
-    var user = jelastic.users.account.GetUserInfo(appid, signature);
-    var title = "Action required: update your Let's Encrypt SSL certificate at " + envDomain;
-    var array = urlUpdScript.split("/");
-    array = array.slice(0, array.length - 2); 
-    array.push("html/update-required.html?_r=" + Math.random()); 
-    var body = new Transport().get(array.join("/"));
-    var from = envDomain;
-    return jelastic.message.email.SendToUser(appid, signature, email, title, body, from);
-  } else {
-    this.session = this.signature;
+  if (version < '4.9.5') {
+    var array = urlUpdScript.split("/"); array.pop(); array.pop(); array.push("html/update-required.html?_r=" + Math.random()); 
+    return SendEmail("Action Required" + emailTitle, new Transport().get(array.join("/")));
   }
 }
 
@@ -106,23 +104,30 @@ if (execResp.responses) {
     if (ind1 != -1){
       var ind2 = out.indexOf(end, ind1);
       var error = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2);
-      return {
+      resp = {
         result: 99,
         error: error,
         response: error,
         debug: debug
       }
+      SendResp(resp);
+      return resp;
     }
   }
 }
 
-//download and configure cron job for auto update script 
-var autoUpdateUrl = getParam('autoUpdateUrl');
-if (autoUpdateUrl) {
-  autoUpdateUrl += "&auto-update=1";
+//configure cron job for auto update 
+if (getParam("install")) {
+  //save params for Unistall and Update button actions
+  var params = toJSON({script: "@" + appid + "/" + scriptName, token: token});
+  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
+  debug.push(resp);
+  
+  //create the auto update cron 
+  var autoUpdateUrl = "https://"+ window.location.host + "/" + scriptName + "?appid=" + appid + "&token=" + token + "&auto-update=1";
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
-  execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' ' + autoUpdateUrl +'\" >> /var/spool/cron/root';
+  execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' \'' + autoUpdateUrl +'\' >> /var/log/letsencrypt.log\" >> /var/spool/cron/root';
   resp = ExecCmdById("wget", execParams); 
   debug.push(resp);
 }
@@ -145,6 +150,7 @@ if (cert_key.body && fullchain.body && cert.body){
 }
 
 resp.debug = debug;
+SendResp(resp);
 return resp;
 
 //managing certificate challenge validation by routing all requests to master node with let's encrypt engine   
@@ -157,3 +163,14 @@ function ExecCmdById(cmd, params){
   return jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": cmd, "params": params } ]), true, "root");  
 }
 
+function SendResp(resp){
+  if (resp.result != 0){
+    return SendEmail("Error" + emailTitle, resp.error);
+  } else {
+    return SendEmail("Successful " + (getParam("auto-update") ? "Update" : "Installation") + emailTitle, "Congratulations!");
+  }
+}
+
+function SendEmail(title, message){
+  return jelastic.message.email.SendToUser(appid, session, email, title, message, envDomain);
+}

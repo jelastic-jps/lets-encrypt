@@ -10,7 +10,7 @@ var envName = '${env.envName}',
     envDomain =  "${env.domain}",
     token = Random.getPswd(64),
     rnd = "?_r=" + Math.random(),
-    scriptName = envName + "-install-ssl",
+    scriptName = envName + "-letsencrypt-ssl",
     urlInstScript = baseDir + "/install-ssl.js" + rnd,
     urlLeScript = baseDir + "/install-le.sh" + rnd,
     urlGenScript = baseDir + "/generate-ssl-cert.sh" + rnd,
@@ -53,6 +53,7 @@ scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
 scriptBody = scriptBody.replace("${MASTER_ID}", masterId.toString());
 scriptBody = scriptBody.replace("${SCRIPT_URL}", scriptName.toString());
+scriptBody = scriptBody.replace("${SCRIPT_NAME}", scriptName.toString());
 scriptBody = scriptBody.replace("${CRON_TIME}", cronTime.toString());
 
                                                                
@@ -63,83 +64,10 @@ jelastic.dev.scripting.DeleteScript(scriptName);
 var resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 if (resp.result != 0) return resp;
 
-//get app domain
-var domain = jelastic.dev.apps.GetApp(appid).hosting.domain;
-
 //eval the script 
-var autoUpdateUrl = "http://"+ domain + "/" + scriptName + "?token=" + token;
 var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
-    autoUpdateUrl: autoUpdateUrl
-});
-if (resp.result != 0) return resp;
-if (resp.response.result != 0) return resp.response;
-
-var scripting =  hivext.local.exp.wrapRequest(new Scripting({
-    serverUrl : "http://" + window.location.host.replace("app", "appstore") + "/"
-}));
-
-//getting url of the success message text
-var array = baseDir.split("/");
-array.pop();
-array.push("html/success.html" + rnd); 
-var successHtml = array.join("/")
-    
-//adding add-on for the further actions via dashboard 
-resp = scripting.eval({
-    script : "installApp",
-    targetAppid : '${env.appid}',
-    session: session, 
-    nodeGroup: group,
-    manifest : {
-        jpsType : "update",
-        application : {
-		id: "lets-encrypt-addon",
-		name: "Let's Encrypt SSL",
-		logo: "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/le-logo-lockonly.png",
-		description: "Let's Encrypt SSL Certificate",
-		success: {
-	        	email: new Transport().get(successHtml)
-		},
-		procedures: [{
-			id: "update",
-			onCall: {
-				execScript: {
-					type: "js",
-					script: "return jelastic.dev.scripting.Eval('@" + appid + "/" + scriptName + "', {token: '" + token + "'});"
-				}	
-			}
-		}],
-		buttons: [{
-        		confirmText: "Do you want to update SSL certificate?",
-        		loadingText: "Updating...",
-        		procedure: "update",
-        		caption: "Update",
-        		successText: "SSL certificate has been updated successfully!"
-      		}],
-		onUninstall: {
-        		execScript: {
-				type: "js",
-				script: "return jelastic.dev.scripting.Eval('@" + appid + "/" + scriptName + "', {token: '" + token + "', uninstall: 1});"
-			}
-      		}
-	 }
-    }
+    install: 1
 });
 
 return resp;
-
-/*
-return {
-    result: 0,
-    onAfterReturn : {
-        call : {
-            procedure : next,
-            params : {
-                domain : domain,
-                token : token
-            }
-        }
-    }
-}
-*/

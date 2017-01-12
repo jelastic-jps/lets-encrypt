@@ -3,7 +3,7 @@
   "jpsType": "update",
   "application": {
     "id": "letsencrypt-ssl-addon",
-    "name": "LetsEncrypt SSL",
+    "name": "Let's Encrypt Free SSL",
     "categories": [
       "apps/dev-and-admin-tools"
     ],
@@ -12,6 +12,7 @@
         "tomcat6",
         "tomcat7",
         "tomcat8",
+        "tomcat9",
         "tomee",
         "glassfish3",
         "glassfish4",
@@ -24,12 +25,12 @@
         "haproxy"
       ]
     },
-    "version": "1.0",
-    "homepage": "https://github.com/jelastic-jps",
+    "version": "1.1",
+    "homepage": "https://github.com/jelastic-jps/lets-encrypt",
     "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
     "description": {
-      "text": "Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit. Let’s Encrypt is a service provided by the Internet Security Research Group (ISRG).<br><u>Supported stacks:</u> all Jelastic certified containers<br><u>Unsupported stacks:</u> GlassFish4, Jetty9, JBoss/WildFly, Apache-Python, Docker.<br>Support is coming soon ...",
-      "short": "Free Let’s Encrypt tool to configure environment for supporting secured SSL connection, by either internal or custom domain name."
+      "text": "<div><b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.</div><div><u>Supported stacks:</u> All Jelastic certified container templates except of Jetty 8/9, JBoss/WildFly, Node.js, Apache-Python, Varnish and Docker containers (coming soon)</div><br><div><b>Note</b> that Public IP address(es) will be automatically attached to all nodes within the entry point environment layer (i.e. either application server or load balancer).<br></div>",
+      "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
     },
     "onInstall": [
       {
@@ -49,8 +50,36 @@
         "onCall": {
           "log": "${this.message}"
         }
+      },
+      {
+        "id": "callScript",
+        "onCall": {
+          "execScript": {
+            "type": "js",
+            "script": "var p = eval('(' + jelastic.dev.apps.GetApp('${env.appid}').description + ')'); p['${this.action}']=1; return jelastic.dev.scripting.Eval(p.script, p)"
+          }
+        }
       }
     ],
+    "buttons": [
+      {
+        "confirmText": "Do you want to update attached SSL certificate(s)?",
+        "loadingText": "Updating...",
+        "procedure": "callScript",
+        "caption": "Update",
+        "successText": "SSL certificate files have been successfully updated!"
+      }
+    ],
+    "onUninstall": {
+      "call": [
+        {
+          "procedure": "callScript",
+          "params": {
+            "action": "uninstall"
+          }
+        }
+      ]
+    },
     "settings": {
       "fields": [
         {
@@ -66,7 +95,7 @@
               {
                 "type": "string",
                 "name": "customDomain",
-                "regex" : "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
+                "regex": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
                 "caption": {
                   "en": "Domain"
                 },
@@ -76,6 +105,9 @@
           }
         }
       ]
+    },
+    "success": {
+      "text": "<div>Your Let’s Encrypt SSL certificate(s) will remain valid for 90 days. To avoid their expiration, use the Update option at add-on’s panel (you'll get the appropriate email notification beforehand).</div><div>Starting with 4.9.5 Jelastic version, this operation is handled by the system automatically.</div><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate'>How to renew SSL certificate</div><div><a href='https://docs.jelastic.com/custom-domain-via-cname'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord'>How to bind custom domain via A Record</a></div>"
     }
   }
 }
