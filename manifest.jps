@@ -22,7 +22,8 @@
         "apache2-ruby",
         "nginx-ruby",
         "nginx",
-        "haproxy"
+        "haproxy",
+	"apache-lb"
       ]
     },
     "version": "1.1",
