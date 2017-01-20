@@ -33,12 +33,12 @@ For the Let’s Encrypt SSL appliance, copy link to the **_manifest.jps_** file 
 
 ![Let’s Encrypt Installation](/images/install-letsencrypt-ssl.png)
 
-To complete installation, define target environment with the corresponding drop-down list and choose one of the following options:
+Here, choose one of the following options:
 - **Environment Name Domain** - creates a dummy (invalid) SSL certificate for your environment internal URL (_env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}_) to be used in testing 
 - **Custom Domain** - allows to list the previously attached to the environment external domain(s) (if specifying multiple ones, separate them with either comma, space or semicolon)
 
 
-Click on **Install** to initiate installation of the appropriate SSL certificates.
+Then define target environment with the corresponding _Environment name_ drop-down list (leaving the automatically chosen _Nodes_ layer value unchanged) and click on **Install** to initiate installation of the appropriate SSL certificates.
 
 
 ## How to Renew SSL Certificate
