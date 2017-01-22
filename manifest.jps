@@ -57,7 +57,7 @@
         "onCall": {
           "execScript": {
             "type": "js",
-            "script": "var p = eval('(' + jelastic.dev.apps.GetApp('${env.appid}').description + ')'); p['${this.action}']=1; return jelastic.dev.scripting.Eval(p.script, p)"
+            "script": "var p = eval('(' + jelastic.dev.apps.GetApp('${env.appid}').description + ')'); p['${this.action}']=1; return jelastic.dev.scripting.Eval(p.appid, session, p.script, p)"
           }
         }
       }
