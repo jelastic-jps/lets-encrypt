@@ -119,7 +119,7 @@ if (execResp.responses) {
 //configure cron job for auto update 
 if (getParam("install")) {
   //save params for Unistall and Update button actions
-  var params = toJSON({script: "@" + appid + "/" + scriptName, token: token});
+  var params = toJSON({appid: appid, script: scriptName, token: token});
   resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
   debug.push(resp);
   
