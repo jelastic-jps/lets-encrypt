@@ -108,7 +108,7 @@
       ]
     },
     "success": {
-      "text": "Your Let’s Encrypt SSL certificate(s) will remain valid for 90 days. You'll get the appropriate email notification 2 weeks before expiration, whilst the system will automatically request and apply the required updates.<br><br>To perform this operation manually at any time, use the <b>Update</b> option at add-on’s panel.<br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</div><div><a href='https://docs.jelastic.com/custom-domain-via-cname'target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
+      "text": "Your Let’s Encrypt SSL certificate(s) will remain valid for 90 days. You'll get the appropriate email notification 2 weeks before expiration, whilst the system will automatically request and apply the required updates.<br><br>To perform this operation manually at any time, use the <b>Update</b> option at add-on’s panel.<br><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</div><div><a href='https://docs.jelastic.com/custom-domain-via-cname'target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
     }
   }
 }
