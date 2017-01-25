@@ -88,8 +88,8 @@
           "name": "extDomain",
           "default": "currentDomain",
           "values": {
-            "currentDomain": "Internal Domain - get test (invalid) SSL certificate to be used in testing",
-            "customDomain": "Custom Domain - get valid SSL certificate to be used in production<div style='color:#d87800;'>The appropriate external domain(s) should be attached beforehand.</div>"
+            "currentDomain": "Internal Domain - get test (invalid) SSL certificate for testing purposes",
+            "customDomain": "Custom Domain - get valid SSL certificate for production use<div style='color:#d87800;'>The appropriate external domain(s) should be already bound to an environment.</div>"
           },
           "showIf": {
             "customDomain": [
