@@ -1,7 +1,7 @@
 {
   "jpsVersion": "0.6",
   "jpsType": "update",
-  "build": "201701251709",
+  "build": "201701261610",
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "Let's Encrypt Free SSL (beta)",
@@ -31,7 +31,7 @@
     "homepage": "https://github.com/jelastic-jps/lets-encrypt",
     "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
     "description": {
-      "text": "<span><b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.</span><div class='warning-lower'><b>Note:</b> Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer). The list of currently supported stacks can be found <u><a href='https://github.com/jelastic-jps/lets-encrypt#ssl-configuration-with-jelastic-lets-encrypt-add-on' target='_blank' style='color:#d87800;'>here</a></u>.</div>",
+      "text": "<div><b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.</div><div>The list of currently supported stacks can be found at <a href='https://github.com/jelastic-jps/lets-encrypt#ssl-configuration-with-jelastic-lets-encrypt-add-on' target='_blank' style='color:#75bd4f'>the link</a>.</div><div class='warning-lower' style='color:#b7c3da'><b>Note:</b> Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).</div>",
       "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
     },
     "onInstall": [
@@ -90,7 +90,7 @@
           "default": "currentDomain",
           "values": {
             "currentDomain": "Internal Domain - get test (invalid) SSL certificate for testing purposes",
-            "customDomain": "Custom Domain - get valid SSL certificate for production use<div style='color:#d87800;'>The appropriate external domain(s) should be already bound to an environment.</div>"
+            "customDomain": "Custom Domain - get valid SSL certificate for production use<div style='color:#d87800;'>The domains should be already bound to the environment <u><a href='https://docs.jelastic.com/custom-domain-via-cname 'target='_blank'style='color:#d87800;'>via CNAME</a></u> or <u><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank' style='color:#d87800;'>via A Record</a></u></div>"
           },
           "showIf": {
             "customDomain": [
@@ -109,7 +109,7 @@
       ]
     },
     "success": {
-      "text": "Your Let’s Encrypt SSL certificate(s) will remain valid for 90 days. Two weeks before expiration the system will try to automatically request and apply the required updates, whilst you'll get the appropriate email notification.<br><br>To perform this operation manually at any time, use the <b>Update</b> option at add-on’s panel.<br><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</div><div><a href='https://docs.jelastic.com/custom-domain-via-cname'target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
+      "text": "Your Let’s Encrypt SSL certificate will remain valid for 90 days. Two weeks before expiration the system will automatically request the certificate update, whilst you'll get the appropriate email notification.<br><br>To perform this operation manually at any time, use the <b>Update</b> option at add-on’s panel.<br><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</div><div><a href='https://docs.jelastic.com/custom-domain-via-cname'target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
     }
   }
 }
