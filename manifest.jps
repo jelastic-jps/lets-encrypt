@@ -1,7 +1,7 @@
 {
   "jpsVersion": "0.6",
   "jpsType": "update",
-  "build": "201701261752",
+  "build": "201701261844",
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "Let's Encrypt Free SSL (beta)",
@@ -97,7 +97,7 @@
               {
                 "type": "string",
                 "name": "customDomain",
-                "regex": "^\\s*(([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9]{2,26})+)+,)*([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9]{2,26})+)$",
+                "regex": "^\\s*(([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9]{2,26})+)+\\s*,\\s*)*([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9]{2,50})+)$"
                 "caption": {
                   "en": "Domains"
                 },
