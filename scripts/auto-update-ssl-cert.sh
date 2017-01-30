@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DAYS_BEFORE_EXPIRE=14
+DAYS_BEFORE_EXPIRE=30
 
 auto_update_url=$1
 
