@@ -38,7 +38,7 @@ For the Let’s Encrypt SSL appliance, copy link to the **_manifest.jps_** file 
 ![Let’s Encrypt Installation](/images/install-letsencrypt-ssl.png)
 
 Here, choose one of the following options:
-- **Environment Name Domain** - creates a dummy (invalid) SSL certificate for your environment internal URL (_env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}_) to be used in testing 
+- **Internal Domain** - creates a dummy (invalid) SSL certificate for your environment internal URL (_env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}_) to be used in testing 
 - **Custom Domain** - allows to list the previously attached to the environment external domain(s) (if specifying multiple ones, separate them with either comma, space or semicolon)
 
 
