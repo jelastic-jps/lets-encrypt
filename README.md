@@ -24,7 +24,7 @@ Herewith, pay attention that Tomcat 8/9, GlassFish 4 and HAProxy servers are sup
 
 The Let’s Encrypt add-on allows to configure SSL for:
 - **_Internal environment address_** (i.e. the one that contains platform domain name); can be used for testing purposes
-- **_Custom domains_**, including multiple ones (each of them should be preliminarily bound to external IP of the corresponding node - either master application server instance or load balancer - via [A Record](https://docs.jelastic.com/a-records-domain-names)); provides trusted SSL certificates for production applications
+- **_Custom domain_**, including multiple ones (each of them should be preliminarily bound to external IP of the corresponding node - either master application server instance or load balancer - via [A Record](https://docs.jelastic.com/a-records-domain-names)) or [CNAME](https://docs.jelastic.com/custom-domain-via-cname); provides trusted SSL certificates for production applications
 
 
 To get deeper insights on how the Let’s Encrypt service works, refer to the [official documentation](https://letsencrypt.org/how-it-works/).
@@ -48,10 +48,10 @@ Then define target environment with the corresponding _Environment name_ drop-do
 ## How to Renew SSL Certificate
 
 
-Your Let’s Encrypt SSL certificate(s) will remain valid for _90_ days. After this period expires, they need to be renewed (you'll get the appropriate email notification 30 days before expiration).
+Your Let’s Encrypt SSL certificate(s) will remain valid for _90_ days. After this period expires, they need to be renewed (you'll get the appropriate email notification 30 days before expiration) for the encryption to remain active.
 
 Depending on the Platform version your application is running at, this operation is performed in one of the following ways:
-- _for Jelastic of 4.9.5 version and higher_ - the required updated SSL certificates are requested and applied automatically. By default, their validity is checked once per day at 3 AM with a special cron job (to change this period, adjust the corresponding _"0 3 * * *"_ setting within this package manifest file)
+- _for Jelastic of 4.9.5 version and higher_ - the required updated SSL certificates are requested and applied automatically. By default, their expiration date is checked once per day at 3 AM with a special cron job (to change this period, adjust the corresponding _"0 3 * * *"_ setting within this package manifest file) to initiate the renewal 30 days before this period ends
 - _for preceding Jelastic versions_ - you need to handle this operation by your own upon receiving the appropriate notification.
 
 To renew certificate files manually, use the **Update** button within add-on’s panel.
