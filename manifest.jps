@@ -31,7 +31,7 @@
     "homepage": "https://github.com/jelastic-jps/lets-encrypt",
     "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
     "description": {
-      "text": "<div><b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.</div><div>The list of currently supported stacks can be found at <a href='https://github.com/jelastic-jps/lets-encrypt#ssl-configuration-with-jelastic-lets-encrypt-add-on' target='_blank' style='color:#75bd4f'>the link</a>.</div><div class='warning-lower' style='color:#b7c3da'><b>Note:</b> Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).</div>",
+      "text": "<span><b>Let's Encrypt</b> is a free and open Certificate Authority (CA), aimed to simplify and automate processes of browser-trusted SSL certificates issuing and appliance.</span><div>The list of currently supported stacks can be found at <a href='https://github.com/jelastic-jps/lets-encrypt#ssl-configuration-with-jelastic-lets-encrypt-add-on' target='_blank' style='color:#75bd4f'>the link</a>.</div><div class='warning-lower' style='color:#b7c3da'><b>Note:</b> Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).</div>",
       "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
     },
     "onInstall": [
