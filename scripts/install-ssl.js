@@ -88,7 +88,7 @@ debug.push(resp);
 
 if (execResp.responses) {
   //getting "error" and "out" for the further errors processing
-  var out = execResp.responses[0].error + execResp.responses[0].out;
+  var out = "" + execResp.responses[0].error + execResp.responses[0].out;
   //just cutting "out" for debug logging becuase it's too long in ssl generation output  
   resp.responses[0].out = out.substring(out.length - 400);
 
