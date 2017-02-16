@@ -1,14 +1,5 @@
 #!/bin/bash
 
-[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || echo "No settings available"
-
-#To be sure that r/w access
-mkdir -p /etc/letsencrypt/
-#chown -R jelastic:jelastic /etc/letsencrypt/
-
-cd /opt/letsencrypt
-git pull origin master
-
 iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
 
@@ -17,7 +8,7 @@ test_params='';
 [ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
 
 #Request for certificates
-/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
+certbot certonly --standalone $test_params --domain $domain --preferred-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
 
 iptables -t nat -D PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
 iptables -D INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
@@ -41,8 +32,3 @@ echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}'
 echo $uploadresult | awk -F '{"file":"' '{print $4}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/cert.url
 
 sed -i '/^\s*$/d' /tmp/*.url
-
-#installing ssl cert via JEM
-#sed -i '/function doDownloadKeys/a return 0;#letsenctemp' /usr/lib/jelastic/modules/keystore.module
-#jem ssl install
-#sed -i  '/letsenctemp/d' /usr/lib/jelastic/modules/keystore.module
