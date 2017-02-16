@@ -1,9 +1,12 @@
 #!/bin/bash
 
 echo Install opel-release
-yum -y install epel-release;
-
-yum install -y certbot
+if ! rpm -qa | grep -qw epel-release; then
+    yum -y install epel-release;
+fi
+if ! rpm -qa | grep -qw certbot; then
+    yum install -y certbot
+fi
 
 JEM_SSL_MODULE_LATEST_URL="https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module"
 JEM_SSL_MODULE_PATH="/usr/lib/jelastic/modules/ssl.module"
