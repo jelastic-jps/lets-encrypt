@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[ -f '/root/letsencrypt_settings'  ] && source '/root/letsencrypt_settings' || echo "No settings available"
+
 iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
 

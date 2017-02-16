@@ -69,7 +69,7 @@ debug.push(resp);
 
 //write configs for ssl generation
 var primaryDomain = window.location.host;
-execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
+execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /root/letsencrypt_settings' 
 resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
 
