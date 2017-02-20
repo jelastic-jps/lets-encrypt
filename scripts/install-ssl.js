@@ -21,6 +21,7 @@ var envDomain = "${ENV_DOMAIN}",
     cronTime = "${CRON_TIME}",
     scriptName = "${SCRIPT_NAME}",
     resp, 
+    cleanupParams,
     debug = [],
     emailTitle = ": Let's Encrypt SSL at " + envDomain;
 
@@ -30,6 +31,9 @@ if (getParam("uninstall")){
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = 'crontab -l | grep -v "' + fileName + '" | crontab - ';
   resp = ExecCmdById("bash", execParams); 
+  debug.push(resp);
+  cleanupParams = '-rf /etc/letsencrypt /opt/letsencrypt /root/auto-update-ssl-cert.sh /root/generate-ssl-cert.sh /root/letsencrypt_settings /root/install-le.sh';
+  resp = ExecCmdById("rm", cleanupParams);
   debug.push(resp);
   
   //remove ssl certificate
