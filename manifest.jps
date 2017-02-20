@@ -1,7 +1,7 @@
 {
   "jpsVersion": "0.6",
   "jpsType": "update",
-  "build": "201701301438",
+  "build": "201702201918",
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "Let's Encrypt Free SSL (beta)",
