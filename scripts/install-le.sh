@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo Checking RPM database 
+
+rpm -qa > /dev/null 2>&1  || rpm --rebuilddb
+
 echo Install opel-release
 yum -y install epel-release git bc;
 
