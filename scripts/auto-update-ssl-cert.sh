@@ -2,6 +2,9 @@
 
 DAYS_BEFORE_EXPIRE=30
 
+TIME_TO_WAIT=$(($RANDOM%3600));
+sleep $TIME_TO_WAIT;
+
 auto_update_url=$1
 
 seconds_before_expire=$(( $DAYS_BEFORE_EXPIRE * 24 * 60 * 60 ));
