@@ -4,7 +4,7 @@
 import com.hivext.api.core.utils.Transport;
 
 if (token != "${TOKEN}") {
-  return {result: 8, error: "wrong token", response: {result: 8}}
+  return {result: 8, error: "wrong token", type:"error", message:"Token does not match", response: {result: 8}}
 }
 
 var envDomain = "${ENV_DOMAIN}",
@@ -112,6 +112,8 @@ if (execResp.responses) {
         result: 99,
         error: error,
         response: error,
+        type: "error", 
+        message: error,
         debug: debug
       }
       SendResp(resp);
@@ -139,17 +141,19 @@ if (getParam("install")) {
 //read certificates
 var cert_key = jelastic.env.file.Read(envName, session, "/tmp/privkey.url", null, null, masterId);
 var cert = jelastic.env.file.Read(envName, session, "/tmp/cert.url", null, null, masterId);
-var fullchain = jelastic.env.file.Read(envName, session, "/tmp/fullchain.url", null, null, masterId);
+var chain = jelastic.env.file.Read(envName, session, "/tmp/fullchain.url", null, null, masterId);
 
-if (cert_key.body && fullchain.body && cert.body){
-  resp = jelastic.env.binder.BindSSL(envName, session, cert_key.body, cert.body, fullchain.body);
+if (cert_key.body && chain.body && cert.body){
+  resp = jelastic.env.binder.BindSSL(envName, session, cert_key.body, cert.body, chain.body);
   debug.push(resp);
 } else {
-  var error = "can't read ssl certificate";
+  var error = "Can't read ssl certificate: key=" + toJSON(cert_key) + " cert=" + toJSON(cert) + " chain=" + toJSON(chain);
   resp = {
     result: 99, 
     error: error,
-    response: error
+    response: error,
+    type: "error", 
+    message: error
   }
 }
 
