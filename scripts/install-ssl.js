@@ -176,5 +176,5 @@ function SendResp(resp){
 }
 
 function SendEmail(title, message){
-  return jelastic.message.email.SendToUser(appid, session, email, title, message, envDomain);
+  return jelastic.message.email.SendToUser(appid, session, email, title, message);
 }
