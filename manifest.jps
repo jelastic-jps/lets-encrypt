@@ -1,7 +1,7 @@
 {
   "jpsVersion": "0.6",
   "jpsType": "update",
-  "build": "201703131804",
+  "build": "201703171520",
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "Let's Encrypt Free SSL (beta)",
@@ -14,17 +14,24 @@
         "tomcat7",
         "tomcat8",
         "tomcat9",
+        "tomcat",
         "tomee",
+        "tomee-dockerized",
         "glassfish3",
         "glassfish4",
+        "glassfish",
         "jetty6",
         "apache2",
         "nginxphp",
         "apache2-ruby",
         "nginx-ruby",
         "nginx",
+        "nginx-dockerized",
+        "nginxphp-dockerized",
         "haproxy",
-        "apache-lb"
+        "apache-lb",
+        "varnish",
+        "varnish-dockerized"
       ]
     },
     "version": "1.2",
