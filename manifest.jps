@@ -21,6 +21,7 @@
         "glassfish4",
         "glassfish",
         "jetty6",
+        "apache",
         "apache2",
         "nginxphp",
         "apache2-ruby",
