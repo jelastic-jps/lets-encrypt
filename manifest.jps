@@ -1,7 +1,7 @@
 {
   "jpsVersion": "0.6",
   "jpsType": "update",
-  "build": "201703171520",
+  "build": "201703251700",
   "application": {
     "id": "letsencrypt-ssl-addon",
     "name": "Let's Encrypt Free SSL (beta)",
@@ -13,6 +13,7 @@
         "tomcat6",
         "tomcat7",
         "tomcat8",
+        "tomcat85",
         "tomcat9",
         "tomcat",
         "tomee",
