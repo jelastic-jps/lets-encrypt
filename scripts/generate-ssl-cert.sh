@@ -29,6 +29,8 @@ appdomain=$(cut -d"." -f2- <<< $appdomain)
 
 certdir=$(sed -nr '/^[[:digit:]-]{10} [[:digit:]:]{8},[[:digit:]]+:.*:[[:alnum:]\.]*:Reporting to user: Congratulations![[:alnum:][:space:]]*([^[:blank:]]+)[/][^/[[:blank:]]+[.][[:alnum:][:space:]]*.*$/{s//\1/p}' /var/log/letsencrypt/letsencrypt.log | tail -n 1)
 
+rm -f /var/lib/jelastic/keys/*.pem
+
 [ ! -z $certdir ] && cp $certdir/* /var/lib/jelastic/keys/ && chown jelastic -R /var/lib/jelastic/keys/
 
 echo appid = $appid
