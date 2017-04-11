@@ -36,7 +36,7 @@
                 "varnish-dockerized"
             ]
         },
-        "version": "1.2",
+        "version": "2.0",
         "homepage": "https://github.com/jelastic-jps/lets-encrypt",
         "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
         "description": {
