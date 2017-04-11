@@ -1,0 +1,14 @@
+{
+    "jpsType": "update",
+    "id": "redirect-http-to-https",
+    "name": "Redirect incoming HTTP requests to HTPPS",
+    "globals": {
+        "log": "/var/log/run.log"
+    },
+    "onInstall": [{
+     
+    }],
+    "actions": {
+       
+    }
+}
