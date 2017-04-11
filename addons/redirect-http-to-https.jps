@@ -1,14 +1,41 @@
 {
     "jpsType": "update",
     "id": "redirect-http-to-https",
-    "name": "Redirect incoming HTTP requests to HTPPS",
+    "name": "Redirect incoming HTTP requests to HTTPS",
     "globals": {
-        "log": "/var/log/run.log"
+        "log": "/var/log/run.log",
+        "server": "/redirect-server.py",
+        "port": "7654"
     },
-    "onInstall": [{
-     
-    }],
+    "onInstall": [
+        "clear", "apply"
+    ],
+    "onUnistall": "clear",
     "actions": {
-       
+        "clear": {
+            "cmd[cp]": [
+                "sed -i '/\\${globals.server}/d' /etc/rc.d/rc.local",
+                "PID=$(ps aux | grep ${globals.server} | grep -v grep | awk '{print $2}')",
+                "kill -9 $PID &>> ${globals.log}",
+                "iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${globals.port}",
+                "iptables-save > /etc/iptables.rules"
+            ],
+            "user": "root"
+        },
+        "apply": {
+            "cmd[cp]": [
+                "export REDIRECT_SERVER_PORT=${globals.port}",
+                "wget https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/http2https/addons/redirect-server.py -O ${globals.server}",
+                "chmod +x ${globals.server}",
+                "CMD=${globals.server}",
+                "echo \"${CMD} &>> ${globals.log} &\" >> /etc/rc.d/rc.local",
+                "chmod +x /etc/rc.d/rc.local",
+                "systemctl enable rc-local",
+                "systemctl restart rc-local",
+                "iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${globals.port}",
+                "iptables-save > /etc/iptables.rules"
+            ],
+            "user": "root"
+        }
     }
 }
