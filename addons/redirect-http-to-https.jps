@@ -7,13 +7,28 @@
         "server": "/redirect-server.py",
         "port": "7654"
     },
-    "onInstall": [
-        "clear", "apply"
-    ],
-    "onUnistall": "clear",
+    "onInstall": [{
+        "getGroup": {
+            "act1": "clear",
+            "act2": "apply"
+        }
+    }],
+    "onUnistall": {
+        "getGroup": {
+            "act1": "clear",
+            "act2": "log"
+        }
+    },
     "actions": {
+        "getGroup": {
+            "script": [
+                "g = 'cp', gs = jelastic.env.control.GetEnvInfo('${env.envName}', session).nodeGroups",
+                "for (i = 0; i < gs.length; i++) if (gs[i].name == 'lb') {g = 'lb'; break}",
+                "return {result: 0, onAfterReturn: [{${this.act1}: {group: g}}, {${this.act2}: {group: g}}]}"
+            ]
+        },
         "clear": {
-            "cmd[cp]": [
+            "cmd[${this.group}]": [
                 "sed -i '/\\${globals.server}/d' /etc/rc.d/rc.local",
                 "PID=$(ps aux | grep ${globals.server} | grep -v grep | awk '{print $2}')",
                 "kill -9 $PID &>> ${globals.log}",
@@ -23,9 +38,9 @@
             "user": "root"
         },
         "apply": {
-            "cmd[cp]": [
+            "cmd[${this.group}]": [
                 "export REDIRECT_SERVER_PORT=${globals.port}",
-                "wget https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/http2https/addons/redirect-server.py -O ${globals.server}",
+                "wget ${settings.baseUrl}/redirect-server.py -O ${globals.server}",
                 "chmod +x ${globals.server}",
                 "CMD=${globals.server}",
                 "echo \"${CMD} &>> ${globals.log} &\" >> /etc/rc.d/rc.local",
