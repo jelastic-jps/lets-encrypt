@@ -40,7 +40,7 @@
         "apply": {
             "cmd[${this.group}]": [
                 "export REDIRECT_SERVER_PORT=${globals.port}",
-                "wget ${settings.baseUrl}/redirect-server.py -O ${globals.server}",
+                "wget ${baseUrl}/redirect-server.py -O ${globals.server}",
                 "chmod +x ${globals.server}",
                 "CMD=${globals.server}",
                 "echo \"${CMD} &>> ${globals.log} &\" >> /etc/rc.d/rc.local",
