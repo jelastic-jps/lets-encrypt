@@ -7,12 +7,12 @@
         "server": "/redirect-server.py",
         "port": "7654"
     },
-    "onInstall": [{
+    "onInstall": {
         "getGroup": {
             "act1": "clear",
             "act2": "apply"
         }
-    }],
+    },
     "onUnistall": {
         "getGroup": {
             "act1": "clear",
