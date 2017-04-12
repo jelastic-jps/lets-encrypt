@@ -1,5 +1,5 @@
 {
-    "jpsType": "update",
+    "type": "update",
     "id": "redirect-http-to-https",
     "name": "Redirect incoming HTTP requests to HTTPS",
     "globals": {
