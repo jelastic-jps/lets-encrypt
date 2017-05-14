@@ -24,7 +24,7 @@ Herewith, pay attention that Tomcat 8/9, GlassFish 4 and HAProxy servers are sup
 
 The Let’s Encrypt add-on allows to configure SSL for:
 - **_Internal environment address_** (i.e. the one that contains platform domain name); can be used for testing purposes
-- **_Custom domain_**, including multiple ones (each of them should be preliminarily bound to external IP of the corresponding node - either master application server instance or load balancer - via [A Record](https://docs.jelastic.com/a-records-domain-names)) or [CNAME](https://docs.jelastic.com/custom-domain-via-cname); provides trusted SSL certificates for production applications
+- **_Custom domain_**, including multiple ones (each of them should be preliminarily bound to external IP of the corresponding node - either master application server instance or load balancer - via [A Record](https://docs.jelastic.com/a-records-domain-names) or [CNAME](https://docs.jelastic.com/custom-domain-via-cname)); provides trusted SSL certificates for production applications
 
 
 To get deeper insights on how the Let’s Encrypt service works, refer to the [official documentation](https://letsencrypt.org/how-it-works/).
