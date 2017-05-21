@@ -175,7 +175,8 @@ function SendResp(resp){
   if (resp.result != 0){
     return SendEmail("Error" + emailTitle, resp.error);
   } else {
-    return SendEmail("Successful " + (getParam("auto-update") ? "Update" : "Installation") + emailTitle, "Congratulations!");
+    var text = "Congratulations!\nSSL certificates for your " + envName +" environment have been automatically updated and will remain valid for 3 more months. The exact certificates expiration date can be seen in the Custom SSL section of the corresponding environment Settings.";
+    return SendEmail("Successful " + (getParam("auto-update") ? "Update" : "Installation") + emailTitle, text);
   }
 }
 
