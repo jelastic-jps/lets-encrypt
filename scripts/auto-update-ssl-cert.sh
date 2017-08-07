@@ -9,7 +9,7 @@ auto_update_url=$1
 
 seconds_before_expire=$(( $DAYS_BEFORE_EXPIRE * 24 * 60 * 60 ));
 wget=$(which wget);
-exp_date=$(jem ssl checkdomain | python -c "import sys, json; print json.load(sys.stdin)['expiredate']");
+[ -f "/var/lib/jelastic/SSL/jelastic.crt" ] && exp_date=$(jem ssl checkdomain | python -c "import sys, json; print json.load(sys.stdin)['expiredate']");
 [ -z exp_date  ] && { echo "no certificates for update"; exit 0; };
 _exp_date_unixtime=$(date --date="$exp_date" "+%s");
 _cur_date_unixtime=$(date "+%s");
