@@ -30,10 +30,7 @@ for (var i = 0, n = nodes.length; i < n; i++) {
 var masterId, masterIP;
 for (var i = 0, n = nodes.length; i < n; i++) {
       if (nodes[i].nodeGroup != group) continue;
-      if (!nodes[i].extIPs) jelastic.env.control.AttachExtIp({ 
-            envName : envName,
-            nodeId : nodes[i].id
-         });   
+      if (!nodes[i].extIPs) jelastic.env.control.AttachExtIp(envName, session, nodes[i].id);  
       if (nodes[i].ismaster) { 
             masterId = nodes[i].id;
             masterIP = nodes[i].address;
