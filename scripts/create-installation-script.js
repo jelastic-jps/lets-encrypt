@@ -33,11 +33,13 @@ var masterId, masterIP;
 for (var i = 0, n = nodes.length; i < n; i++) {
       if (nodes[i].nodeGroup != group) continue;
       if (!nodes[i].extIPs)  {
+          var resp;
           if (compareVersions(version, '4.9.5') >= 0) {
-              jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodes[i].id }); 
+              resp = jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodes[i].id }); 
           } else {
-              jelastic.env.control.AttachExtIp(envName, session,nodes[i].id); 
+              resp = jelastic.env.control.AttachExtIp(envName, session,nodes[i].id); 
           }
+          if (resp.result != 0) return resp;
       }
       if (nodes[i].ismaster) { 
             masterId = nodes[i].id;
