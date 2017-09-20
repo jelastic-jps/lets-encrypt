@@ -34,7 +34,7 @@ for (var i = 0, n = nodes.length; i < n; i++) {
       if (nodes[i].nodeGroup != group) continue;
       if (!nodes[i].extIPs)  {
           var resp;
-          if (compareVersions(version, '4.9.5') >= 0) {
+          if (compareVersions(version, '4.9.5') >= 0) || (version.indexOf('trunk')) != -1) {
               resp = jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodes[i].id }); 
           } else {
               resp = jelastic.env.control.AttachExtIp(envName, session,nodes[i].id); 
