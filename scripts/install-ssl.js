@@ -198,7 +198,7 @@ function SendResp(resp){
     array.push("html/update-success.html?_r=" + Math.random()); 
     var html = new Transport().get(array.join("/"));
     var isUpdate = getParam("auto-update");
-    return SendEmail("Successful " + (isUpdate ? "Update" : "Installation") + emailTitle, html.replace("${ENV_NAME}", envName).replace("${ACTION}", isUpdate ? "updated" : "installed"));
+    return SendEmail("Successful " + (isUpdate ? "Update" : "Installation") + emailTitle, html.replace("${ENVIRONMENT}", envName).replace("${ACTION}", isUpdate ? "updated" : "installed"));
   }
 }
 
