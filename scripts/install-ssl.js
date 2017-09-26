@@ -25,6 +25,8 @@ var envDomain = "${ENV_DOMAIN}",
     debug = [],
     emailTitle = ": Let's Encrypt SSL at " + envDomain;
 
+var baseUrlArr = urlUpdScript.split("/"); baseUrlArr.pop(); baseUrlArr.pop(); 
+
 //uninstall logic
 if (getParam("uninstall")){
   //remove auto-update cron job
@@ -51,8 +53,26 @@ if (getParam("auto-update")) {
   //temporary for scheduled auto updates at platfroms with version < 4.9.5
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
   if (version < '4.9.5') {
-    var array = urlUpdScript.split("/"); array.pop(); array.pop(); array.push("html/update-required.html?_r=" + Math.random()); 
+    var array = baseUrlArr.slice();
+    array.push("html/update-required.html?_r=" + Math.random()); 
     return SendEmail("Action Required" + emailTitle, new Transport().get(array.join("/")));
+  }
+    
+  //checking access to the env
+  //mark of error access to a shared env  
+  var errorMark = "session [xxx";
+  resp = jelastic.env.control.GetEnvInfo(envName, session);
+  if (resp.result != 0) {
+      if (resp.result == 702 && resp.error.indexOf(errorMark) > -1) {
+          var array = baseUrlArr.slice();
+          array.push("html/shared-env.html?_r=" + Math.random()); 
+          SendEmail("Action Required" + emailTitle, new Transport().get(array.join("/")));
+          resp.debug = debug;
+          return resp;
+      } else {
+          resp.debug = debug;
+          return SendErrResp(resp);
+      }
   }
 }
 
@@ -116,8 +136,7 @@ if (execResp.responses) {
         message: error,
         debug: debug
       }
-      SendResp(resp);
-      return resp;
+      return SendErrResp;
     }
   }
 }
@@ -173,11 +192,22 @@ function ExecCmdById(cmd, params){
 
 function SendResp(resp){
   if (resp.result != 0){
-    return SendEmail("Error" + emailTitle, resp.error);
+    return SendErrResp(resp);
   } else {
-    var text = "Congratulations!\nSSL certificates for your " + envName +" environment have been automatically updated and will remain valid for 3 more months. The exact certificates expiration date can be seen in the Custom SSL section of the corresponding environment Settings.";
-    return SendEmail("Successful " + (getParam("auto-update") ? "Update" : "Installation") + emailTitle, text);
+    var array = baseUrlArr.slice();
+    array.push("html/update-success.html?_r=" + Math.random()); 
+    var html = new Transport().get(array.join("/"));
+    var isUpdate = getParam("auto-update");
+    return SendEmail("Successful " + (isUpdate ? "Update" : "Installation") + emailTitle, html.replace("${ENV_NAME}", envName).replace("${ACTION}", isUpdate ? "updated" : "installed"));
   }
+}
+
+function SendErrResp(resp){
+   var array = baseUrlArr.slice();
+   array.push("html/update-error.html?_r=" + Math.random()); 
+   var html = new Transport().get(array.join("/"));
+   SendEmail("Error" + emailTitle, html.replace("${RESP}", resp + "").replace("${SUPPORT_EMAIL}", "support@jelastic.com"));
+   return resp;
 }
 
 function SendEmail(title, message){
