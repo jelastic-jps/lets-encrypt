@@ -17,3 +17,4 @@ JEM_SSL_MODULE_LATEST_URL="https://raw.githubusercontent.com/jelastic/jem/master
 JEM_SSL_MODULE_PATH="/usr/lib/jelastic/modules/ssl.module"
 localedef -i en_US -f UTF-8 en_US.UTF-8
 wget --no-check-certificate "https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module" -O $JEM_SSL_MODULE_PATH
+[ -d "/var/www/" ] && chown -R apache:apache "/var/www/" 2> /dev/null
