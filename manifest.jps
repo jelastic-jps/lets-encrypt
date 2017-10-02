@@ -47,9 +47,9 @@
       {
         "execScript": {
           "type": "js",
-          "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/create-installation-script.js",
+          "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/email-error/scripts/create-installation-script.js",
           "params": {
-            "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts",
+            "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/email-error/scripts",
             "cronTime": "0 3 * * *"
           }
         }
