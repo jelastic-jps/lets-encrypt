@@ -1,7 +1,7 @@
 #!/bin/bash
 
-[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || echo "No settings available"
-
+[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || { echo "No settings available" ; exit 3 ; }
+ 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
 #chown -R jelastic:jelastic /etc/letsencrypt/
