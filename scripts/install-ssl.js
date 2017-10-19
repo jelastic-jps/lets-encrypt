@@ -136,7 +136,7 @@ if (execResp.responses) {
         message: error,
         debug: debug
       }
-      return SendErrResp;
+      return SendErrResp(resp);
     }
   }
 }
