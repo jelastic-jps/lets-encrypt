@@ -32,7 +32,7 @@ var version = jelastic.system.service.GetVersion().version.split("-").shift();
 var masterId, masterIP;
 for (var i = 0, n = nodes.length; i < n; i++) {
       if (nodes[i].nodeGroup != group) continue;
-      if (!nodes[i].extIPs)  {
+      if (!nodes[i].extIPs || nodes[i].extIPs.length == 0) {
           var resp;
           if (compareVersions(version, '4.9.5') >= 0 || version.indexOf('trunk') != -1) {
               resp = jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodes[i].id }); 
