@@ -120,16 +120,28 @@ debug.push(resp);
 
 if (execResp.responses) {
   //getting "error" and "out" for the further errors processing
-  var out = "" + execResp.responses[0].error + execResp.responses[0].out;
+  resp = execResp.responses[0]; 
+  var out = resp.error + resp.errOut + resp.out;
   //just cutting "out" for debug logging becuase it's too long in ssl generation output  
-  resp.responses[0].out = out.substring(out.length - 400);
+  execResp.responses[0].out = out.substring(out.length - 400);
 
+  //checking success marks in ssl generation output      
+  var success = [
+      "Already up-to-date."
+  ]  
+  for (var i = 0; i < success.length; i++) {
+    var ind1 = out.indexOf(success[i]);
+    if (ind1 != -1){
+        SendResp({result:0, message: success[i]});
+        return execResp;
+    }
+  }
+    
   //checking errors in ssl generation output  
   var errors = {
     "An unexpected error": "Please see",
     "The following errors": "appid ="
   }
-
   for (var start in errors) {
     var end = errors[start];
     var ind1 = out.indexOf(start);
@@ -141,8 +153,8 @@ if (execResp.responses) {
         error: error,
         response: error,
         type: "error", 
-        message: error,
-        debug: debug
+        message: error
+        //,debug: debug
       }
       return SendErrResp(resp);
     }
