@@ -4,7 +4,7 @@
 import com.hivext.api.core.utils.Transport;
 
 if (token.replace(/\s/g, "") != "${TOKEN}") {
-  return {result: 8, error: "wrong token", type:"error", message:"Token does not match", response: {result: 8}}
+  return {result: 8, error: "wrong token", type:"error", message:"Token [" + token + "] does not match", response: {result: 8}}
 }
 
 var envDomain = "${ENV_DOMAIN}",
@@ -48,7 +48,6 @@ if (getParam("uninstall")){
 
 //auto-update logic 
 if (getParam("auto-update")) {
-  this.session = this.signature;
   
   //temporary for scheduled auto updates at platfroms with version < 4.9.5
   var version = jelastic.system.service.GetVersion().version.split("-").shift();
@@ -57,23 +56,32 @@ if (getParam("auto-update")) {
     array.push("html/update-required.html?_r=" + Math.random()); 
     return SendEmail("Action Required" + emailTitle, new Transport().get(array.join("/")));
   }
+  
+  if (!getParam("task")) {
+    this.session = this.signature;
     
-  //checking access to the env
-  //mark of error access to a shared env  
-  var errorMark = "session [xxx";
-  resp = jelastic.env.control.GetEnvInfo(envName, session);
-  if (resp.result != 0) {
+    //checking access to the env
+    //mark of error access to a shared env  
+    var errorMark = "session [xxx";
+    resp = jelastic.env.control.GetEnvInfo(envName, session);
+    if (resp.result != 0) {
       if (resp.result == 702 && resp.error.indexOf(errorMark) > -1) {
-          var array = baseUrlArr.slice();
-          array.push("html/shared-env.html?_r=" + Math.random()); 
-          SendEmail("Action Required" + emailTitle, new Transport().get(array.join("/")));
+          resp = jelastic.utils.scheduler.AddTask({
+            appid: appid,
+            session: session,
+            script: scriptName,
+            trigger: "once_delay:1000",
+            description: "update LE sertificate",
+            params: {token:token, task: 1, 'auto-update': 1}
+          })     
           resp.debug = debug;
           return resp;
       } else {
           resp.debug = debug;
           return SendErrResp(resp);
       }
-  }
+    }    
+  }  
 }
 
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
