@@ -3,7 +3,7 @@
 
 import com.hivext.api.core.utils.Transport;
 
-if (token != "${TOKEN}") {
+if (token.replace(/\s/g, "") != "${TOKEN}") {
   return {result: 8, error: "wrong token", type:"error", message:"Token does not match", response: {result: 8}}
 }
 
