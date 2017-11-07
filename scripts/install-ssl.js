@@ -126,7 +126,7 @@ if (execResp.responses) {
   execResp.responses[0].out = out.substring(out.length - 400);
 
   //checking success marks in ssl generation output      
-  var success = [
+  /*var success = [
       "Already up-to-date."
   ]  
   for (var i = 0; i < success.length; i++) {
@@ -135,7 +135,7 @@ if (execResp.responses) {
         SendResp({result:0, message: success[i]});
         return execResp;
     }
-  }
+  }*/
     
   //checking errors in ssl generation output  
   var errors = {
