@@ -74,6 +74,8 @@ jelastic.dev.scripting.DeleteScript(scriptName);
 var resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 if (resp.result != 0) return resp;
 
+java.lang.Thread.sleep(1000);
+
 //eval the script 
 var resp = jelastic.dev.scripting.Eval(scriptName, {
     token: token,
