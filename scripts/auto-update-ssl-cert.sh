@@ -2,6 +2,12 @@
 
 DAYS_BEFORE_EXPIRE=30
 
+[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || { echo "No settings available" ; exit 3 ; }
+[ -f '/root/validation.sh'  ] && source '/root/validation.sh' || { echo "No validation library available" ; exit 3 ; }
+
+validateExtIP
+validateDNSSettings
+
 TIME_TO_WAIT=$(($RANDOM%3600));
 sleep $TIME_TO_WAIT;
 

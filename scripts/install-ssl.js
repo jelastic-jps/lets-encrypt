@@ -99,6 +99,12 @@ execParams = ' --no-check-certificate ' + urlGenScript + ' -O /root/' + fileName
 resp = ExecCmdById("wget", execParams); 
 debug.push(resp);
 
+//download validation script
+var fileName = urlValidationScript.split('/').pop().split('?').shift();
+var execParams = ' --no-check-certificate ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
+resp = ExecCmdById("wget", execParams);
+debug.push(resp);
+
 //write configs for ssl generation
 var primaryDomain = window.location.host;
 execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 

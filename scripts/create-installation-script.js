@@ -15,6 +15,7 @@ var envName = '${env.envName}',
     urlLeScript = baseDir + "/install-le.sh" + rnd,
     urlGenScript = baseDir + "/generate-ssl-cert.sh" + rnd,
     urlUpdScript = baseDir + "/auto-update-ssl-cert.sh" + rnd;    
+    urlValidationScript = baseDir + "/validation.sh" + rnd;
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
