@@ -59,6 +59,7 @@ scriptBody = scriptBody.replace("${ENV_DOMAIN}", envDomain.toString());
 scriptBody = scriptBody.replace("${CUSTOM_DOMAIN}", customDomain.toString());
 scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
+scriptBody = scriptBody.replace("${LE_VALIDATION}", urlValidationScript.toString());
 scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
