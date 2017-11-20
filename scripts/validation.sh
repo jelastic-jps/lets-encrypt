@@ -24,3 +24,14 @@ function validateDNSSettings(){
         done
     return 0
 }
+
+function validateCertBot(){
+	[ -f "/opt/letsencrypt/certbot-auto" ] && return 0  || { echo "Error: Certbot is not installed!"; exit 1 ; };
+}
+
+function runAllChecks(){
+   validateExtIP
+   validateDNSSettings
+   validateCertBot
+   echo "All validations are passed succesfully";
+}
