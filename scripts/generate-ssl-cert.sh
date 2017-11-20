@@ -20,6 +20,7 @@ test_params='';
 #Validate settings
 validateExtIP
 validateDNSSettings
+validateCertBot
 
 #Request for certificates
 /opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
