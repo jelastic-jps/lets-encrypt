@@ -27,7 +27,10 @@ if (customDomain) {
 }
 
 //get nodeGroup 
-var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
+var resp = jelastic.env.control.GetEnvInfo(envName, session);
+if (resp.result != 0) return resp;
+
+var nodes = resp.nodes, 
     group = 'cp';
 
 for (var i = 0, n = nodes.length; i < n; i++) {
