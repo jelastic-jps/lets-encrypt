@@ -88,10 +88,28 @@ if (getParam("auto-update")) {
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
 
-//download validation script
+//write configs for ssl generation
+var primaryDomain = window.location.host;
+execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
+resp = ExecCmdById("printf", execParams); 
+debug.push(resp);
+
+//download & execute validation script -> validateExtIP && validateDNSSettings
 var fileName = urlValidationScript.split('/').pop().split('?').shift();
-var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
+var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' >> /var/log/letsencrypt.log && source /root/' + fileName + ' && validateExtIP && validateDNSSettings';
 resp = ExecCmdById("wget", execParams);
+
+if (resp.result == 4109) {
+    var error = resp.responses[0].out;
+      resp = {
+        result: 4109,
+        type: "warning", 
+        error: error,
+        response: error,
+        message: error
+      }
+      return SendErrResp(resp);
+}
 debug.push(resp);
 
 //download and execute Let's Encrypt package installation script 
@@ -104,12 +122,6 @@ debug.push(resp);
 fileName = urlGenScript.split('/').pop().split('?').shift();
 execParams = ' --no-check-certificate ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
 resp = ExecCmdById("wget", execParams); 
-debug.push(resp);
-
-//write configs for ssl generation
-var primaryDomain = window.location.host;
-execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
-resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
 
 //redirect incoming requests to master node  
