@@ -88,6 +88,12 @@ if (getParam("auto-update")) {
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
 
+//download validation script
+var fileName = urlValidationScript.split('/').pop().split('?').shift();
+var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
+resp = ExecCmdById("wget", execParams);
+debug.push(resp);
+
 //download and execute Let's Encrypt package installation script 
 var fileName = urlLeScript.split('/').pop().split('?').shift();
 var execParams = ' --no-check-certificate ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
@@ -98,12 +104,6 @@ debug.push(resp);
 fileName = urlGenScript.split('/').pop().split('?').shift();
 execParams = ' --no-check-certificate ' + urlGenScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
 resp = ExecCmdById("wget", execParams); 
-debug.push(resp);
-
-//download validation script
-var fileName = urlValidationScript.split('/').pop().split('?').shift();
-var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
-resp = ExecCmdById("wget", execParams);
 debug.push(resp);
 
 //write configs for ssl generation
