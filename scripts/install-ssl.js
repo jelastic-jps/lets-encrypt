@@ -90,8 +90,8 @@ if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").jo
 
 //write configs for ssl generation
 var primaryDomain = window.location.host;
-execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
-resp = ExecCmdById("printf", execParams); 
+execParams = 'mkdir -p /etc/letsencrypt && printf \"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
+resp = ExecCmdById(execParams); 
 debug.push(resp);
 
 //download & execute validation script -> validateExtIP && validateDNSSettings
