@@ -90,7 +90,7 @@ if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").jo
 
 //write configs for ssl generation
 var primaryDomain = window.location.host;
-execParams = 'mkdir -p /etc/letsencrypt && printf \"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
+execParams = 'mkdir -p /opt/letsencrypt && printf \"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
 resp = ExecCmdById(execParams); 
 debug.push(resp);
 
