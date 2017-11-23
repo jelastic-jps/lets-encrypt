@@ -1,3 +1,5 @@
+[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || { echo "Error: no settings available" ; exit 3 ; }
+
 EXT_IP=$(ip r get 1 | awk '{print $5}' | head -n 1)
 
 function isLANIP() {
