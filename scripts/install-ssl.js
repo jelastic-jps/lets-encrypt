@@ -100,13 +100,14 @@ var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/'
 resp = ExecCmdById("wget", execParams);
 
 if (resp.result == 4109) {
-    var error = resp.responses[0].out;
+      var error = resp.responses[0].out;
       resp = {
         result: 4109,
         type: "warning", 
         error: error,
         response: error,
-        message: error
+        message: error,
+        debug: debug
       }
       return SendErrResp(resp);
 }
