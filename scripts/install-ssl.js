@@ -85,13 +85,19 @@ if (getParam("auto-update")) {
   }  
 }
 
+//download and execute Let's Encrypt package installation script 
+var fileName = urlLeScript.split('/').pop().split('?').shift();
+var execParams = ' --no-check-certificate ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
+resp = ExecCmdById("wget", execParams); 
+debug.push(resp);
+
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
 
 //write configs for ssl generation
 var primaryDomain = window.location.host;
-execParams = 'mkdir -p /opt/letsencrypt && printf \"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
-resp = ExecCmdById(execParams); 
+execParams = '\"domain=\'' + (customDomain || envDomain) + '\'\nemail=\''+email+'\'\nappid=\''+envAppid+'\'\nappdomain=\''+envDomain+'\'\ntest=\''+ (customDomain ? false : true)+  '\'\nprimarydomain=\''+primaryDomain +  '\'\n\" >  /opt/letsencrypt/settings' 
+resp = ExecCmdById("printf", execParams); 
 debug.push(resp);
 
 //download & execute validation script -> validateExtIP && validateDNSSettings
@@ -111,12 +117,6 @@ if (resp.result == 4109) {
       }
       return SendErrResp(resp);
 }
-debug.push(resp);
-
-//download and execute Let's Encrypt package installation script 
-var fileName = urlLeScript.split('/').pop().split('?').shift();
-var execParams = ' --no-check-certificate ' + urlLeScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' && /root/' + fileName + ' >> /var/log/letsencrypt.log';
-resp = ExecCmdById("wget", execParams); 
 debug.push(resp);
 
 //download ssl generation script
