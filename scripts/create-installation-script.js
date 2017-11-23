@@ -96,6 +96,8 @@ var resp = jelastic.dev.scripting.Eval(scriptName, {
     install: 1
 });
 
+if (resp.result == 0 && typeof resp.response === "object" && resp.response.result != 0) resp = resp.response;
+
 function compareVersions(a, b) {
   a = a.split("."), b = b.split(".")
   for (var i = 0, l = Math.max(a.length, b.length); i < l; i++) {x = parseInt(a[i], 10) || 0; y = parseInt(b[i], 10) || 0; if (x != y) return x > y ? 1 : -1 }
