@@ -6,7 +6,7 @@ import com.hivext.api.development.Scripting;
 import com.hivext.api.utils.Random;
 
 var envName = '${env.envName}',
-    customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}' : '',
+    customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}'.replace(/^\s+|\s+$/g, '') : '',
     envDomain =  "${env.domain}",
     token = Random.getPswd(64),
     rnd = "?_r=" + Math.random(),
@@ -16,6 +16,15 @@ var envName = '${env.envName}',
     urlGenScript = baseDir + "/generate-ssl-cert.sh" + rnd,
     urlUpdScript = baseDir + "/auto-update-ssl-cert.sh" + rnd;    
     urlValidationScript = baseDir + "/validation.sh" + rnd;
+
+if (customDomain) {
+    customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ");
+    var regex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}(\n|$)/
+    for (var i = 0; i < customDomain.length; i++) {
+        if (!regex.test(customDomain[i])) return {result: 99, type:"error", message: "Domain '" + customDomain[i] + "' is invalid. Please double check specified domains in External Domains field."}
+    }
+    customDomain = customDomain.join(" -d ");
+}
 
 //get nodeGroup 
 var nodes = jelastic.env.control.GetEnvInfo(envName, session).nodes, 
