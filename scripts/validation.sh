@@ -13,7 +13,7 @@ function isLANIP() {
 }
 
 function validateExtIP(){
-        isLANIP $EXT_IP || return 0 && echo "Error: External IP is required!"; exit 1;
+        isLANIP $EXT_IP || return 0 && { echo "Error: External IP is required!"; exit 1; }
 }
 
 function validateDNSSettings(){
