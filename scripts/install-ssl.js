@@ -38,7 +38,7 @@ if (getParam("install")) {
 if (getParam("uninstall")){
   //remove auto-update cron job
   fileName = urlUpdScript.split('/').pop().split('?').shift();
-  execParams = 'crontab -l | grep -v "' + fileName + '" | crontab - ';
+  execParams = 'crontab -l 2>/dev/null | grep -v "' + fileName + '" | crontab - ';
   resp = ExecCmdById("bash", execParams); 
   debug.push(resp);
   cleanupParams = '-rf /etc/letsencrypt /opt/letsencrypt /root/auto-update-ssl-cert.sh /root/generate-ssl-cert.sh /root/letsencrypt_settings /root/install-le.sh';
@@ -174,7 +174,7 @@ if (getParam("install")) {
   var autoUpdateUrl = "https://"+ window.location.host + "/" + scriptName + "?appid=" + appid + "&token=" + token + "&auto-update=1";
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
-  execParams += ' && crontab -l | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' \'' + autoUpdateUrl +'\' >> /var/log/letsencrypt.log\" >> /var/spool/cron/root';
+  execParams += ' && crontab -l 2>/dev/null | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' \'' + autoUpdateUrl +'\' >> /var/log/letsencrypt.log\" >> /var/spool/cron/root';
   resp = ExecCmdById("wget", execParams); 
   debug.push(resp);
 }
