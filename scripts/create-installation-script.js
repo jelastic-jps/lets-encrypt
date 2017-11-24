@@ -62,7 +62,7 @@ for (var i = 0, n = nodes.length; i < n; i++) {
 
 //download & execute validation script -> validateExtIP && validateDNSSettings
 var fileName = urlValidationScript.split('/').pop().split('?').shift();
-var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' >> /var/log/letsencrypt.log && source /root/' + fileName + ' && validateExtIP && validateDNSSettings ' + (customDomain || envDomain);
+var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' >> /var/log/letsencrypt.log && source /root/' + fileName + ' && validateExtIP && validateDNSSettings "' + (customDomain || envDomain) + '"';
 resp = ExecCmdById("wget", execParams);
 
 if (resp.result == 4109) {
