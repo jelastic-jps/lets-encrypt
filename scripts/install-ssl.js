@@ -15,7 +15,6 @@ var envDomain = "${ENV_DOMAIN}",
     urlLeScript = "${LE_INSTALL}",
     urlGenScript = "${LE_GENERATE_SSL}",   
     urlUpdScript = "${UPDATE_SSL}",     
-    urlValidationScript = "${LE_VALIDATION}",
     group = "${NODE_GROUP}",
     email = "${USER_EMAIL}",
     envAppid = "${ENV_APPID}",
@@ -94,25 +93,6 @@ if (getParam("auto-update")) {
 
 //multi domain support - any following separator can be used: ' ' or ';' or ',' 
 if (customDomain) customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ").join(" -d ");
-
-//download & execute validation script -> validateExtIP && validateDNSSettings
-var fileName = urlValidationScript.split('/').pop().split('?').shift();
-var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' >> /var/log/letsencrypt.log && source /root/' + fileName + ' && validateExtIP && validateDNSSettings ' + (customDomain || envDomain);
-resp = ExecCmdById("wget", execParams);
-
-if (resp.result == 4109) {
-      var error = resp.responses[0].out;
-      resp = {
-        result: 4109,
-        type: "warning", 
-        error: error,
-        response: error,
-        message: error,
-        debug: debug
-      }
-      return SendErrResp(resp);
-}
-debug.push(resp);
 
 //download and execute Let's Encrypt package installation script 
 var fileName = urlLeScript.split('/').pop().split('?').shift();
