@@ -28,6 +28,13 @@ var envDomain = "${ENV_DOMAIN}",
 
 var baseUrlArr = urlUpdScript.split("/"); baseUrlArr.pop(); baseUrlArr.pop(); 
 
+//save params for Unistall and Update button actions
+if (getParam("install")) {
+  var params = toJSON({appid: appid, script: scriptName, token: token});
+  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
+  debug.push(resp);
+}
+
 //uninstall logic
 if (getParam("uninstall")){
   //remove auto-update cron job
@@ -181,14 +188,8 @@ if (execResp.responses) {
   }
 }
 
-//configure cron job for auto update 
-if (getParam("install")) {
-  //save params for Unistall and Update button actions
-  var params = toJSON({appid: appid, script: scriptName, token: token});
-  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
-  debug.push(resp);
-  
-  //create the auto update cron 
+if (getParam("install")) { 
+  //create the auto update cron job
   var autoUpdateUrl = "https://"+ window.location.host + "/" + scriptName + "?appid=" + appid + "&token=" + token + "&auto-update=1";
   fileName = urlUpdScript.split('/').pop().split('?').shift();
   execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
