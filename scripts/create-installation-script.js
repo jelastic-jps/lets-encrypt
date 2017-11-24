@@ -26,6 +26,23 @@ if (customDomain) {
     customDomain = customDomain.join(" ");
 }
 
+//download & execute validation script -> validateExtIP && validateDNSSettings
+var fileName = urlValidationScript.split('/').pop().split('?').shift();
+var execParams = ' --no-check-certificate ' + urlValidationScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName + ' >> /var/log/letsencrypt.log && source /root/' + fileName + ' && validateExtIP && validateDNSSettings ' + (customDomain || envDomain);
+resp = ExecCmdById("wget", execParams);
+
+if (resp.result == 4109) {
+      var error = resp.responses[0].out;
+      resp = {
+        result: 4109,
+        type: "warning", 
+        error: error,
+        response: error,
+        message: error
+      }
+      return resp;
+}
+
 //get nodeGroup 
 var resp = jelastic.env.control.GetEnvInfo(envName, session);
 if (resp.result != 0) return resp;
