@@ -88,7 +88,6 @@ scriptBody = scriptBody.replace("${ENV_DOMAIN}", envDomain.toString());
 scriptBody = scriptBody.replace("${CUSTOM_DOMAIN}", customDomain.toString());
 scriptBody = scriptBody.replace("${LE_INSTALL}", urlLeScript.toString());
 scriptBody = scriptBody.replace("${LE_GENERATE_SSL}", urlGenScript.toString());
-scriptBody = scriptBody.replace("${LE_VALIDATION}", urlValidationScript.toString());
 scriptBody = scriptBody.replace("${UPDATE_SSL}", urlUpdScript.toString());
 scriptBody = scriptBody.replace("${NODE_GROUP}", group.toString());
 scriptBody = scriptBody.replace("${MASTER_IP}", masterIP.toString());
@@ -119,6 +118,10 @@ function compareVersions(a, b) {
   a = a.split("."), b = b.split(".")
   for (var i = 0, l = Math.max(a.length, b.length); i < l; i++) {x = parseInt(a[i], 10) || 0; y = parseInt(b[i], 10) || 0; if (x != y) return x > y ? 1 : -1 }
   return 0;
+}
+
+function ExecCmdById(cmd, params){
+  return jelastic.env.control.ExecCmdById(envName, session, masterId,  toJSON( [ { "command": cmd, "params": params } ]), true, "root");  
 }
 
 return resp;
