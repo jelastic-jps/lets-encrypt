@@ -21,7 +21,7 @@ if (customDomain) {
     customDomain = customDomain.split(";").join(" ").split(",").join(" ").replace(/\s+/g, " ").replace(/^\s+|\s+$/gm,'').split(" ");
     var regex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}(\n|$)/
     for (var i = 0; i < customDomain.length; i++) {
-        if (!regex.test(customDomain[i])) return {result: 99, type:"warning", message: "Domain " + customDomain[i] + " is invalid. Please double check specified domains in the External Domains field."}
+        if (!regex.test(customDomain[i])) return {result: 99, type:"error", message: "Domain " + customDomain[i] + " is invalid. Please double check specified domains in the External Domains field."}
     }
     customDomain = customDomain.join(" ");
 }
@@ -69,7 +69,7 @@ if (resp.result == 4109) {
       var error = resp.responses[0].out;
       resp = {
         result: 4109,
-        type: "warning", 
+        type: "error", 
         error: error,
         response: error,
         message: error
