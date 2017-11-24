@@ -1,5 +1,3 @@
-[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || { echo "Error: no settings available" ; exit 3 ; }
-
 EXT_IP=$(ip r get 1 | awk '{print $5}' | head -n 1)
 
 function isLANIP() {
@@ -19,12 +17,17 @@ function validateExtIP(){
 }
 
 function validateDNSSettings(){
-    domain_list=$(echo $domain | sed "s/,/ /g")
-        for single_domain in $domain_list
-        do
-            dig +short  @8.8.8.8 A $single_domain | grep -q $EXT_IP  || { echo "Error: Incorrect DNS settings for domain $single_domain! It should be bound to $EXT_IP."; exit 1; };
-        done
-    return 0
+	domain=$1;
+	[ -z "$domain" ] && { 
+		[ -f '/opt/letsencrypt/settings'  ] && source '/opt/letsencrypt/settings' || { echo "Error: no settings available" ; exit 3 ; }
+	}
+
+	domain_list=$(echo $domain | sed "s/,/ /g")
+    	for single_domain in $domain_list
+    	do
+    		dig +short  @8.8.8.8 A $single_domain | grep -q $EXT_IP  || { echo "Error: Incorrect DNS settings for domain $single_domain! It should be bound to $EXT_IP."; exit 1; };
+    	done
+    	return 0
 }
 
 function validateCertBot(){
