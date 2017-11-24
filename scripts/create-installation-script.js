@@ -6,7 +6,7 @@ import com.hivext.api.development.Scripting;
 import com.hivext.api.utils.Random;
 
 var envName = '${env.envName}',
-    customDomain = '${settings.extDomain}' == 'customDomain' ? '${settings.customDomain}'.replace(/^\s+|\s+$/g, '') : '',
+    customDomain = (getParam('customDomain') || '').replace(/^\s+|\s+$/g, ''),
     envDomain =  "${env.domain}",
     token = Random.getPswd(64),
     rnd = "?_r=" + Math.random(),
