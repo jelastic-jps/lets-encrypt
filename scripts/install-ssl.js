@@ -147,13 +147,14 @@ if (execResp.responses) {
   //checking errors in ssl generation output  
   var errors = {
     "An unexpected error": "Please see",
-    "The following errors": "appid ="
+    "The following errors": "appid =",
+    "Error:": null  
   }
   for (var start in errors) {
     var end = errors[start];
     var ind1 = out.indexOf(start);
     if (ind1 != -1){
-      var ind2 = out.indexOf(end, ind1);
+      var ind2 = end ? out.indexOf(end, ind1) : -1;
       var error = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2);
       resp = {
         result: 99,
