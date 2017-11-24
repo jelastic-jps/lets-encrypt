@@ -25,6 +25,7 @@ function validateDNSSettings(){
 	domain_list=$(echo $domain | sed "s/,/ /g")
     	for single_domain in $domain_list
     	do
+		[ "$single_domain" == "-d" ] && continue;
     		dig +short  @8.8.8.8 A $single_domain | grep -q $EXT_IP  || { echo "Error: Incorrect DNS settings for domain $single_domain! It should be bound to $EXT_IP."; exit 1; };
     	done
     	return 0
