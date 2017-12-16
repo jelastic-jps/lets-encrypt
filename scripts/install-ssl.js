@@ -1,10 +1,13 @@
 //@url('/${SCRIPT_URL}')
-//@req(token)
 
 import com.hivext.api.core.utils.Transport;
 
+var token = getParam("token") || "";
+var isValidToken = false;
 if (token.replace(/\s/g, "") != "${TOKEN}") {
-  return {result: 8, error: "wrong token", type:"error", message:"Token [" + token + "] does not match", response: {result: 8}}
+  if (!this.session) return {result: 8, error: "wrong token", type:"error", message:"Token [" + token + "] does not match", response: {result: 8}}
+} else {
+    isValidToken = true;
 }
 
 var envDomain = "${ENV_DOMAIN}",
@@ -58,7 +61,7 @@ if (getParam("auto-update")) {
   }
   
   if (!getParam("task")) {
-    this.session = this.signature;
+    if (isValidToken) this.session = this.signature;
     
     //checking access to the env
     //mark of error access to a shared env  
