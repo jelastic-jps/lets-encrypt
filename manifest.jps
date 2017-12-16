@@ -4,7 +4,7 @@
     "build": "201711251736",
     "application": {
         "id": "letsencrypt-ssl-addon",
-        "name": "Let's Encrypt Free SSL (beta)",
+        "name": "Let's Encrypt Free SSL",
         "categories": [
             "apps/dev-and-admin-tools"
         ],
