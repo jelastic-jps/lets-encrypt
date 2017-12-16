@@ -27,13 +27,6 @@ var envDomain = "${ENV_DOMAIN}",
 
 var baseUrlArr = urlUpdScript.split("/"); baseUrlArr.pop(); baseUrlArr.pop(); 
 
-//save params for Unistall and Update button actions
-if (getParam("install")) {
-  var params = toJSON({appid: appid, script: scriptName, token: token});
-  resp = jelastic.dev.apps.ChangeAppInfo(envAppid, "description", params);
-  debug.push(resp);
-}
-
 //uninstall logic
 if (getParam("uninstall")){
   //remove auto-update cron job
