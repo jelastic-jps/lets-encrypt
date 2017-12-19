@@ -60,22 +60,26 @@
             "callScript": {
                 "script": "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-letsencrypt-ssl', {'${this.action}':1}); if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response; return resp;"
             },
-            "update": {
+            "update": [{
                 "callScript": {
                     "action": "auto-update"
                 }
-            }
+            }, {
+                "return": {
+                    "type": "success",
+                    "message": "SSL certificate files have been successfully updated!"
+                }
+            }]
         },
         "buttons": [{
-            "caption": "Configure",
-            "settings": "main",
-            "action": "install"
-        }, {
             "confirmText": "Do you want to update attached SSL certificate(s)?",
             "loadingText": "Updating...",
             "action": "update",
-            "caption": "Update Now",
-            "successText": "SSL certificate files have been successfully updated!"
+            "caption": "Update Now"
+        }, {
+            "caption": "Configure",
+            "settings": "main",
+            "action": "install"
         }],
         "onUninstall": {
             "callScript": {
