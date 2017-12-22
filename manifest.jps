@@ -48,6 +48,11 @@
                 "customDomain": "${settings.customDomain}"
             }
         },
+        "onUninstall": {
+            "callScript": {
+                "action": "uninstall"
+            }
+        },
         "actions": {
             "install": {
                 "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/scripts/create-installation-script.js?_r=${fn.random}",
@@ -58,16 +63,22 @@
                 }
             },
             "callScript": {
-                "script": "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-letsencrypt-ssl', {'${this.action}':1}); if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response; return resp;"
+                "script": [
+                    "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-letsencrypt-ssl', {'${this.action}':1});",
+                    "if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;",
+                    "return resp;"
+                ]
             },
             "update": [{
                 "callScript": {
                     "action": "auto-update"
                 }
             }, {
-                "return": {
-                    "type": "success",
-                    "message": "SSL certificate files have been successfully updated!"
+                "if (jelastic.system.service.GetVersion().version.split('-').shift() >= '5.1')": {
+                    "return": {
+                        "type": "success",
+                        "message": "SSL certificate files have been successfully updated!"
+                    }
                 }
             }]
         },
@@ -75,17 +86,13 @@
             "confirmText": "Do you want to update attached SSL certificate(s)?",
             "loadingText": "Updating...",
             "action": "update",
-            "caption": "Update Now"
+            "caption": "Update Now",
+            "successText": "SSL certificate files have been successfully updated!"
         }, {
             "caption": "Configure",
             "settings": "main",
             "action": "install"
         }],
-        "onUninstall": {
-            "callScript": {
-                "action": "uninstall"
-            }
-        },
         "settings": {
             "fields": [{
                 "type": "string",
