@@ -1,109 +1,119 @@
 {
     "jpsVersion": "0.99",
     "jpsType": "update",
-    "build": "201711251736",
-    "application": {
-        "id": "letsencrypt-ssl-addon",
-        "name": "Let's Encrypt Free SSL",
-        "categories": [
-            "apps/dev-and-admin-tools"
-        ],
-        "targetNodes": {
-            "nodeType": [
-                "tomcat6",
-                "tomcat7",
-                "tomcat8",
-                "tomcat85",
-                "tomcat9",
-                "tomcat",
-                "tomee",
-                "tomee-dockerized",
-                "glassfish3",
-                "glassfish4",
-                "glassfish",
-                "jetty6",
-                "apache",
-                "apache2",
-                "nginxphp",
-                "apache2-ruby",
-                "nginx-ruby",
-                "nginx",
-                "nginx-dockerized",
-                "nginxphp-dockerized",
-                "haproxy",
-                "apache-lb",
-                "varnish",
-                "varnish-dockerized"
-            ]
-        },
-        "version": "1.2",
-        "homepage": "https://github.com/jelastic-jps/lets-encrypt",
-        "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/images/lets-encrypt.png",
-        "description": {
-            "text": "<span><b>Let's Encrypt</b> is a free and  and automated solution for browser-trusted SSL certificates issuing and appliance. Just select a required <b><i>Environment name</i></b> from the list below and specify the attached <b><i>External Domain(s)</i></b>.</span><div class='warning-lower' style='color:#b7c3da'><b>Note:</b><ul><li>Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).</li><li>To get a dummy SSL certificate for internal environment domain, leave the <i>External Domain(s)</i> field blank</li></ul></div>",
-            "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
-        },
-        "onInstall": {
-            "install": {
-                "customDomain": "${settings.customDomain}"
-            }
-        },
-        "onUninstall": {
+    "build": "201712291307",
+    "id": "letsencrypt-ssl-addon",
+    "name": "Let's Encrypt Free SSL",
+    "categories": [
+        "apps/dev-and-admin-tools"
+    ],
+    "targetNodes": {
+        "nodeType": [
+            "tomcat6",
+            "tomcat7",
+            "tomcat8",
+            "tomcat85",
+            "tomcat9",
+            "tomcat",
+            "tomee",
+            "tomee-dockerized",
+            "glassfish3",
+            "glassfish4",
+            "glassfish",
+            "jetty6",
+            "apache",
+            "apache2",
+            "nginxphp",
+            "apache2-ruby",
+            "nginx-ruby",
+            "nginx",
+            "nginx-dockerized",
+            "nginxphp-dockerized",
+            "haproxy",
+            "apache-lb",
+            "varnish",
+            "varnish-dockerized"
+        ]
+    },
+    "version": "1.3",
+    "homepage": "https://github.com/jelastic-jps/lets-encrypt",
+    "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/images/lets-encrypt.png",
+    "description": {
+        "text": "<span><b>Let's Encrypt</b> is a free and  and automated solution for browser-trusted SSL certificates issuing and appliance. Just select a required <b><i>Environment name</i></b> from the list below and specify the attached <b><i>External Domain(s)</i></b>.</span><div class='warning-lower' style='color:#b7c3da'><b>Note:</b><ul><li>Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).</li><li>To get a dummy SSL certificate for internal environment domain, leave the <i>External Domain(s)</i> field blank</li></ul></div>",
+        "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
+    },
+    "globals": {
+        "scriptSufix": "letsencrypt-ssl"
+    },
+    "onInstall": {
+        "install": {
+            "customDomain": "${settings.customDomain}"
+        }
+    },
+    "onUninstall": [{
             "callScript": {
                 "action": "uninstall"
             }
         },
-        "actions": {
-            "install": {
-                "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/scripts/create-installation-script.js?_r=${fn.random}",
-                "params": {
-                    "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/scripts",
-                    "cronTime": "0 ${fn.random(1,6)} * * *",
-                    "customDomain": "${this.customDomain}"
-                }
-            },
+        "delete"
+    ],
+    "onBeforeDelete": "delete",
+    "actions": {
+        "install": {
+            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/scripts/create-installation-script.js?_r=${fn.random}",
+            "params": {
+                "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/validations/scripts",
+                "cronTime": "0 ${fn.random(1,6)} * * *",
+                "customDomain": "${this.customDomain}"
+            }
+        },
+        "callScript": {
+            "script": [
+                "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {'${this.action}':1});",
+                "if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;",
+                "return resp;"
+            ]
+        },
+        "update": [{
             "callScript": {
-                "script": [
-                    "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-letsencrypt-ssl', {'${this.action}':1});",
-                    "if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;",
-                    "return resp;"
-                ]
-            },
-            "update": [{
-                "callScript": {
-                    "action": "auto-update"
-                }
-            }, {
-                "if (jelastic.system.service.GetVersion().version.split('-').shift() >= '5.1')": {
-                    "return": {
-                        "type": "success",
-                        "message": "SSL certificate files have been successfully updated!"
-                    }
-                }
-            }]
-        },
-        "buttons": [{
-            "confirmText": "Do you want to update attached SSL certificate(s)?",
-            "loadingText": "Updating...",
-            "action": "update",
-            "caption": "Update Now",
-            "successText": "SSL certificate files have been successfully updated!"
+                "action": "auto-update"
+            }
         }, {
-            "caption": "Configure",
-            "settings": "main",
-            "action": "install"
+            "if (jelastic.system.service.GetVersion().version.split('-').shift() >= '5.1')": {
+                "return": {
+                    "type": "success",
+                    "message": "SSL certificate files have been successfully updated!"
+                }
+            }
         }],
-        "settings": {
-            "fields": [{
-                "type": "string",
-                "name": "customDomain",
-                "regex": "^\\s*(([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9-]{1,6})+)+\\s*,\\s*;\\s*)*([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9-]?(.[a-zA-Z0-9-]{1,6})+)$",
-                "caption": "External Domain(s)",
-                "required": false
-            }]
-        },
-        "success": {
-            "text": "Your Let’s Encrypt SSL certificate will remain valid for 90 days. One month before expiration the system will automatically request the certificate update, whilst you'll get the appropriate email notification.<br><br>To perform this operation manually at any time, use the <b>Update Now</b> option at the add-on’s panel. Also, the currently used domain names list can be adjusted later with the <b>Configure</b> button.<br><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</a></div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-reconfigure-ssl-certificate' target='_blank'>How to reconfigure SSL certificate</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-cname' target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
+        "delete": {
+            "script": [
+                "jelastic.dev.scripting.DeleteScript('${env.envName}-${globals.scriptSufix}');",
+                "return {result:0}"
+            ]
         }
+    },
+    "buttons": [{
+        "confirmText": "Do you want to update attached SSL certificate(s)?",
+        "loadingText": "Updating...",
+        "action": "update",
+        "caption": "Update Now",
+        "successText": "SSL certificate files have been successfully updated!"
+    }, {
+        "caption": "Configure",
+        "settings": "main",
+        "action": "install"
+    }],
+    "settings": {
+        "fields": [{
+            "type": "string",
+            "name": "customDomain",
+            "regex": "^\\s*(([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9-]{1,6})+)+\\s*,\\s*;\\s*)*([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9-]?(.[a-zA-Z0-9-]{1,6})+)$",
+            "caption": "External Domain(s)",
+            "required": false
+        }]
+    },
+    "success": {
+        "text": "Your Let’s Encrypt SSL certificate will remain valid for 90 days. One month before expiration the system will automatically request the certificate update, whilst you'll get the appropriate email notification.<br><br>To perform this operation manually at any time, use the <b>Update Now</b> option at the add-on’s panel. Also, the currently used domain names list can be adjusted later with the <b>Configure</b> button.<br><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</a></div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-reconfigure-ssl-certificate' target='_blank'>How to reconfigure SSL certificate</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-cname' target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
     }
 }
