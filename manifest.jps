@@ -105,13 +105,30 @@
         "action": "install"
     }],
     "settings": {
-        "fields": [{
-            "type": "string",
-            "name": "customDomain",
-            "regex": "^\\s*(([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9-]{1,6})+)+\\s*,\\s*;\\s*)*([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9-]?(.[a-zA-Z0-9-]{1,6})+)$",
-            "caption": "External Domain(s)",
-            "required": false
-        }]
+      "fields": [
+        {
+          "type": "radio-fieldset",
+          "name": "extDomain",
+          "default": "currentDomain",
+          "values": {
+            "currentDomain": "Internal Domain - get test (invalid) SSL certificate for testing purposes",
+            "customDomain": "Custom Domain - get valid SSL certificate for production use<div style='color:#d87800;'>The domains should be already bound to the environment <u><a href='https://docs.jelastic.com/custom-domain-via-cname 'target='_blank'style='color:#d87800;'>via CNAME</a></u> or <u><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank' style='color:#d87800;'>via A Record</a></u></div>"
+          },
+          "showIf": {
+            "customDomain": [
+              {
+                "type": "string",
+                "name": "customDomain",
+                "regex": "^\\s*((([a-zA-Z]{0,3}\\.)?[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9]{2,6})+)+\\s*[,|;]?\\s*)*([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9]{2,6})+)$",
+                "caption": {
+                  "en": "Domains"
+                },
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
     },
     "success": {
         "text": "Your Let’s Encrypt SSL certificate will remain valid for 90 days. One month before expiration the system will automatically request the certificate update, whilst you'll get the appropriate email notification.<br><br>To perform this operation manually at any time, use the <b>Update Now</b> option at the add-on’s panel. Also, the currently used domain names list can be adjusted later with the <b>Configure</b> button.<br><br><div>Useful links:</div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate' target='_blank'>How to renew SSL certificate</a></div><div><a href='https://github.com/jelastic-jps/lets-encrypt#how-to-reconfigure-ssl-certificate' target='_blank'>How to reconfigure SSL certificate</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-cname' target='_blank'>How to bind custom domain via CNAME</a></div><div><a href='https://docs.jelastic.com/custom-domain-via-arecord' target='_blank'>How to bind custom domain via A Record</a></div>"
