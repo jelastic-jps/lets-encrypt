@@ -8,6 +8,7 @@ mkdir -p /etc/letsencrypt/
 #chown -R jelastic:jelastic /etc/letsencrypt/
 
 cd /opt/letsencrypt
+git reset --hard
 git pull origin master
 
 iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
