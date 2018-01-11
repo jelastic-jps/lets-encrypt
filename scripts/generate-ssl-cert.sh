@@ -24,7 +24,7 @@ validateDNSSettings
 validateCertBot
 
 #Request for certificates
-/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges tls-sni-01 --tls-sni-01-port 9999 --renew-by-default --email $email --agree-tos
+/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 9999 --renew-by-default --email $email --agree-tos
 
 iptables -t nat -D PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 9999
 iptables -D INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
