@@ -200,7 +200,7 @@ return resp;
 
 //managing certificate challenge validation by routing all requests to master node with let's encrypt engine   
 function manageDnat(action) {
-  var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 443 -j DNAT --to-destination ' + masterIP + ':443';
+  var dnatParams = 'a | grep -q  ' + masterIP + ' || iptables -t nat ' + (action == 'add' ? '-I' : '-D') + ' PREROUTING -p tcp --dport 80 -j DNAT --to-destination ' + masterIP + ':80';
   return jelastic.env.control.ExecCmdByGroup(envName, session, group, toJSON([{ "command": "ip", "params": dnatParams }]), true, false, "root"); 
 }
 
