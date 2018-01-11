@@ -32,7 +32,8 @@
             "haproxy",
             "apache-lb",
             "varnish",
-            "varnish-dockerized"
+            "varnish-dockerized",
+            "payara"
         ]
     },
     "version": "1.3",
