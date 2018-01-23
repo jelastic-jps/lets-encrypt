@@ -50,6 +50,11 @@ echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}'
 echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/fullchain.url
 echo $uploadresult | awk -F '{"file":"' '{print $4}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/cert.url
 
+JEM_SSL_MODULE_LATEST_URL="https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module"
+JEM_SSL_MODULE_PATH="/usr/lib/jelastic/modules/ssl.module"
+localedef -i en_US -f UTF-8 en_US.UTF-8
+wget --no-check-certificate "https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module" -O $JEM_SSL_MODULE_PATH
+
 sed -i '/^\s*$/d' /tmp/*.url
 
 #installing ssl cert via JEM
