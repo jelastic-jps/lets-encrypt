@@ -169,7 +169,7 @@ if (getParam("install")) {
   //create the auto update cron job
   var autoUpdateUrl = "https://"+ window.location.host + "/" + scriptName + "?appid=" + appid + "&token=" + token + "&auto-update=1";
   fileName = urlUpdScript.split('/').pop().split('?').shift();
-  execParams = ' ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
+  execParams = ' --no-check-certificate ' + urlUpdScript + ' -O /root/' + fileName + ' && chmod +x /root/' + fileName;
   execParams += ' && crontab -l 2>/dev/null | grep -v "' + fileName + '" | crontab - && echo \"' + cronTime + ' /root/' + fileName + ' \'' + autoUpdateUrl +'\' >> /var/log/letsencrypt.log\" >> /var/spool/cron/root';
   resp = ExecCmdById("wget", execParams); 
   debug.push(resp);
