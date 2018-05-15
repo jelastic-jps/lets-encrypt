@@ -25,5 +25,5 @@ _delta_time=$(( $_exp_date_unixtime - $_cur_date_unixtime  ));
 [[ $_delta_time -le $seconds_before_expire ]] && {
     echo "$(date) - update required" >> /var/log/letsencrypt.log;
     resp=$(wget -qO- ${auto_update_url});
-    echo $resp |  grep -q 'result:0' || wget -qO- "${jerror_url}/jerror?appid=$appid&actionname=updatefromcontainer&callparameters=$auto_update_url&email=$email&errorcode=4121&errormessage=$resp&priority=high"
+    { echo $resp | sed 's/"//g' | grep -q 'result:0' ;} || wget -qO- "${jerror_url}/jerror?appid=$appid&actionname=updatefromcontainer&callparameters=$auto_update_url&email=$email&errorcode=4121&errormessage=$resp&priority=high"
 }
