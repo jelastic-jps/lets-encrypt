@@ -23,6 +23,9 @@ validateExtIP
 validateDNSSettings
 validateCertBot
 
+#Kill hanged certificate requests
+pkill letsencrypt-auto > /dev/null 2>&1
+
 #Request for certificates
 /opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 9999 --renew-by-default --email $email --agree-tos
 
