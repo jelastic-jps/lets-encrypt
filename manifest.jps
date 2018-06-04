@@ -35,7 +35,9 @@
             "varnish-dockerized",
             "payara",
             "wildfly",
-            "nodejs"
+            "nodejs",
+            "apacheruby",
+            "nginxruby"
         ]
     },
     "version": "1.3",
