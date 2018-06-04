@@ -45,7 +45,7 @@
     },
     "globals": {
         "scriptSufix": "letsencrypt-ssl",
-        "baseUrl": "http://0222bf403592023ba9fcfa9b9808755b.app.stg.jelastic.com"
+        "baseUrl": "https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/le-custom"
     },
     "onInstall": {
         "install": {
