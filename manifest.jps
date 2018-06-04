@@ -33,7 +33,9 @@
             "apache-lb",
             "varnish",
             "varnish-dockerized",
-            "payara"
+            "payara",
+            "wildfly",
+            "nodejs"
         ]
     },
     "version": "1.3",
