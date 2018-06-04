@@ -9,7 +9,7 @@ echo Checking RPM database
 
 echo "Installing required packages"
 {
-  yum -y install epel-release git bc;
+  yum -y install epel-release git bc nss;
   [ ! -d '/opt/letsencrypt' ] && git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt;
   /opt/letsencrypt/letsencrypt-auto --os-packages-only
 
