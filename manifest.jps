@@ -36,7 +36,7 @@
             "payara",
             "wildfly",
             "nodejs",
-            "apacheruby",
+            "apache-ruby",
             "nginxruby"
         ]
     },
