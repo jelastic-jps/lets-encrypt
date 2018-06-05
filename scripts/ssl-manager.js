@@ -95,19 +95,21 @@ function SSLManager(config) {
     };
 
     me.uninstall = function () {
+        var autoUpdateScript = nodeManager.getScriptPath("auto-update-ssl-cert.sh");
+
         return me.execAll([
-            [ me.cmd, 'crontab -l 2>/dev/null | grep -v %(fileName) | crontab -', {
-                fileName : "auto-update-ssl-cert.sh"
+            [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
+                scriptPath : autoUpdateScript
             }],
 
             [ me.cmd, 'rm -rf %(paths)', {
                 paths : [
                     // "/etc/letsencrypt",
                     nodeManager.getPath("opt/letsencrypt"),
-                    nodeManager.getScriptPath("auto-update-ssl-cert.sh"),
                     nodeManager.getScriptPath("generate-ssl-cert.sh"),
                     nodeManager.getScriptPath("letsencrypt_settings"),
-                    nodeManager.getScriptPath("install-le.sh")
+                    nodeManager.getScriptPath("install-le.sh"),
+                    autoUpdateScript
                 ].join(" ")
             }],
 
@@ -475,11 +477,10 @@ function SSLManager(config) {
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
             "chmod +x %(scriptPath)",
-            "crontab -l  >/dev/null | grep -v '%(fileName)' | crontab -",
+            "crontab -l  >/dev/null | grep -v '%(scriptPath)' | crontab -",
             "echo \"%(cronTime) %(scriptPath) '%(autoUpdateUrl)' >> %(log)\" >> /var/spool/cron/root"
         ], {
             url : scriptUrl,
-            fileName : fileName,
             cronTime : config.cronTime,
             scriptPath : nodeManager.getScriptPath(fileName),
             autoUpdateUrl : autoUpdateUrl
