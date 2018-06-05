@@ -17,6 +17,9 @@ function SSLManager(config) {
      *      [nodeIp] : {String}
      *      [nodeGroup] : {String}
      *      [customDomains] : {String}
+     *      [deployHook] : {String}
+     *      [undeployHook] : {String}
+     *      [test] : {Boolean}
      * }} config
      * @constructor
      */
@@ -695,7 +698,7 @@ function SSLManager(config) {
             return { result : 0, group : group || "cp" };
         };
 
-        me.attachExtIp = function (nodeId) {
+        me.attachExtIp = function attachExtIp(nodeId) {
             var platformVersion = getPlatformVersion();
 
             if (compareVersions(platformVersion, '4.9.5') >= 0 || platformVersion.indexOf('trunk') != -1) {
