@@ -67,7 +67,11 @@
                 "scriptName": "${env.envName}-${globals.scriptSufix}",
                 "baseUrl": "${globals.baseUrl}",
                 "cronTime": "0 ${fn.random(1,6)} * * *",
-                "customDomains": "${this.customDomains}"
+                "customDomains": "${this.customDomains}",
+                "nodeId": "${settings.nodeId}",
+                "nodeGroup": "${settings.nodeGroup}",
+                "deployHook": "${sessings.deployHook}",
+                "undeployHook": "${sessings.undeployHook}"
             }
         },
         "callScript": {

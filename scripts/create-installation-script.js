@@ -18,10 +18,10 @@ function run() {
         baseDir        : baseDir,
         customDomains  : customDomains,
         scriptName     : scriptName,
-        nodeId         : nodeId,
-        nodeGroup      : nodeGroup,
-        deployHook     : deployHook,
-        undeployHook   : undeployHook,
+        nodeId         : replace(String(nodeId)),
+        nodeGroup      : replace(nodeGroup),
+        deployHook     : replace(deployHook),
+        undeployHook   : replace(undeployHook),
         test           : test,
         envName        : "${env.envName}",
         envDomain      : "${env.domain}",
@@ -39,6 +39,10 @@ function use(script, config) {
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
 
     return new (new Function("return " + body)())(config);
+}
+
+function replace(str) {
+    return str.replace(/^\${.*}$/, "");
 }
 
 try {

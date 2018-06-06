@@ -6,7 +6,7 @@ var action = getParam("action", "install"),
     baseUrl = "${baseUrl}";
 
 function run() {
-      var SSLManager = use("scripts/ssl-manager.js", {
+    var SSLManager = use("scripts/ssl-manager.js", {
         session       : session,
         isTask        : isTask,
         baseUrl       : baseUrl,
@@ -45,7 +45,7 @@ function use(script, config) {
 }
 
 try {
-  run();
+    run();
 } catch (ex) {
     var resp = {
         result : com.hivext.api.Response.ERROR_UNKNOWN,
