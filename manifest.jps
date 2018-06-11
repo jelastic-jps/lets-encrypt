@@ -49,7 +49,7 @@
     },
     "globals": {
         "scriptSufix": "letsencrypt-ssl",
-        "baseUrl": "https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/le-custom"
+        "baseUrl": "https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/master"
     },
     "onInstall": {
         "install": {
