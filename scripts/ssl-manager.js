@@ -495,7 +495,7 @@ function SSLManager(config) {
             ], { hook : config.deployHook });
         }
 
-        if (me.checkSSLModule()) {
+        if (me.checkCustomSSL()) {
             return me.exec(me.bindSSL);
         }
 
@@ -509,28 +509,24 @@ function SSLManager(config) {
             ], { hook : config.undeployHook });
         }
 
-        if (me.checkSSLModule()) {
+        if (me.checkCustomSSL()) {
             return me.exec(me.bindSSL);
         }
 
         return { result : 0 };
     };
 
-    me.checkSSLModule = function () {
+    me.checkCustomSSL = function () {
         var fileName = "validation.sh";
 
-        var resp = nodeManager.cmd([
-            "source %(path)",
-            "validateCustomSSL"
-        ], { path : nodeManager.getScriptPath(fileName) });
+        var resp = me.exec(
+            me.cmd([
+                "source %(path)",
+                "validateCustomSSL"
+            ], { path : nodeManager.getScriptPath(fileName) })
+        );
 
-        var isOK = (resp.result == 0);
-
-        if (!isOK) {
-            log("WARNING: " + resp);
-        }
-
-        return isOK;
+        return resp.result == 0;
     };
 
     me.bindSSL = function bindSSL() {
