@@ -46,6 +46,17 @@ function validateCertBot(){
     [ -f "${DIR}/opt/letsencrypt/certbot-auto" ] && return 0  || { echo "Error: Certbot is not installed!"; exit 1 ; };
 }
 
+function validateCustomSSL() {
+    export META_FILE="/etc/jelastic/metainf.conf"
+    [ -f "/var/lib/jelastic/libs/envinfo.lib" ] && source "/var/lib/jelastic/libs/envinfo.lib";
+
+    [ -z "$ssl_module_inherit" ] && {
+        [[ "x${COMPUTE_TYPE}" != "xcartridge" || ! -f "${CARTRIDGE_HOME}/jelastic/scripts/ssl_manager.sh" ]] && { echo "Error: custom SSL is not available"; exit 1; }
+    }
+
+    return 0;
+}
+
 function runAllChecks(){
    validateExtIP
    validateDNSSettings

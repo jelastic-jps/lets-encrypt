@@ -102,6 +102,8 @@ function SSLManager(config) {
                 scriptPath : autoUpdateScript
             }],
 
+            me.undeploy,
+
             [ me.cmd, 'rm -rf %(paths)', {
                 paths : [
                     // "/etc/letsencrypt",
@@ -109,11 +111,10 @@ function SSLManager(config) {
                     nodeManager.getScriptPath("generate-ssl-cert.sh"),
                     nodeManager.getScriptPath("letsencrypt_settings"),
                     nodeManager.getScriptPath("install-le.sh"),
+                    nodeManager.getScriptPath("validation.sh"),
                     autoUpdateScript
                 ].join(" ")
-            }],
-
-            me.undeploy
+            }]
         ]);
     };
 
@@ -494,7 +495,11 @@ function SSLManager(config) {
             ], { hook : config.deployHook });
         }
 
-        return me.exec(me.bindSSL);
+        if (me.checkSSLModule()) {
+            return me.exec(me.bindSSL);
+        }
+
+        return { result : 0 };
     };
 
     me.undeploy = function undeploy() {
@@ -504,7 +509,28 @@ function SSLManager(config) {
             ], { hook : config.undeployHook });
         }
 
-        return me.exec(me.bindSSL);
+        if (me.checkSSLModule()) {
+            return me.exec(me.bindSSL);
+        }
+
+        return { result : 0 };
+    };
+
+    me.checkSSLModule = function () {
+        var fileName = "validation.sh";
+
+        var resp = nodeManager.cmd([
+            "source %(path)",
+            "validateCustomSSL"
+        ], { path : nodeManager.getScriptPath(fileName) });
+
+        var isOK = (resp.result == 0);
+
+        if (!isOK) {
+            log("WARNING: " + resp);
+        }
+
+        return isOK;
     };
 
     me.bindSSL = function bindSSL() {
