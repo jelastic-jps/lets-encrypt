@@ -520,10 +520,10 @@ function SSLManager(config) {
         var fileName = "validation.sh";
 
         var resp = me.exec(
-            me.cmd([
+            me.cmd, [
                 "source %(path)",
                 "validateCustomSSL"
-            ], { path : nodeManager.getScriptPath(fileName) })
+            ], { path : nodeManager.getScriptPath(fileName) }
         );
 
         return resp.result == 0;
