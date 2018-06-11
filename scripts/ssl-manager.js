@@ -390,7 +390,6 @@ function SSLManager(config) {
         var fileName = "generate-ssl-cert.sh",
             url = me.getScriptUrl(fileName),
             generateSSLScript = nodeManager.getScriptPath(fileName),
-            bUpload = !config.deployHook,
             resp;
 
         me.execAll([
@@ -405,9 +404,9 @@ function SSLManager(config) {
         ]);
 
         //execute ssl generation script
-        resp = me.analyzeSslResponse(
-            me.exec(me.cmd, generateSSLScript + (bUpload ? " --upload-certs" : ""))
-        );
+        resp = me.analyzeSslResponse(me.exec(
+            me.cmd, generateSSLScript
+        ));
 
         //removing redirect
         me.exec(me.manageDnat, "remove");
