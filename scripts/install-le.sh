@@ -10,9 +10,9 @@ echo Checking RPM database
 
 echo "Installing required packages"
 {
-  yum -y install epel-release git bc;
-  mkdir -p ${DIR}/opt
-  [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/letsencrypt/letsencrypt ${DIR}/opt/letsencrypt;
+  yum -y install epel-release git bc nss;
+  mkdir -p ${DIR}/opt;
+  [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/certbot/certbot ${DIR}/opt/letsencrypt;
   ${DIR}/opt/letsencrypt/letsencrypt-auto --os-packages-only
 
 } &> /dev/null
@@ -22,8 +22,9 @@ echo "Installing required packages"
     JEM_SSL_MODULE_PATH="/usr/lib/jelastic/modules/ssl.module"
     localedef -i en_US -f UTF-8 en_US.UTF-8
     wget --no-check-certificate "${JEM_SSL_MODULE_LATEST_URL}" -O $JEM_SSL_MODULE_PATH
+
+    grep -q '^jelastic:' /etc/passwd && JELASTIC_UID=$(id -u jelastic) || JELASTIC_UID="700"
+    [ -d "/var/www/" ] && chown -R ${JELASTIC_UID}:${JELASTIC_UID} "/var/www/" 2> /dev/null
 }
 
-[ -d "/var/www/" ] && chown -R 700:700 "/var/www/" 2> /dev/null
 exit 0
-#test -f /usr/lib/jelastic/modules/ssl.module
