@@ -65,6 +65,12 @@ function uploadCerts() {
     exit 0;
 }
 
-set -e;
-validateCustomSSL || true;
-[ $? -eq 0 ] && { set +e && uploadCerts $certdir; }
+while [[ "$1" != "" ]]; do
+    case "$1" in
+        -u|--upload-certs )
+            shift;
+            uploadCerts $certdir;
+            ;;
+    esac
+    shift
+done

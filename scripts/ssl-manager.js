@@ -390,6 +390,7 @@ function SSLManager(config) {
         var fileName = "generate-ssl-cert.sh",
             url = me.getScriptUrl(fileName),
             generateSSLScript = nodeManager.getScriptPath(fileName),
+            bUpload,
             resp;
 
         me.execAll([
@@ -403,10 +404,12 @@ function SSLManager(config) {
             [ me.manageDnat, "add" ]
         ]);
 
+        bUpload = nodeManager.checkCustomSSL();
+
         //execute ssl generation script
-        resp = me.analyzeSslResponse(me.exec(
-            me.cmd, generateSSLScript
-        ));
+        resp = me.analyzeSslResponse(
+            me.exec(me.cmd, generateSSLScript + (bUpload ? " --upload-certs" : ""))
+        );
 
         //removing redirect
         me.exec(me.manageDnat, "remove");
@@ -494,7 +497,7 @@ function SSLManager(config) {
             ], { hook : config.deployHook });
         }
 
-        if (me.checkCustomSSL()) {
+        if (nodeManager.checkCustomSSL()) {
             return me.exec(me.bindSSL);
         }
 
@@ -508,24 +511,11 @@ function SSLManager(config) {
             ], { hook : config.undeployHook });
         }
 
-        if (me.checkCustomSSL()) {
+        if (nodeManager.checkCustomSSL()) {
             return me.exec(me.bindSSL);
         }
 
         return { result : 0 };
-    };
-
-    me.checkCustomSSL = function () {
-        var fileName = "validation.sh";
-
-        var resp = me.exec(
-            me.cmd, [
-                "source %(path)",
-                "validateCustomSSL"
-            ], { path : nodeManager.getScriptPath(fileName) }
-        );
-
-        return resp.result == 0;
     };
 
     me.bindSSL = function bindSSL() {
@@ -647,8 +637,10 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
+            bCustomSSLSupported,
             envInfo,
-            nodeIp;
+            nodeIp,
+            node;
 
         baseDir = baseDir || "/";
 
@@ -686,6 +678,28 @@ function SSLManager(config) {
 
         me.setNodeIp = function (ip) {
             nodeIp = ip;
+        };
+
+        me.getNode = function () {
+            var resp,
+                nodes;
+
+            if (!node && nodeId) {
+                resp = me.getEnvInfo();
+
+                if (resp.result != 0) return resp;
+
+                nodes = resp.nodes;
+
+                for (var i = 0, n = nodes.length; i < n; i++) {
+                    if (nodes[i].id == nodeId) {
+                        node = nodes[i];
+                        break;
+                    }
+                }
+            }
+
+            return { result : 0, node : node };
         };
 
         me.getEnvInfo = function () {
@@ -756,10 +770,45 @@ function SSLManager(config) {
         me.readFile = function (path) {
             return jelastic.env.file.Read(envName, session, path, null, null, nodeId);
         };
+
+        me.checkCustomSSL = function () {
+            var node;
+
+            if (!isDefined(bCustomSSLSupported)) {
+                var resp = me.getNode();
+
+                if (resp.result != 0) {
+                    log("ERROR: getNode() = " + resp);
+                }
+
+                if (resp.node) {
+                    node = resp.node;
+
+                    bCustomSSLSupported = node.isCustomSslSupport;
+
+                    if (!isDefined(bCustomSSLSupported) && node.nodemission != "docker") {
+                        resp = me.cmd([
+                            "source %(path)",
+                            "validateCustomSSL"
+                        ], { path : nodeManager.getScriptPath("validation.sh") });
+
+                        bCustomSSLSupported = (resp.result == 0);
+                    }
+                }
+
+                bCustomSSLSupported = !!bCustomSSLSupported;
+            }
+
+            return bCustomSSLSupported;
+        };
     }
 
     function _(str, values) {
         return new StrSubstitutor(values || {}, "%(", ")").replace(str);
+    }
+
+    function isDefined(value) {
+        return typeof value !== "undefined";
     }
 
     function getPlatformVersion() {
