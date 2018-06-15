@@ -1,7 +1,7 @@
 {
     "jpsVersion": "0.99",
     "jpsType": "update",
-    "build": "201805161650",
+    "build": "201806011934",
     "id": "letsencrypt-ssl-addon",
     "name": "Let's Encrypt Free SSL",
     "categories": [
@@ -48,11 +48,12 @@
         "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
     },
     "globals": {
-        "scriptSufix": "letsencrypt-ssl"
+        "scriptSufix": "letsencrypt-ssl",
+        "baseUrl": "https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/master"
     },
     "onInstall": {
         "install": {
-            "customDomain": "${settings.customDomain}"
+            "customDomains": "${settings.customDomains}"
         }
     },
     "onUninstall": [{
@@ -65,16 +66,21 @@
     "onBeforeDelete": "delete",
     "actions": {
         "install": {
-            "script": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/create-installation-script.js?_r=${fn.random}",
+            "script": "${globals.baseUrl}/scripts/create-installation-script.js?_r=${fn.random}",
             "params": {
-                "baseDir": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts",
+                "scriptName": "${env.envName}-${globals.scriptSufix}",
+                "baseUrl": "${globals.baseUrl}",
                 "cronTime": "0 ${fn.random(1,6)} * * *",
-                "customDomain": "${this.customDomain}"
+                "customDomains": "${this.customDomains}",
+                "nodeId": "${settings.nodeId}",
+                "nodeGroup": "${settings.nodeGroup}",
+                "deployHook": "${sessings.deployHook}",
+                "undeployHook": "${sessings.undeployHook}"
             }
         },
         "callScript": {
             "script": [
-                "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {'${this.action}':1});",
+                "var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {action:'${this.action}'});",
                 "if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;",
                 "return resp;"
             ]
@@ -112,7 +118,7 @@
     "settings": {
         "fields": [{
             "type": "string",
-            "name": "customDomain",
+            "name": "customDomains",
             "regex": "^([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9-]{1,}){1,6}[,|;]?){1,7}$",
             "caption": "External Domain(s)",
             "required": false
