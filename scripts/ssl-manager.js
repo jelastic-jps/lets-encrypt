@@ -512,7 +512,7 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            return me.exec(me.bindSSL);
+            return me.exec(me.removeSSL);
         }
 
         return { result : 0 };
