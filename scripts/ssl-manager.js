@@ -132,7 +132,11 @@ function SSLManager(config) {
             
             resp = nodeManager.getEnvInfo();
             
-            if (resp.result != 0 || log("checkPermissions").result != 0) {
+            if (resp.result == 0) {
+                resp = log("checkPermissions");
+            }
+            
+            if (resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
             }
         }
