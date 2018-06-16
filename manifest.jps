@@ -74,8 +74,8 @@
                 "customDomains": "${this.customDomains}",
                 "nodeId": "${settings.nodeId}",
                 "nodeGroup": "${settings.nodeGroup}",
-                "deployHook": "${sessings.deployHook}",
-                "undeployHook": "${sessings.undeployHook}"
+                "deployHook": "${settings.deployHook}",
+                "undeployHook": "${settings.undeployHook}"
             }
         },
         "callScript": {
