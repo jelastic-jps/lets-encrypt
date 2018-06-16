@@ -827,7 +827,7 @@ function SSLManager(config) {
 
     function log(message) {
         if (jelastic.marketplace && jelastic.marketplace.console) {
-            return jelastic.marketplace.console.WriteLog(message);
+            return jelastic.marketplace.console.WriteLog(appid, session, message);
         }
         
         return { result : 0 };
