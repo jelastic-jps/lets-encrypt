@@ -129,13 +129,12 @@ function SSLManager(config) {
             if (me.hasValidToken()) {
                 session = signature;
             }
-
-            return me.exec(me.addAutoUpdateTask);
-            // resp = nodeManager.getEnvInfo();
-            //
-            // if (resp.result != 0) {
-            //     return me.checkEnvAccessAndUpdate(resp);
-            // }
+            
+            resp = nodeManager.getEnvInfo();
+            
+            if (resp.result != 0 || log("checkPermissions").result != 0) {
+                return me.checkEnvAccessAndUpdate(resp);
+            }
         }
 
         return me.install(true);
@@ -828,7 +827,9 @@ function SSLManager(config) {
 
     function log(message) {
         if (jelastic.marketplace && jelastic.marketplace.console) {
-            jelastic.marketplace.console.WriteLog(message);
+            return jelastic.marketplace.console.WriteLog(message);
         }
+        
+        return { result : 0 };
     }
 }
