@@ -321,6 +321,9 @@ function SSLManager(config) {
             resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
+            
+            //build script to avoid caching
+            jelastic.dev.scripting.Build(scriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
