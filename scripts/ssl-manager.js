@@ -136,7 +136,7 @@ function SSLManager(config) {
                 resp = log("checkPermissions");
             }
             
-            if (resp.result != 0) {
+            if (resp && resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
             }
         }
