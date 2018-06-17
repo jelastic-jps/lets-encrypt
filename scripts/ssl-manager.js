@@ -126,7 +126,7 @@ function SSLManager(config) {
         }
 
         if (!config.isTask) {
-            if (me.hasValidToken()) {
+            if (!session && me.hasValidToken()) {
                 session = signature;
             }
             
@@ -162,7 +162,7 @@ function SSLManager(config) {
             script: config.scriptName,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
-            params: { token: config.token, task: 1, "auto-update": 1 }
+            params: { token: config.token, task: 1, action : "auto-update" }
         });
     };
 
@@ -495,9 +495,10 @@ function SSLManager(config) {
 
     me.deploy = function deploy() {
         if (config.deployHook) {
-            return me.exec(me.cmd, [
-                "/bin/bash %(hook) >> %(log)"
-            ], { hook : config.deployHook });
+            return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { 
+                hook : config.deployHook, 
+                nodeGroup: config.nodeGroup
+            });
         }
 
         if (nodeManager.checkCustomSSL()) {
@@ -509,9 +510,10 @@ function SSLManager(config) {
 
     me.undeploy = function undeploy() {
         if (config.undeployHook) {
-            return me.exec(me.cmd, [
-                "/bin/bash %(hook) >> %(log)"
-            ], { hook : config.undeployHook });
+            return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { 
+                hook : config.undeployHook, 
+                nodeGroup: config.nodeGroup 
+            });
         }
 
         if (nodeManager.checkCustomSSL()) {
