@@ -126,16 +126,19 @@ function SSLManager(config) {
         }
 
         if (!config.isTask) {
-            if (me.hasValidToken()) {
+            if (!session && me.hasValidToken()) {
                 session = signature;
             }
-
-            return me.exec(me.addAutoUpdateTask);
-            // resp = nodeManager.getEnvInfo();
-            //
-            // if (resp.result != 0) {
-            //     return me.checkEnvAccessAndUpdate(resp);
-            // }
+            
+            resp = nodeManager.getEnvInfo();
+            
+            if (resp.result == 0) {
+                resp = log("checkPermissions");
+            }
+            
+            if (resp && resp.result != 0) {
+                return me.checkEnvAccessAndUpdate(resp);
+            }
         }
 
         return me.install(true);
@@ -159,7 +162,7 @@ function SSLManager(config) {
             script: config.scriptName,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
-            params: { token: config.token, task: 1, "auto-update": 1 }
+            params: { token: config.token, task: 1, action : "auto-update" }
         });
     };
 
@@ -318,6 +321,9 @@ function SSLManager(config) {
             resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
+            
+            //build script to avoid caching
+            jelastic.dev.scripting.Build(scriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
@@ -492,9 +498,10 @@ function SSLManager(config) {
 
     me.deploy = function deploy() {
         if (config.deployHook) {
-            return me.exec(me.cmd, [
-                "/bin/bash %(hook) >> %(log)"
-            ], { hook : config.deployHook });
+            return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { 
+                hook : config.deployHook, 
+                nodeGroup: config.nodeGroup
+            });
         }
 
         if (nodeManager.checkCustomSSL()) {
@@ -506,9 +513,10 @@ function SSLManager(config) {
 
     me.undeploy = function undeploy() {
         if (config.undeployHook) {
-            return me.exec(me.cmd, [
-                "/bin/bash %(hook) >> %(log)"
-            ], { hook : config.undeployHook });
+            return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { 
+                hook : config.undeployHook, 
+                nodeGroup: config.nodeGroup 
+            });
         }
 
         if (nodeManager.checkCustomSSL()) {
@@ -828,7 +836,9 @@ function SSLManager(config) {
 
     function log(message) {
         if (jelastic.marketplace && jelastic.marketplace.console) {
-            jelastic.marketplace.console.WriteLog(message);
+            return jelastic.marketplace.console.WriteLog(appid, session, message);
         }
+        
+        return { result : 0 };
     }
 }
