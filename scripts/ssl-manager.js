@@ -395,6 +395,7 @@ function SSLManager(config) {
     me.generateSslCerts = function generateSslCerts() {
         var fileName = "generate-ssl-cert.sh",
             url = me.getScriptUrl(fileName),
+            validationFileName = "validation.sh",
             generateSSLScript = nodeManager.getScriptPath(fileName),
             bUpload,
             resp;
@@ -403,8 +404,15 @@ function SSLManager(config) {
             //download SSL generation script
             [ me.cmd, [
                 "wget --no-check-certificate '%(url)' -O %(path)",
+                "chmod +x %(path)",
+                "wget --no-check-certificate '%(validationUrl)' -O %(validationPath)",
                 "chmod +x %(path)"
-            ], { url : url, path : generateSSLScript } ],
+            ], {
+                validationUrl : me.getScriptUrl(validationFileName),
+                validationPath : nodeManager.getScriptPath(validationFileName),
+                url : url,
+                path : generateSSLScript
+            }],
 
             //redirect incoming requests to master node
             [ me.manageDnat, "add" ]
