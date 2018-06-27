@@ -422,7 +422,7 @@ function SSLManager(config) {
 
         //execute ssl generation script
         resp = me.analyzeSslResponse(
-            me.exec(me.cmd, generateSSLScript + (bUpload ? " --upload-certs" : ""))
+            me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
         //removing redirect
