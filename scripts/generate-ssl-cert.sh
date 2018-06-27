@@ -67,10 +67,12 @@ function uploadCerts() {
 
 while [[ "$1" != "" ]]; do
     case "$1" in
-        -u|--upload-certs )
+        -n|--no-upload-certs )
             shift;
-            uploadCerts $certdir;
+            exit 0;
             ;;
     esac
     shift
 done
+
+uploadCerts $certdir;
