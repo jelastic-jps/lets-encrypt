@@ -8,7 +8,7 @@ GREP=$(which grep)
 SED=$(which sed)
 GIT=$(which git);
 BASE_REPO_URL="https://github.com/jelastic-jps/lets-encrypt"
-RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/multiple-ip-bug/scripts/"
+RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/"
 
 [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh"  ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
