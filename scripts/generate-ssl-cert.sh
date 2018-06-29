@@ -13,9 +13,6 @@ cd "${DIR}/opt/letsencrypt"
 git reset --hard
 git pull origin master
 
-iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
-iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 9999
-
 #Parameters for test certificates
 test_params='';
 [ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
@@ -30,6 +27,9 @@ killall -9 letsencrypt-auto > /dev/null 2>&1
 killall -9 letsencrypt > /dev/null 2>&1
 
 mkdir -p $DIR/var/log/letsencrypt
+
+iptables -I INPUT -p tcp -m tcp --dport 9999 -j ACCEPT
+iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 9999
 
 #Request for certificates
 $DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 9999 --renew-by-default --email $email --agree-tos --logs-dir $DIR/var/log/letsencrypt
