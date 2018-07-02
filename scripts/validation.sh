@@ -30,16 +30,18 @@ function validateDNSSettings(){
         [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "Error: no settings available" ; exit 3 ; }
     }
 
-    domain_list=$(echo $domain | sed "s/,/ /g")
+    domain_list=$(echo $domain | sed "s/-d/ /g")
         for single_domain in $domain_list
         do
             [ "$single_domain" == "-d" ] && continue;
+	    detected=false
             for EXT_IP in $EXT_IPs
             do
-                dig +short @8.8.8.8 A $single_domain | grep -q $EXT_IP && return 0;
+                dig +short @8.8.8.8 A $single_domain | grep -q $EXT_IP && detected=true;
             done
+	    [[ $detected == 'false'  ]] && { echo "Error: Incorrect DNS settings for domain $single_domain! It should be bound to containers Public IP."; exit 1 ; };
         done
-    { echo "Error: Incorrect DNS settings for domain $single_domain! It should be bound to $EXT_IP."; exit 1 ; };
+	    return 0;
 }
 
 function validateCertBot(){
