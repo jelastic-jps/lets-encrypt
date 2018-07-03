@@ -495,7 +495,7 @@ function SSLManager(config) {
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
             "chmod +x %(scriptPath)",
             "crontab -l  >/dev/null | grep -v '%(scriptPath)' | crontab -",
-            "echo \"%(cronTime) %(scriptPath) '%(autoUpdateUrl)' >> %(log)\" >> /var/spool/cron/root"
+            "echo \"%(cronTime) su - root -c '%(scriptPath) \\'%(autoUpdateUrl)\\' >> %(log)\"' >> /var/spool/cron/root"
         ], {
             url : scriptUrl,
             cronTime : config.cronTime,
