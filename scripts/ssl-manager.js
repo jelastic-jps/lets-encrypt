@@ -63,7 +63,11 @@ function SSLManager(config) {
             "uninstall"   : me.uninstall,
             "auto-update" : me.autoUpdate
         };
-
+        
+        if (getParam("uninstall")) {
+            action = "uninstall";
+        }
+        
         if (!actions[action]) {
             return {
                 result : Response.ERROR_UNKNOWN,
