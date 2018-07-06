@@ -6,7 +6,7 @@
 
 The installation can be performed on one of the following Jelastic containers as an entry point:
 * Load Balancers - _NGINX_, _Apache LB_, _HAProxy_, _Varnish_
-* Java application servers - _Tomcat_, _TomEE_, _GlassFish_, _Jetty_
+* Java application servers - _Tomcat_, _TomEE_, _GlassFish_, _Payara_, _Jetty_
 * PHP application servers - _Apache PHP_, _NGINX PHP_
 * Ruby application servers - _Apache Ruby_, _NGINX Ruby_
 
@@ -24,13 +24,17 @@ Import the [raw link of the add-on manifest](https://raw.githubusercontent.com/j
 
 Note: to access the dashboard you need to be registered at one of the [Jelastic Public Cloud providers](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/manifest.jps&keys=app.jelastic.eapps.com;app.cloud.hostnet.nl;app.jelastichosting.nl;app.appengine.flow.ch;app.jelasticlw.com.br;app.mircloud.host;app.jcs.opusinteractive.io;app.paas.quarinet.eu) or have a Private Cloud installation.
 
+<p align="center"> 
 <img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/install-letsencrypt-ssl.png" width="400">
+</p>
 
 In the opened confirmation window:
 * provide **External Domain(s)** of target environment, the possible options are:
   * leave the field blank to create a dummy SSL certificate, assigned to environment internal URL (env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}), for being used in testing
   * insert the preliminary linked external domain(s) to get trusted certificates; if specifying multiple hostnames, separate them with either comma or semicolon
+<p align="center">
 <img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/separate-domains.png" width="400">
+</p>
 
 * select the corresponding **Environment name** within the expandable drop-down list 
 * choose a Nodes layer with your environment entry point (usually, it’s automatically detected but can be redefined manually)
