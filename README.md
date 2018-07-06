@@ -29,11 +29,11 @@ For the Let’s Encrypt SSL appliance, copy link to the **_manifest.jps_** file 
 ![Let’s Encrypt Installation](/images/install-letsencrypt-ssl.png)
 
 Here, you need to:
-1. provide **_External Domain(s)_** of target environment. Here, the possible options are:
+* provide **_External Domain(s)_** of target environment. Here, the possible options are:
   * leave the field blank to create a dummy SSl certificate, assigned to environment internal URL (_env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}_), for being used in testing
   * insert the preliminary linked external domain(s) to get a trusted certificate for each of them; if specifying multiple hostnames, separate them with either comma or semicolon
-2. select the corresponding **_Environment name_** within the expandable drop-down list 
-3. leave the automatically chosen _Nodes_ layer value unchanged - it defines a layer with your environment entry point
+* select the corresponding **_Environment name_** within the expandable drop-down list 
+* leave the automatically chosen _Nodes_ layer value unchanged - it defines a layer with your environment entry point
 
 Finally, click on **Install** to initiate installation of the appropriate SSL certificate(s).
 
