@@ -51,7 +51,7 @@ function validateDNSSettings(){
         [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "Error: no settings available" ; exit 3 ; }
     }
 
-    domain_list=$(echo $domain | sed "s/-d/ /g")
+    domain_list=$(echo $domain | sed "s/-d / /g")
         for single_domain in $domain_list
         do
             [ "$single_domain" == "-d" ] && continue;
