@@ -42,14 +42,14 @@
     },
     "version": "1.3",
     "homepage": "https://github.com/jelastic-jps/lets-encrypt",
-    "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/hooks/images/lets-encrypt.png",
+    "logo": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png",
     "description": {
         "text": "<span><b>Let's Encrypt</b> is a free and  and automated solution for browser-trusted SSL certificates issuing and appliance. Just select a required <b><i>Environment name</i></b> from the list below and specify the attached <b><i>External Domain(s)</i></b>.</span><div class='warning-lower' style='color:#b7c3da'><b>Note:</b><ul><li>Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).</li><li>To get a dummy SSL certificate for internal environment domain, leave the <i>External Domain(s)</i> field blank</li></ul></div>",
         "short": "Free tool to configure support of secured SSL connection for an environment, by either internal or custom domain name."
     },
     "globals": {
         "scriptSufix": "letsencrypt-ssl",
-        "baseUrl": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master"
+        "baseUrl": "https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/hooks"
     },
     "onInstall": {
         "install": {
