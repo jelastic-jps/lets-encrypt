@@ -77,7 +77,7 @@ function validateCustomSSL() {
     export META_FILE="/etc/jelastic/metainf.conf"
     [ -f "/var/lib/jelastic/libs/envinfo.lib" ] && source "/var/lib/jelastic/libs/envinfo.lib";
 
-    [ -z "$ssl_module_inherit" ] && {
+    [[ -z "$ssl_module_inherit" && ! -f "/var/lib/jelastic/overrides/varnish_ssl.lib" ]] && {
         [[ "x${COMPUTE_TYPE}" != "xcartridge" || ! -f "${CARTRIDGE_HOME}/jelastic/scripts/ssl_manager.sh" ]] && { echo "Error: custom SSL is not available"; exit 1; }
     }
 
