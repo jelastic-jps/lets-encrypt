@@ -31,7 +31,7 @@ function SSLManager(config) {
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         Random = com.hivext.api.utils.Random,
         me = this,
-        isValidToken = false,2
+        isValidToken = false,
         debug = [],
         nodeManager,
         baseUrl,
