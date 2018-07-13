@@ -19,7 +19,7 @@ validateExtIP
 validateDNSSettings
 
 TIME_TO_WAIT=$(($RANDOM%3600));
-sleep $TIME_TO_WAIT;
+#sleep $TIME_TO_WAIT;   
 
 auto_update_url=$1
 jerror_url=$(awk -F "/" '{ print $1"//"$2$3"/1.0/environment/jerror/rest"}' <<< $auto_update_url )
