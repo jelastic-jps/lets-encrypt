@@ -806,7 +806,7 @@ function SSLManager(config) {
 
                     bCustomSSLSupported = node.isCustomSslSupport;
 
-                    if (/*(!isDefined(bCustomSSLSupported) || node.type == "NATIVE") &&*/ node.nodemission != "docker") {
+                    if ((!isDefined(bCustomSSLSupported) || node.type != "DOCKERIZED") && node.nodemission != "docker") {
                         resp = me.cmd([
                             "source %(path)",
                             "validateCustomSSL"
