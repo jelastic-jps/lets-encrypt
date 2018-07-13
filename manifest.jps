@@ -75,7 +75,9 @@
                 "nodeId": "${settings.nodeId}",
                 "nodeGroup": "${settings.nodeGroup}",
                 "deployHook": "${settings.deployHook}",
-                "undeployHook": "${settings.undeployHook}"
+                "deployHookType": "${settings.deployHookType}",
+                "undeployHook": "${settings.undeployHook}",                
+                "undeployHookType": "${settings.undeployHookType}"
             }
         },
         "callScript": {
