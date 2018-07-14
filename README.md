@@ -1,20 +1,18 @@
-# Free SSL Let’s Encrypt Add-On
+# Let’s Encrypt Add-On for Automated SSL Certificates Configuration
 
-Let’s Encrypt Add-on for Automatic SSL Configuration of Your Jelastic Environment
+**[Let’s Encrypt](https://letsencrypt.org/)** is a free and open Certificate Authority, that simplifies and automates processes of browser-trusted SSL certificates issuing and appliance. Using this package you can automatically install Let’s Encrypt as an add-on to your environment.
 
-![Let’s Encrypt Add-on](/images/letsencrypt-jelastic-ssl.png)
+<p align="center"> 
+<img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/letsencrypt-jelastic-ssl.png" width="400">
+</p>
 
-**[Let’s Encrypt](https://letsencrypt.org/)** is a free and open Certificate Authority, that simplifies and automates processes of browser-trusted SSL certificates issuing and appliance. This is achieved through obtaining a browser-trusted SSL certificate from Let's Encrypt and attaching it to environment entry point (i.e. either compute node or load balancer). Upon integrating such certificate into your application, it will start supporting secure connection via the _HTTPS_ protocol. 
-
-## SSL Configuration with Jelastic Let’s Encrypt Add-On
-
-This solution can be installed to any environment with one of the following Jelastic certified or dockerized containers as an entry point:
+The installation can be performed on one of the following Jelastic containers as an entry point:
 * Load Balancers - _NGINX_, _Apache LB_, _HAProxy_, _Varnish_
-* Java application servers - _Tomcat 6/7/8/9_, _TomEE_, _GlassFish 3/4_, _Jetty 6_
+* Java application servers - _Tomcat_, _TomEE_, _GlassFish_, _Payara_, _Jetty_
 * PHP application servers - _Apache PHP_, _NGINX PHP_
 * Ruby application servers - _Apache Ruby_, _NGINX Ruby_
 
-This list is constantly extended to subsequently provide all software stacks support.
+If you require Let’s Encrypt SSL for any other stack, just add a load balancer in front of your application servers and install the add-on. SSL termination at load balancing level is used by default in clustered topologies.
 
 The Let’s Encrypt add-on allows to configure SSL for:
 * **_internal environment address_**, which is composed of environment name and platform domain, to be served with a dummy (i.e. not commonly trusted) SSL certificate; this option can be used for testing purposes
@@ -22,39 +20,29 @@ The Let’s Encrypt add-on allows to configure SSL for:
 
 To get deeper insights on how the Let’s Encrypt service works, refer to the [official documentation](https://letsencrypt.org/how-it-works/).
 
-## How to Install Let’s Encrypt Add-On to Jelastic Environment
+## Installation Process
 
-For the Let’s Encrypt SSL appliance, copy link to the **_manifest.jps_** file above and [import](https://docs.jelastic.com/environment-import) it to the required Jelastic Platform.
+Import the [raw link of the add-on manifest](https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/manifest.jps) within Jelastic PaaS dashboard or initiate the installation within **Marketplace > Add-Ons**.
 
-![Let’s Encrypt Installation](/images/install-letsencrypt-ssl.png)
+Note: to access the dashboard you need to be registered at one of the [Jelastic Public Cloud providers](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/manifest.jps&keys=app.jelastic.eapps.com;app.cloud.hostnet.nl;app.jelastichosting.nl;app.appengine.flow.ch;app.jelasticlw.com.br;app.mircloud.host;app.jcs.opusinteractive.io;app.paas.quarinet.eu) or have a Private Cloud installation.
 
-Here, you need to:
-* provide **_External Domain(s)_** of target environment. Here, the possible options are:
-  * leave the field blank to create a dummy SSl certificate, assigned to environment internal URL (_env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}_), for being used in testing
-  * insert the preliminary linked external domain(s) to get a trusted certificate for each of them; if specifying multiple hostnames, separate them with either comma, space or semicolon
-* select the corresponding **_Environment name_** within the expandable drop-down list 
-* leave the automatically chosen _Nodes_ layer value unchanged - it defines a layer with your environment entry point
+<p align="center"> 
+<img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/install-letsencrypt-ssl.png" width="400">
+</p>
 
-Finally, click on **Install** to initiate installation of the appropriate SSL certificate(s).
+In the opened confirmation window:
+* provide **External Domain(s)** of target environment, the possible options are:
+  * leave the field blank to create a dummy SSL certificate, assigned to environment internal URL (env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}), for being used in testing
+  * insert the preliminary linked external domain(s) to get trusted certificates; if specifying multiple hostnames, separate them with either comma or semicolon
+<p align="center">
+<img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/separate-domains.png" width="400">
+</p>
 
-## How to Renew SSL Certificate
+* select the corresponding **Environment name** within the expandable drop-down list 
+* choose a Nodes layer with your environment entry point (usually, it’s automatically detected but can be redefined manually)
 
-Your Let’s Encrypt SSL certificate(s) will remain valid for _90_ days. After this period expires, they need to be renewed for the encryption to remain active.
+Finally, click **Install** and wait a few minutes for the process to be completed.
 
-By default, the required updated SSL certificates are requested and applied automatically 30 days before expiration (you'll get the appropriate email notification). Such a check up is performed once per day based on the appropriate cron job. If needed, the exact time can be specified through adjusting the corresponding "cronTime": "_0 ${fn.random(1,6)} * * *_" setting within this package manifest file.
+For additional information on how to renew or reconfigure SSL certificates using this add-on, follow the detailed [Let’s Encrypt SSL Certificates](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) article.
 
-To renew certificate files manually, click the **Add-ons** button next to the appropriate environment layer and use the **Update Now** button within add-on’s panel.
-
-![Let’s Encrypt Update](/images/update-ssl-certificate.png)
-
-Also, your SSL certificates can be updated by add-on re-installation for the same domain name(s). Herewith, adding new or specifying different domain name(s) during this procedure will cause the complete replacement of used certificates.
-
-## How to Reconfigure SSL Certificate
-
-In case of necessity, the already existing **Let’s Encrypt** add-on can be adjusted to match a new requirements (i.e. to replace the currently used domain names with a list of new ones).
-
-![Let’s Encrypt Configure](/images/configure-ssl-certificate.png)
-
-> **Note:** To avoid security issues, a new certificate will be issued, even in case of removing domain name(s) from the existing one.
-
-Just click the **Configure** button within Let’s Encrypt panel and type domain name in the appeared pop up window.
+Try out the **Let’s Encrypt SSL** add-on with [Jelastic Multi-Cloud PaaS](https://jelastic.com/) for Java, PHP, Node.js, Ruby, Python, .NET, Go, Docker Swarm and Kubernetes clusters.
