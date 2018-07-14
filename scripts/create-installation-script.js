@@ -1,32 +1,36 @@
 //@auth
 //@required(baseUrl, cronTime)
 
-var baseDir        = getParam("baseDir", "/"),
-    customDomains  = getParam("customDomains"),
-    scriptName     = getParam("scriptName", "${env.envName}-letsencrypt-ssl"),
-    nodeId         = getParam("nodeId", ""),
-    nodeGroup      = getParam("nodeGroup", ""),
-    deployHook     = getParam("deployHook", ""),
-    undeployHook   = getParam("undeployHook", ""),
-    test           = getParam("test", "");
+var baseDir          = getParam("baseDir", "/"),
+    customDomains    = getParam("customDomains"),
+    scriptName       = getParam("scriptName", "${env.envName}-letsencrypt-ssl"),
+    nodeId           = getParam("nodeId", ""),
+    nodeGroup        = getParam("nodeGroup", ""),
+    deployHook       = getParam("deployHook", ""),
+    deployHookType   = getParam("deployHookType", ""),
+    undeployHook     = getParam("undeployHook", ""),
+    undeployHookType = getParam("undeployHookType", ""),
+    test             = getParam("test", "");
 
 function run() {
     var SSLManager = use("scripts/ssl-manager.js", {
-        session        : session,
-        cronTime       : cronTime,
-        baseUrl        : baseUrl,
-        baseDir        : baseDir,
-        scriptName     : scriptName,
-        customDomains  : replace(customDomains),
-        nodeId         : replace(String(nodeId)),
-        nodeGroup      : replace(nodeGroup),
-        deployHook     : replace(deployHook),
-        undeployHook   : replace(undeployHook),
-        test           : test,
-        envName        : "${env.envName}",
-        envDomain      : "${env.domain}",
-        envAppid       : "${env.appid}",
-        email          : "${user.email}"
+        session          : session,
+        cronTime         : cronTime,
+        baseUrl          : baseUrl,
+        baseDir          : baseDir,
+        scriptName       : scriptName,
+        customDomains    : replace(customDomains),
+        nodeId           : replace(String(nodeId)),
+        nodeGroup        : replace(nodeGroup),
+        deployHook       : replace(deployHook),
+        deployHookType   : replace(deployHookType),
+        undeployHook     : replace(undeployHook),
+        undeployHookType : replace(undeployHookType),
+        test             : test,
+        envName          : "${env.envName}",
+        envDomain        : "${env.domain}",
+        envAppid         : "${env.appid}",
+        email            : "${user.email}"
     });
 
     jelastic.local.ReturnResult(
