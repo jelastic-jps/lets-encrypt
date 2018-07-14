@@ -65,7 +65,11 @@ function SSLManager(config) {
             "uninstall"   : me.uninstall,
             "auto-update" : me.autoUpdate
         };
-
+        
+        if (getParam("uninstall")) {
+            action = "uninstall";
+        }
+        
         if (!actions[action]) {
             return {
                 result : Response.ERROR_UNKNOWN,
@@ -131,13 +135,13 @@ function SSLManager(config) {
             if (!session && me.hasValidToken()) {
                 session = signature;
             }
-            
+
             resp = nodeManager.getEnvInfo();
-            
+
             if (resp.result == 0) {
                 resp = log("checkPermissions");
             }
-            
+
             if (resp && resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
             }
@@ -323,7 +327,7 @@ function SSLManager(config) {
             resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
-            
+
             //build script to avoid caching
             jelastic.dev.scripting.Build(scriptName);
         } catch (ex) {
@@ -497,7 +501,7 @@ function SSLManager(config) {
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
             "chmod +x %(scriptPath)",
             "crontab -l  >/dev/null | grep -v '%(scriptPath)' | crontab -",
-            "echo \"%(cronTime) %(scriptPath) '%(autoUpdateUrl)' >> %(log)\" >> /var/spool/cron/root"
+            "echo \"%(cronTime) su - root -c \\\"%(scriptPath) '%(autoUpdateUrl)' >> %(log)\\\"\" >> /var/spool/cron/root"
         ], {
             url : scriptUrl,
             cronTime : config.cronTime,
@@ -507,7 +511,8 @@ function SSLManager(config) {
     };
 
     me.deploy = function deploy() {
-        if (config.deployHook) {
+        if (config.deployHook) 
+        {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
 
@@ -825,7 +830,7 @@ function SSLManager(config) {
 
                     bCustomSSLSupported = node.isCustomSslSupport;
 
-                    if (/*(!isDefined(bCustomSSLSupported) || node.type == "NATIVE") &&*/ node.nodemission != "docker") {
+                    if ((!isDefined(bCustomSSLSupported) || node.type != "DOCKERIZED") && node.nodemission != "docker") {
                         resp = me.cmd([
                             "source %(path)",
                             "validateCustomSSL"
@@ -869,7 +874,7 @@ function SSLManager(config) {
         if (jelastic.marketplace && jelastic.marketplace.console) {
             return jelastic.marketplace.console.WriteLog(appid, session, message);
         }
-        
+
         return { result : 0 };
     }
 }
