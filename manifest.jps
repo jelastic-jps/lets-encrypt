@@ -49,7 +49,7 @@
     },
     "globals": {
         "scriptSufix": "letsencrypt-ssl",
-        "baseUrl": "https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master"
+        "baseUrl": "https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/hooks"
     },
     "onInstall": {
         "install": {
@@ -75,7 +75,9 @@
                 "nodeId": "${settings.nodeId}",
                 "nodeGroup": "${settings.nodeGroup}",
                 "deployHook": "${settings.deployHook}",
-                "undeployHook": "${settings.undeployHook}"
+                "deployHookType": "${settings.deployHookType}",
+                "undeployHook": "${settings.undeployHook}",                
+                "undeployHookType": "${settings.undeployHookType}"
             }
         },
         "callScript": {

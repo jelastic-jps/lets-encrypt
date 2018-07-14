@@ -7,25 +7,28 @@ var action = getParam("action", "install"),
 
 function run() {
     var SSLManager = use("scripts/ssl-manager.js", {
-        session       : session,
-        isTask        : isTask,
-        baseUrl       : baseUrl,
+        session          : session,
+        isTask           : isTask,
+        baseUrl          : baseUrl,
 
-        token         : "${token}",
-        email         : "${email}",
-        baseDir       : "${baseDir}",
-        scriptName    : "${scriptName}",
-        envName       : "${envName}",
-        envDomain     : "${envDomain}",
-        envAppid      : "${envAppid}",
-        nodeId        : "${nodeId}",
-        nodeIp        : "${nodeIp}",
-        nodeGroup     : "${nodeGroup}",
-        customDomains : "${customDomains}",
-        cronTime      : "${cronTime}",
-        deployHook    : "${deployHook}",
-        undeployHook  : "${undeployHook}",
-        test          : "${test}"
+        token            : "${token}",
+        email            : "${email}",
+        baseDir          : "${baseDir}",
+        scriptName       : "${scriptName}",
+        envName          : "${envName}",
+        envDomain        : "${envDomain}",
+
+        envAppid         : "${envAppid}",
+        nodeId           : "${nodeId}",
+        nodeIp           : "${nodeIp}",
+        nodeGroup        : "${nodeGroup}",
+        customDomains    : "${customDomains}",
+        cronTime         : "${cronTime}",
+        deployHook       : "${deployHook}",
+        deployHookType   : "${deployHook}",
+        undeployHook     : "${undeployHook}",
+        undeployHookType : "${undeployHook}",
+        test             : "${test}"
     });
 
     var resp = SSLManager.auth(token);

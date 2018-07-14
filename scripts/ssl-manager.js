@@ -18,7 +18,9 @@ function SSLManager(config) {
      *      [nodeGroup] : {String}
      *      [customDomains] : {String}
      *      [deployHook] : {String}
+     *      [deployHookType] : {String}
      *      [undeployHook] : {String}
+     *      [undeployHookType] : {String}
      *      [test] : {Boolean}
      * }} config
      * @constructor
@@ -509,11 +511,9 @@ function SSLManager(config) {
     };
 
     me.deploy = function deploy() {
-        if (config.deployHook) {
-            return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", {
-                hook : config.deployHook,
-                nodeGroup: config.nodeGroup
-            });
+        if (config.deployHook) 
+        {
+            return me.evalHook(config.deployHook, config.deployHookType);
         }
 
         if (nodeManager.checkCustomSSL()) {
@@ -525,10 +525,7 @@ function SSLManager(config) {
 
     me.undeploy = function undeploy() {
         if (config.undeployHook) {
-            return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", {
-                hook : config.undeployHook,
-                nodeGroup: config.nodeGroup
-            });
+            return me.evalHook(config.undeployHook, config.undeployHookType);
         }
 
         if (nodeManager.checkCustomSSL()) {
@@ -536,6 +533,33 @@ function SSLManager(config) {
         }
 
         return { result : 0 };
+    };
+
+    me.evalHook = function evalHook(hook, hookType) {
+        var urlRegex = new RegExp("^[a-z]+:\\/\\/"),
+            hookBody;
+
+        if (urlRegex.test(hook)) {
+            try {
+                hookBody = new Transport().get(hook);
+            } catch (ex) {
+                return error(Response.ERROR_UNKNOWN, toJSON(ex));
+            }
+        } else {
+            hookBody = hook;
+        }
+
+        if (hookType == "js") {
+            return me.exec(me.evalCode, hookBody, config);
+        }
+
+        return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { hook : hookBody });
+    };
+
+    me.evalCode = function evalCode(code, params) {
+        var resp = jelastic.dev.scripting.EvalCode(appid, session, code, "js", "", params || {});
+
+        return resp.response || resp
     };
 
     me.bindSSL = function bindSSL() {
