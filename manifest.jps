@@ -53,7 +53,13 @@
     },
     "onInstall": {
         "install": {
-            "customDomains": "${settings.customDomains}"
+            "customDomains": "${settings.customDomains}",
+            "nodeId": "${settings.nodeId}",
+            "nodeGroup": "${settings.nodeGroup}",
+            "deployHook": "${settings.deployHook}",
+            "deployHookType": "${settings.deployHookType}",
+            "undeployHook": "${settings.undeployHook}",                
+            "undeployHookType": "${settings.undeployHookType}"
         }
     },
     "onUninstall": [{
@@ -72,12 +78,12 @@
                 "baseUrl": "${globals.baseUrl}",
                 "cronTime": "0 ${fn.random(1,6)} * * *",
                 "customDomains": "${this.customDomains}",
-                "nodeId": "${settings.nodeId}",
-                "nodeGroup": "${settings.nodeGroup}",
-                "deployHook": "${settings.deployHook}",
-                "deployHookType": "${settings.deployHookType}",
-                "undeployHook": "${settings.undeployHook}",                
-                "undeployHookType": "${settings.undeployHookType}"
+                "nodeId": "${this.nodeId}",
+                "nodeGroup": "${this.nodeGroup}",
+                "deployHook": "${this.deployHook}",
+                "deployHookType": "${this.deployHookType}",
+                "undeployHook": "${this.undeployHook}",                
+                "undeployHookType": "${this.undeployHookType}"
             }
         },
         "callScript": {
@@ -124,6 +130,30 @@
             "regex": "^([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\\.[a-zA-Z0-9-]{1,}){1,6}[,|;]?){1,7}$",
             "caption": "External Domain(s)",
             "required": false
+        }, {
+            "type": "string",
+            "name": "nodeId",
+            "inputType": "hidden"
+        }, {
+            "type": "string",
+            "name": "nodeGroup",
+            "inputType": "hidden"
+        }, {
+            "type": "string",
+            "name": "deployHook",
+            "inputType": "hidden"
+        }, {
+            "type": "string",
+            "name": "deployHookType",
+            "inputType": "hidden"
+        }, {
+            "type": "string",
+            "name": "undeployHook",
+            "inputType": "hidden"
+        }, {
+            "type": "string",
+            "name": "undeployHookType",
+            "inputType": "hidden"
         }]
     },
     "success": {
