@@ -1,12 +1,17 @@
 #!/bin/bash
 
 log="/var/log/letsencrypt.log"
-[[ $1 == *"verbose" ]] && {
-    [ -f $log ]	&& {
-	echo '-------- log --------'
-    	tail -n 100 $log
-	echo '-------- log --------'
+function getLog(){
+    [ -f $log ] && {
+        echo '-------- log --------'
+        tail -n 100 $log
+        echo '-------- log --------'
     }
+}
+
+
+[[ $1 == *"verbose" ]] && {
+        getLog;
 }
 
 IP=$(which ip)
