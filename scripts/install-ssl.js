@@ -25,9 +25,9 @@ function run() {
         customDomains    : "${customDomains}",
         cronTime         : "${cronTime}",
         deployHook       : "${deployHook}",
-        deployHookType   : "${deployHook}",
+        deployHookType   : "${deployHookType}",
         undeployHook     : "${undeployHook}",
-        undeployHookType : "${undeployHook}",
+        undeployHookType : "${undeployHookType}",
         test             : "${test}"
     });
 
