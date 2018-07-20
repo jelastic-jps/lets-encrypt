@@ -10,7 +10,8 @@ function run() {
         session          : session,
         isTask           : isTask,
         baseUrl          : baseUrl,
-
+        action           : action,
+        
         token            : "${token}",
         email            : "${email}",
         baseDir          : "${baseDir}",
