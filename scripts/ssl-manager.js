@@ -6,10 +6,11 @@ function SSLManager(config) {
      *      envDomain : {String}
      *      envAppid : {String}
      *      baseUrl : {String}
-     *      baseDir : {String}
+     *      baseDir : {String}     
      *      scriptName : {String}
      *      cronTime : {String}
      *      email : {String}
+     *      [action] : {String}
      *      [session] : {String}
      *      [token] : {String}
      *      [isTask] : {Boolean}
