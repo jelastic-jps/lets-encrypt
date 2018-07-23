@@ -6,6 +6,8 @@ To perform update manually at any time, use the **Update Now** button at the add
 
 Also, the used domain names list can be adjusted later with the **Configure** button.  
 
+![Img](/images/lets-encrypt-addon-config.png)
+
 Useful links:
 * [How to renew SSL certificate](https://github.com/jelastic-jps/lets-encrypt#how-to-renew-ssl-certificate)
 * [How to reconfigure SSL certificate](https://github.com/jelastic-jps/lets-encrypt#how-to-reconfigure-ssl-certificate)
