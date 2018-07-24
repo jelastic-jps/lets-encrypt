@@ -38,7 +38,7 @@ targetNodes:
     - apache-ruby
     - nginxruby
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/siruslan/lets-encrypt/hooks
+baseUrl: https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/hooks
 logo: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png
 description:
   text: /text/description.md
