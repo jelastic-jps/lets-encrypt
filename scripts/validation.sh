@@ -1,6 +1,6 @@
 #!/bin/bash
 
-log="/var/log/letsencrypt.log"
+log="${DIR}/var/log/letsencrypt.log"
 function getLog(){
     [ -f $log ] && {
         echo '-------- log --------'
