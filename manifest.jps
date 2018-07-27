@@ -38,7 +38,7 @@ targetNodes:
     - apache-ruby
     - nginxruby
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/SlavaKatiukha/lets-encrypt/hooks
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
 logo: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png
 description:
   text: /text/description.md
@@ -72,7 +72,7 @@ settings:
     - type: string
       name: undeployHookType
       inputType: hidden
- 
+
 buttons:
   - confirmText: Do you want to update attached SSL certificate(s)?
     loadingText: Updating...
@@ -92,7 +92,7 @@ onInstall:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
-    
+
 onUninstall:
   - callScript:
       action: uninstall
@@ -100,17 +100,17 @@ onUninstall:
 
 onBeforeDelete: delete
 
-onAfterClone: 
+onAfterClone:
   install: ${baseUrl}/manifest.jps?_r=${fn.random}
   envName: ${event.response.env.envName}
   nodeGroup: ${targetNodes.nodeGroup}
-  settings: 
+  settings:
     customDomains: ''
     nodeGroup: ${settings.nodeGroup}
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
 
-   
+
 actions:
   installScript:
     script: /scripts/create-installation-script.js?_r=${fn.random}
@@ -140,6 +140,6 @@ actions:
   delete:
     script: |
       jelastic.dev.scripting.DeleteScript('${env.envName}-${globals.scriptSufix}');
-      return {result:0}    
-  
+      return {result:0}
+
 success: /text/success.md

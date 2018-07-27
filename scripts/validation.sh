@@ -1,5 +1,19 @@
 #!/bin/bash
 
+log="/var/log/letsencrypt.log"
+function getLog(){
+    [ -f $log ] && {
+        echo '-------- log --------'
+        tail -n 100 $log
+        echo '-------- log --------'
+    }
+}
+
+
+[[ $1 == *"verbose" ]] && {
+        getLog;
+}
+
 IP=$(which ip)
 [[ -z "$IP" ]] && { echo "ip command not found, unable to verify IP"; exit 3 ; }
 
