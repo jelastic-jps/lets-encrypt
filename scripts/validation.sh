@@ -20,7 +20,6 @@ IP=$(which ip)
 
 EXT_IPs=$($IP a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 EXT_IPs_v6=$($IP a | sed -En 's/inet6 ::1\/128//;s/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p')
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 
 function isLANIP() {
     : ${1:?"Missing param: IP"};
