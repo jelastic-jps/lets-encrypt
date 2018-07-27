@@ -10,7 +10,8 @@ function run() {
         session          : session,
         isTask           : isTask,
         baseUrl          : baseUrl,
-
+        action           : action,
+        
         token            : "${token}",
         email            : "${email}",
         baseDir          : "${baseDir}",
@@ -25,9 +26,9 @@ function run() {
         customDomains    : "${customDomains}",
         cronTime         : "${cronTime}",
         deployHook       : "${deployHook}",
-        deployHookType   : "${deployHook}",
+        deployHookType   : "${deployHookType}",
         undeployHook     : "${undeployHook}",
-        undeployHookType : "${undeployHook}",
+        undeployHookType : "${undeployHookType}",
         test             : "${test}"
     });
 
