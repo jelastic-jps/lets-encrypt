@@ -1,5 +1,5 @@
 #!/bin/bash
-
+PATH="$PATH:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin::/root/bin"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 log="${DIR}/var/log/letsencrypt.log"
 function getLog(){
