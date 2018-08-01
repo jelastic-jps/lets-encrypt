@@ -1,6 +1,8 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
+WGET=$(which wget);
+RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/"
 
 echo Checking RPM database
 {
@@ -16,6 +18,11 @@ echo "Installing required packages"
   ${DIR}/opt/letsencrypt/letsencrypt-auto --os-packages-only
 
 } &> /dev/null
+
+[ ! -f "${DIR}/root/validation.sh" ] && {
+    $WGET --no-check-certificate $RAW_REPO_SCRIPS_URL/validation.sh -O ${DIR}/root/validation.sh
+    chmod +x ${DIR}/root/validation.sh
+}
 
 [ -f "/usr/lib/jelastic/modules/ssl.module" ] && {
     JEM_SSL_MODULE_LATEST_URL="https://raw.githubusercontent.com/jelastic/jem/master/usr/lib/jelastic/modules/ssl.module"
