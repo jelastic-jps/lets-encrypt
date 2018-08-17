@@ -28,7 +28,7 @@ seconds_before_expire=$(( $DAYS_BEFORE_EXPIRE * 24 * 60 * 60 ));
 
 
 [ -f "/var/lib/jelastic/SSL/jelastic.crt" ] && exp_date=$(jem ssl checkdomain | python -c "import sys, json; print json.load(sys.stdin)['expiredate']");
-[ -f "${DIR}/var/lib/jelastic/cert.pem" ] && {
+[ -f "${DIR}/var/lib/jelastic/keys/cert.pem" ] && {
     exp_date_raw=$($OPENSSL x509 -text -noout -in "${DIR}/var/lib/jelastic/keys/cert.pem" -subject -enddate | $GREP notAfter | $SED 's/^notAfter=//');
     exp_date=$(date --utc --date="$exp_date_raw" "+%Y-%m-%d %H:%M:%S");
 }
