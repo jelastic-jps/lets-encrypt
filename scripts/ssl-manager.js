@@ -474,7 +474,7 @@ function SSLManager(config) {
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
         return nodeManager.cmd(
-            "ip a | grep -q  '%(nodeIp)' || iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80",
+            "ip a | grep -q  '%(nodeIp)' || { iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE; }",
             {
                 nodeGroup : config.nodeGroup,
                 nodeIp    : config.nodeIp,
