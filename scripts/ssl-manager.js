@@ -90,6 +90,7 @@ function SSLManager(config) {
         ]);
 
         resp = me.exec(me.generateSslCerts);
+        me.exec(me.updateGeneratedCustomDomains);
 
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
@@ -99,6 +100,30 @@ function SSLManager(config) {
         me.exec(me.sendResp, resp, isUpdate);
 
         return resp;
+    };
+    
+    me.updateGeneratedCustomDomains = function () {
+        var resp;
+
+        resp = nodeManager.cmd([
+            "grep -E '^domain=' %(sslSettingPath) | cut -c 8-",
+            "grep -E 'skipped_domains=' %(sslSettingPath) | cut -c 17-"
+        ], {
+            sslSettingPath: "/opt/letsencrypt/settings"
+        });
+
+        resp = resp.responses ? resp.responses[0] : resp;
+        resp = resp.out.replace(/\'/g, "").split("\n");
+
+        me.setCustomDomains(resp[0]);
+        me.setSkippedDomains(resp[1]);
+
+        if (!resp.result || resp.result != 0) {
+            return resp;
+        }
+        return {
+            result: 0
+        };
     };
 
     me.uninstall = function () {
@@ -221,6 +246,18 @@ function SSLManager(config) {
 
     me.getCustomDomains = function () {
         return config.customDomains;
+    };
+    
+    me.setSkippedDomains = function (domains) {
+        config.skippedDomains = domains;
+    };
+
+    me.getSkippedDomains = function () {
+        return config.skippedDomains || "";
+    };
+
+    me.getEnvName = function () {
+        return config.envName || "";
     };
 
     me.getFileUrl = function (filePath) {
@@ -461,7 +498,7 @@ function SSLManager(config) {
 
                 if (ind1 != -1) {
                     var ind2 = end ? out.indexOf(end, ind1) : -1;
-                    var message = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2);
+                    var message = ind2 == -1 ? out.substring(ind1).replace("Error: ", "") : out.substring(ind1, ind2);
                     resp = error(Response.ERROR_UNKNOWN, message);
                     break;
                 }
@@ -595,14 +632,22 @@ function SSLManager(config) {
             "Successful " + (isUpdate ? "Update" : "Installation"),
             "html/update-success.html", {
                 ENVIRONMENT : config.envName,
-                ACTION : isUpdate ? "updated" : "installed"
+                ACTION : isUpdate ? "updated" : "installed",
+                SKIPPED_DOMAINS: me.getSkippedDomains() ? "Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names:\n" + me.getSkippedDomains().replace(/ -d/g, ',') : ""
             }
         );
     };
 
     me.sendErrResp = function sendErrResp(resp) {
         resp = resp || {};
-        resp.debug = debug;
+        
+        if (!me.getCustomDomains() && me.getSkippedDomains()) {
+            resp = "Please not that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n" +
+                "You can fix the issues with DNS records (IP addresses) in your domain admin panel.\n\n" +
+                "In case you no longer require SSL certificates within <b>" + me.getEnvName() + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
+        } else {
+            resp.debug = debug;
+        }
 
         return me.sendEmail("Error", "html/update-error.html", {
             SUPPORT_EMAIL : "support@jelastic.com",
