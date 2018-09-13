@@ -634,7 +634,7 @@ function SSLManager(config) {
             "html/update-success.html", {
                 ENVIRONMENT : config.envName,
                 ACTION : isUpdate ? "updated" : "installed",
-                SKIPPED_DOMAINS: me.getSkippedDomains() ? "Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names:\n" + me.getSkippedDomains().replace(/ -d/g, ',') + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" : ""
+                SKIPPED_DOMAINS: me.getSkippedDomains() ? "Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names:\n" + me.getSkippedDomains().replace(/ -d/g, ',') + ".\n" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" : ""
             }
         );
     };
