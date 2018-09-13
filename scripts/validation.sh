@@ -16,7 +16,7 @@ function getLog(){
 }
 
 IP=$(which ip)
-[[ -z "$IP" ]] && { echo "ip command not found, unable to verify IP"; exit 3 ; }
+[[ -z "$IP" ]] && { echo "Error: ip command not found, unable to verify IP"; exit 3 ; }
 
 EXT_IPs=$($IP a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 EXT_IPs_v6=$($IP a | sed -En 's/inet6 ::1\/128//;s/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p')
