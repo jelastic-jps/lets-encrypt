@@ -429,7 +429,7 @@ function SSLManager(config) {
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
                 appdomain : envDomain || "",
-                test : "true" || !customDomains,
+                test : config.test || !customDomains,
                 primarydomain: primaryDomain,
                 letsEncryptEnv : config.letsEncryptEnv || ""
             }),
