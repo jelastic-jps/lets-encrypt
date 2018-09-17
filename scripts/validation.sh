@@ -16,7 +16,7 @@ function getLog(){
 }
 
 IP=$(which ip)
-[[ -z "$IP" ]] && { echo "ip command not found, unable to verify IP"; exit 3 ; }
+[[ -z "$IP" ]] && { echo "Error: ip command not found, unable to verify IP"; exit 3 ; }
 
 EXT_IPs=$($IP a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 EXT_IPs_v6=$($IP a | sed -En 's/inet6 ::1\/128//;s/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p')
@@ -60,27 +60,52 @@ function validateExtIP(){
 }
 
 function validateDNSSettings(){
+    SETTING_PATH="${DIR}/opt/letsencrypt/settings"
     domain=$1;
     [ -z "$domain" ] && {
-        [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "Error: no settings available" ; exit 3 ; }
+        [ -f "${SETTING_PATH}"  ] && source "${SETTING_PATH}" || { echo "Error: no settings available" ; exit 3 ; }
     }
 
+    [ ! -z "$skipped_domains" ] && domain+=" "$skipped_domains
+
     domain_list=$(echo $domain | sed "s/-d / /g")
-        for single_domain in $domain_list
+    for single_domain in $domain_list
+    do
+        [ "$single_domain" == "-d" ] && continue;
+    detected=false
+        for EXT_IP in $EXT_IPs
         do
-            [ "$single_domain" == "-d" ] && continue;
-	    detected=false
-            for EXT_IP in $EXT_IPs
-            do
-                dig +short @8.8.8.8 A $single_domain | grep -q $EXT_IP && detected=true;
-            done
-            for EXT_IP in $EXT_IPs_v6
-            do
-                dig +short @8.8.8.8 AAAA $single_domain | grep -q $EXT_IP && detected=true;
-            done
-	    [[ $detected == 'false'  ]] && { echo "Error: Incorrect DNS settings for domain $single_domain! It should be bound to containers Public IP."; exit 1 ; };
+            dig +short @8.8.8.8 A $single_domain | grep -q $EXT_IP && detected=true;
         done
-        return 0;
+        for EXT_IP in $EXT_IPs_v6
+        do
+            dig +short @8.8.8.8 AAAA $single_domain | grep -q $EXT_IP && detected=true;
+        done
+    [[ $detected == 'false'  ]] && {
+        echo "Incorrect DNS settings for domain $single_domain! It should be bound to containers Public IP.";
+        need_skip_domains+=" "$single_domain
+    } || {
+        validated_domains+=" "$single_domain
+    };
+    done
+
+    [ -f "${SETTING_PATH}" ] && {
+        [ ! -z "$need_skip_domains" ] && {
+            grep -q "skipped_domains" "${SETTING_PATH}" && sed -i "s/skipped_domains=.*/skipped_domains='$(echo $need_skip_domains | sed "s/ / -d /g")'/g" "${SETTING_PATH}" || printf "\nskipped_domains='$(echo $need_skip_domains | sed "s/ / -d /g")'" >> "${SETTING_PATH}";
+        }
+
+        [[ ! -z "$validated_domains" ]] && {
+            sed -i "s/^domain=.*/domain='$(echo $validated_domains | sed "s/ / -d /g")'/g" "${SETTING_PATH}"
+        } || {
+            sed -i "s/^domain=.*/domain=''/g" "${SETTING_PATH}"
+            echo "Error: SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings. Adjust configurations within your domain admin panel."
+            exit 1 ;
+        }
+    }
+
+    source "${SETTING_PATH}"
+
+    return 0;
 }
 
 function validateCertBot(){
