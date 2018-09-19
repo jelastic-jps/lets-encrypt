@@ -632,11 +632,30 @@ function SSLManager(config) {
         return me.sendEmail(
             "Successful " + (isUpdate ? "Update" : "Installation"),
             "html/update-success.html", {
-                ENVIRONMENT : config.envName,
+                ENVIRONMENT : config.envDomain,
                 ACTION : isUpdate ? "updated" : "installed",
-                SKIPPED_DOMAINS: me.getSkippedDomains() ? "Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names:\n" + me.getSkippedDomains().replace(/ -d/g, ',') + ".\n" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" : ""
+                UPDATED_DOMAINS: "Successfully updated custom domains: <b>" + me.formatUpdatedDomains() + "</b><br><br>",
+                SKIPPED_DOMAINS: me.getSkippedDomains() ? "\n\nPlease note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.getSkippedDomains().replace(/ -d/g, ',') + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings." : ""
             }
         );
+    };
+
+    me.formatUpdatedDomains = function formatUpdatedDomains() {
+        var sDomains = me.getCustomDomains().replace(/ -d/g, ','),
+            aDomains = [],
+            sDomain,
+            sResp = "";
+
+        aDomains = sDomains.split(", ");
+
+        for (var i = 0, n = aDomains.length; i < n; i++) {
+            sDomain = aDomains[i];
+            sResp += "<a href=\"https://" + sDomain + "/\">" + sDomain + "</a>";
+
+            sResp = (n > i + 1) ? sResp += ", " : sResp;
+        }
+
+        return sResp || "";
     };
 
     me.sendErrResp = function sendErrResp(resp) {
