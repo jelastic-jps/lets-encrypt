@@ -207,10 +207,10 @@ function SSLManager(config) {
         return me.exec([
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
-            [ me.validateEntryPoint, null, false ],
+            [ me.validateEntryPoint ],
             [ me.createScript ],
             [ me.evalScript, "install" ]
-        ]);
+        ], null, false);
     };
 
     me.parseDomains = function (domains) {
