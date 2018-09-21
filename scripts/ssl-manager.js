@@ -210,7 +210,7 @@ function SSLManager(config) {
             [ me.validateEntryPoint ],
             [ me.createScript ],
             [ me.evalScript, "install" ]
-        ], null, false);
+        ]);
     };
 
     me.parseDomains = function (domains) {
