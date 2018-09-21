@@ -625,6 +625,8 @@ function SSLManager(config) {
     };
 
     me.sendResp = function sendResp(resp, isUpdate) {
+        var action = isUpdate ? "updated" : "installed";
+
         if (resp.result != 0) {
             return me.sendErrResp(resp);
         }
@@ -632,11 +634,30 @@ function SSLManager(config) {
         return me.sendEmail(
             "Successful " + (isUpdate ? "Update" : "Installation"),
             "html/update-success.html", {
-                ENVIRONMENT : config.envName,
-                ACTION : isUpdate ? "updated" : "installed",
-                SKIPPED_DOMAINS: me.getSkippedDomains() ? "Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names:\n" + me.getSkippedDomains().replace(/ -d/g, ',') + ".\n" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" : ""
+                ENVIRONMENT : config.envDomain,
+                ACTION : action,
+                UPDATED_DOMAINS: "Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>",
+                SKIPPED_DOMAINS: me.getSkippedDomains() ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.getSkippedDomains().replace(/ -d/g, ',') + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
             }
         );
+    };
+
+    me.formatUpdatedDomains = function formatUpdatedDomains() {
+        var sDomains = me.getCustomDomains().replace(/ -d/g, ','),
+            aDomains = [],
+            sDomain,
+            sResp = "";
+
+        aDomains = sDomains.split(", ");
+
+        for (var i = 0, n = aDomains.length; i < n; i++) {
+            sDomain = aDomains[i];
+            sResp += "<a href=\"https://" + sDomain + "/\">" + sDomain + "</a>";
+
+            sResp = (n > i + 1) ? sResp += ", " : sResp;
+        }
+
+        return sResp || "";
     };
 
     me.sendErrResp = function sendErrResp(resp) {
@@ -645,7 +666,7 @@ function SSLManager(config) {
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
             resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n" +
                 "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
-                "In case you no longer require SSL certificates within <b>" + me.getEnvName() + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
+                "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
             resp.debug = debug;
         }
