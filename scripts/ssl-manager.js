@@ -625,6 +625,8 @@ function SSLManager(config) {
     };
 
     me.sendResp = function sendResp(resp, isUpdate) {
+        var action = isUpdate ? "updated" : "installed";
+
         if (resp.result != 0) {
             return me.sendErrResp(resp);
         }
@@ -633,9 +635,9 @@ function SSLManager(config) {
             "Successful " + (isUpdate ? "Update" : "Installation"),
             "html/update-success.html", {
                 ENVIRONMENT : config.envDomain,
-                ACTION : isUpdate ? "updated" : "installed",
-                UPDATED_DOMAINS: "Successfully updated custom domains: <b>" + me.formatUpdatedDomains() + "</b><br><br>",
-                SKIPPED_DOMAINS: me.getSkippedDomains() ? "\n\nPlease note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.getSkippedDomains().replace(/ -d/g, ',') + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
+                ACTION : action,
+                UPDATED_DOMAINS: "Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>",
+                SKIPPED_DOMAINS: me.getSkippedDomains() ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.getSkippedDomains().replace(/ -d/g, ',') + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
             }
         );
     };
