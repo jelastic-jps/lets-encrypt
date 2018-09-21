@@ -82,7 +82,7 @@ function validateDNSSettings(){
             dig +short @8.8.8.8 AAAA $single_domain | grep -q $EXT_IP && detected=true;
         done
     [[ $detected == 'false'  ]] && {
-        echo "Incorrect DNS settings for domain $single_domain! It should be bound to containers Public IP.";
+        #echo "Incorrect DNS settings for domain $single_domain! It should be bound to containers Public IP.";
         need_skip_domains+=" "$single_domain
     } || {
         validated_domains+=" "$single_domain
