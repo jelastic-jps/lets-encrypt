@@ -666,7 +666,7 @@ function SSLManager(config) {
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
             resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n" +
                 "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
-                "In case you no longer require SSL certificates within <b>" + me.getEnvName() + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
+                "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
             resp.debug = debug;
         }
