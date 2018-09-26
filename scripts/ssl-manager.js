@@ -112,16 +112,19 @@ function SSLManager(config) {
         ], {
             setting : nodeManager.getPath(setting)
         });
-
+        
+        if (resp.result != 0) return resp;
+        
         resp = resp.responses ? resp.responses[0] : resp;
         resp = resp.out.replace(/\'/g, "").split("\n");
 
         me.setCustomDomains(resp[0]);
         me.setSkippedDomains(resp[1]);
 
-        if (!resp.result || resp.result != 0) {
+        /*if (!resp.result || resp.result != 0) {
             return resp;
-        }
+        }*/
+        
         return {
             result: 0
         };
