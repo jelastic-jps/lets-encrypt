@@ -44,5 +44,6 @@ In the opened confirmation window:
 Finally, click **Install** and wait a few minutes for the process to be completed.
 
 For additional information on how to renew or reconfigure SSL certificates using this add-on, follow the detailed [Let’s Encrypt SSL Certificates](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) article.
+Take into account, the free and custom SSL certificates are provided for billing accounts only.
 
 Try out the **Let’s Encrypt SSL** add-on with [Jelastic Multi-Cloud PaaS](https://jelastic.com/) for Java, PHP, Node.js, Ruby, Python, .NET, Go, Docker Swarm and Kubernetes clusters.
