@@ -82,16 +82,13 @@ function SSLManager(config) {
     };
 
     me.install = function (isUpdate) {
-        var resp;
-
-        me.execAll([
-            me.installLetsEncrypt,
-            me.generateSslConfig
+        var resp = me.exec([
+            [ me.installLetsEncrypt ],
+            [ me.generateSslConfig ],
+            [ me.generateSslCerts ],
+            [ me.updateGeneratedCustomDomains ]
         ]);
-
-        resp = me.exec(me.generateSslCerts);
-        me.exec(me.updateGeneratedCustomDomains);
-
+        
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
             resp = me.exec(me.deploy);
