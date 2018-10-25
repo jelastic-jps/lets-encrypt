@@ -20,6 +20,7 @@ targetNodes:
     - glassfish3
     - glassfish4
     - glassfish
+    - jetty
     - jetty6
     - apache
     - apache2
