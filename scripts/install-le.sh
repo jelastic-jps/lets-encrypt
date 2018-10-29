@@ -31,7 +31,7 @@ echo "Installing required packages"
     wget --no-check-certificate "${JEM_SSL_MODULE_LATEST_URL}" -O $JEM_SSL_MODULE_PATH
 
     grep -q '^jelastic:' /etc/passwd && JELASTIC_UID=$(id -u jelastic) || JELASTIC_UID="700"
-    [ -d "/var/www/" ] && chown -R ${JELASTIC_UID}:${JELASTIC_UID} "/var/www/" 2> /dev/null
+    [ -d "/var/www/" ] && chown ${JELASTIC_UID}:${JELASTIC_UID} /var/www/ /var/www/* 2> /dev/null
 }
 
 exit 0
