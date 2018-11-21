@@ -241,9 +241,9 @@ function SSLManager(config) {
             return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
         }
 
-        me.logAction("StartUpdateLEFromContainer");
-
         if (!config.isTask) {
+            me.logAction("StartUpdateLEFromContainer");
+            
             if (!session && me.hasValidToken()) {
                 session = signature;
             }
@@ -277,6 +277,8 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
+        me.logAction("addLEAutoUpdateTask");
+        
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
