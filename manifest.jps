@@ -44,7 +44,7 @@ targetNodes:
 requiredFeatures: extip
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/dzotic9/lets-encrypt/master
 logo: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png
 
 description:
@@ -81,6 +81,17 @@ settings:
       name: undeployHookType
       inputType: hidden
 
+nodeGroupAlias:
+  ${targetNodes.nodeGroup}: targetGroup
+
+onBeforeRedeployContainer [targetGroup]:
+  callScript:
+    action: backup-scripts
+
+onAfterRedeployContainer [targetGroup]:
+  callScript:
+    action: restore-scripts
+
 buttons:
   - confirmText: Do you want to update attached SSL certificate(s)?
     loadingText: Updating...
@@ -111,7 +122,7 @@ onBeforeDelete: delete
 onAfterClone:
   install: ${baseUrl}/manifest.jps?_r=${fn.random}
   envName: ${event.response.env.envName}
-  nodeGroup: ${targetNodes.nodeGroup}
+  nodeGroup: targetGroup
   settings:
     customDomains: ''
     nodeGroup: ${settings.nodeGroup}
