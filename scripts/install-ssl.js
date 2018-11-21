@@ -19,6 +19,7 @@ function run() {
         envName          : "${envName}",
         envDomain        : "${envDomain}",
 
+        appId            : "${appId}",
         envAppid         : "${envAppid}",
         nodeId           : "${nodeId}",
         nodeIp           : "${nodeIp}",
