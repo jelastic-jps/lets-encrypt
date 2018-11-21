@@ -10,10 +10,12 @@ var baseDir          = getParam("baseDir", "/"),
     deployHookType   = getParam("deployHookType", ""),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
+    appId            = getParam("appId", "letsencrypt-ssl-addon"),
     test             = getParam("test", "");
 
 function run() {
     var SSLManager = use("scripts/ssl-manager.js", {
+        appId            : appId,
         session          : session,
         cronTime         : cronTime,
         baseUrl          : baseUrl,
