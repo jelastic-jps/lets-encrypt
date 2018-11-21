@@ -277,7 +277,7 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
-        me.logAction("addLEAutoUpdateTask");
+        me.logAction("AddLEAutoUpdateTask");
         
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
