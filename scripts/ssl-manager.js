@@ -2,6 +2,7 @@ function SSLManager(config) {
     /**
      * Implements Let's Encrypt SSL management of the Jelastic environment
      * @param {{
+     *      appId  : {String}
      *      envName : {String}
      *      envDomain : {String}
      *      envAppid : {String}
@@ -43,6 +44,7 @@ function SSLManager(config) {
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
+    nodeManager.setBackupPath("var/lib/jelastic/letsencrypt");
 
     me.auth = function (token) {
         if (!config.session && String(token).replace(/\s/g, "") != config.token) {
@@ -64,7 +66,9 @@ function SSLManager(config) {
         var actions = {
             "install"     : me.install,
             "uninstall"   : me.uninstall,
-            "auto-update" : me.autoUpdate
+            "auto-update" : me.autoUpdate,
+            "backup-scripts": me.backupScripts,
+            "restore-scripts": me.restoreScripts
         };
         
         if (getParam("uninstall")) {
@@ -98,6 +102,32 @@ function SSLManager(config) {
 
         return resp;
     };
+
+    me.logAction = function (actionName, resp) {
+        var uid = getUserInfo().uid,
+            oData = {
+                appId: config.appId,
+                email: config.email,
+                envAppid : config.envAppid,
+                envDomain : config.envDomain,
+                nodeGroup : config.nodeGroup,
+                scriptName : config.scriptName
+            },
+            oResp;
+
+        if (resp && resp.result == 0) {
+            oData.message = "LE add-on has been updated successfully";
+        }
+
+        oResp = jelastic.dev.scripting.Eval("appstore", session, "LogAction", {
+            uid: uid,
+            actionName: actionName,
+            response: resp,
+            data: oData || {}
+        });
+
+        log("ActionLog: " + oResp);
+    };
     
     me.updateGeneratedCustomDomains = function () {
         var setting = "opt/letsencrypt/settings",
@@ -118,10 +148,6 @@ function SSLManager(config) {
         me.setCustomDomains(resp[0]);
         me.setSkippedDomains(resp[1]);
 
-        /*if (!resp.result || resp.result != 0) {
-            return resp;
-        }*/
-        
         return {
             result: 0
         };
@@ -151,6 +177,63 @@ function SSLManager(config) {
         ]);
     };
 
+    me.backupScripts = function () {
+        var backupPath = nodeManager.getBackupPath(),
+            logPath = nodeManager.getLogPath();
+
+        return me.execAll([
+            [ me.cmd, "mkdir -p %(backupPath)", {
+                backupPath: backupPath
+            }],
+
+            [ me.cmd, "cd %(letsencryptPath) && zip backup.zip -r * >> %(logPath) && mv backup.zip %(backupPath)", {
+                logPath: logPath,
+                backupPath: backupPath,
+                letsencryptPath: nodeManager.getPath("opt/letsencrypt")
+            }],
+
+            [ me.cmd, "cat /var/spool/cron/root | grep letsencrypt-ssl > %(backupPath)/letsencrypt-cron", {
+                backupPath: backupPath
+            }],
+
+            [ me.cmd, "\\cp -r {%(scriptToBackup)} %(backupPath)", {
+                backupPath: backupPath,
+                scriptToBackup: [
+                    nodeManager.getScriptPath("auto-update-ssl-cert.sh"),
+                    nodeManager.getScriptPath("install-le.sh"),
+                    nodeManager.getScriptPath("validation.sh")
+                ].join(",")
+            }]
+        ])
+    };
+
+    me.restoreScripts = function () {
+        var backupPath = nodeManager.getBackupPath(),
+            logPath = nodeManager.getLogPath();
+
+        return me.execAll([
+            [ me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
+                backupPath: backupPath
+            }],
+
+            [ me.cmd, "mkdir -p %(settingsPath) && unzip %(backupPath)/backup.zip -d %(settingsPath) > %(logPath)", {
+                backupPath: backupPath,
+                logPath: logPath,
+                settingsPath: nodeManager.getPath("opt/letsencrypt"),
+            }],
+
+            [ me.cmd, "cp -r %(backupPath)/{%(files)} %(rootPath)", {
+                backupPath: backupPath,
+                rootPath: nodeManager.getPath("root"),
+                files: [
+                    "auto-update-ssl-cert.sh",
+                    "install-le.sh",
+                    "validation.sh"
+                ].join(",")
+            }]
+        ])
+    };
+
     me.autoUpdate = function () {
         var resp;
 
@@ -159,6 +242,8 @@ function SSLManager(config) {
         }
 
         if (!config.isTask) {
+            me.logAction("StartUpdateLEFromContainer");
+            
             if (!session && me.hasValidToken()) {
                 session = signature;
             }
@@ -174,7 +259,10 @@ function SSLManager(config) {
             }
         }
 
-        return me.install(true);
+        resp = me.install(true);
+        me.logAction("EndUpdateLEFromContainer", resp);
+
+        return resp;
     };
 
     this.checkEnvAccessAndUpdate = function (errResp) {
@@ -189,6 +277,8 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
+        me.logAction("AddLEAutoUpdateTask");
+        
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
@@ -221,7 +311,7 @@ function SSLManager(config) {
         var domainRegex;
 
         if (domains) {
-            domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}(\n|$)/;
+            domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,24}(\n|$)/;
 
             domains = me.parseDomains(domains);
 
@@ -726,6 +816,7 @@ function SSLManager(config) {
             log(fn.name + ".response: " + resp);
 
             if (resp.result != 0) {
+                me.logAction("InstallLE-" + fn.name, resp);
                 resp.method = fn.name;
                 if (onFail) onFail(resp);
                 if (bBreakOnError !== false) break;
@@ -750,6 +841,7 @@ function SSLManager(config) {
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
             bCustomSSLSupported,
+            sBackupPath,
             envInfo,
             nodeIp,
             node;
@@ -782,6 +874,14 @@ function SSLManager(config) {
 
         me.setLogPath = function (path) {
             logPath = baseDir + path;
+        };
+
+        me.setBackupPath = function (path) {
+            sBackupPath = baseDir + path;
+        };
+
+        me.getBackupPath = function () {
+            return sBackupPath;
         };
 
         me.setNodeId = function (id) {
@@ -944,5 +1044,9 @@ function SSLManager(config) {
         }
 
         return { result : 0 };
+    }
+
+    function getUserInfo() {
+        return jelastic.users.account.GetUserInfo(appid, session);
     }
 }
