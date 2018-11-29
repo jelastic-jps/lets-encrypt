@@ -126,7 +126,7 @@ function SSLManager(config) {
             data: oData || {}
         });
 
-        log("ActionLog: " + oResp);
+        //log("ActionLog: " + oResp);
     };
     
     me.updateGeneratedCustomDomains = function () {
