@@ -135,7 +135,7 @@ actions:
     params:
       scriptName: ${env.envName}-${globals.scriptSufix}
       baseUrl: ${baseUrl}
-      cronTime: 0 ${fn.random(1,6)} * * *
+      cronTime: 0 ${fn.random(1,6)},${fn.random(10,20)} * * *
       customDomains: ${this.customDomains}
       nodeId: ${this.nodeId}
       nodeGroup: ${this.nodeGroup}
