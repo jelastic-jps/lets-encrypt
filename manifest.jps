@@ -44,7 +44,7 @@ targetNodes:
 requiredFeatures: extip
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/dzotic91-ukr/lets-encrypt/master
 logo: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/images/lets-encrypt.png
 
 description:
@@ -81,16 +81,23 @@ settings:
       name: undeployHookType
       inputType: hidden
 
-nodeGroupAlias:
-  ${targetNodes.nodeGroup}: targetGroup
-
-onBeforeRedeployContainer [targetGroup]:
+onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
     action: backup-scripts
 
-onAfterRedeployContainer [targetGroup]:
+onAfterRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
     action: restore-scripts
+
+onAfterConfirmTransfer:
+  installScript:
+    customDomains: ${settings.customDomains}
+    nodeId: ${settings.nodeId}
+    nodeGroup: ${settings.nodeGroup}
+    deployHook: ${settings.deployHook}
+    deployHookType: ${settings.deployHookType}
+    undeployHook: ${settings.undeployHook}
+    undeployHookType: ${settings.undeployHookType}
 
 buttons:
   - confirmText: Do you want to update attached SSL certificate(s)?
@@ -122,7 +129,7 @@ onBeforeDelete: delete
 onAfterClone:
   install: ${baseUrl}/manifest.jps?_r=${fn.random}
   envName: ${event.response.env.envName}
-  nodeGroup: targetGroup
+  nodeGroup: ${targetNodes.nodeGroup}
   settings:
     customDomains: ''
     nodeGroup: ${settings.nodeGroup}
@@ -135,7 +142,7 @@ actions:
     params:
       scriptName: ${env.envName}-${globals.scriptSufix}
       baseUrl: ${baseUrl}
-      cronTime: 0 ${fn.random(1,6)},${fn.random(10,20)} * * *
+      cronTime: 0 ${fn.random(1,6)} * * *
       customDomains: ${this.customDomains}
       nodeId: ${this.nodeId}
       nodeGroup: ${this.nodeGroup}
