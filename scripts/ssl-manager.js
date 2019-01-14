@@ -23,7 +23,6 @@ function SSLManager(config) {
      *      [deployHookType] : {String}
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
-     *      [patchVersion] : {Number}
      *      [test] : {Boolean}
      * }} config
      * @constructor
