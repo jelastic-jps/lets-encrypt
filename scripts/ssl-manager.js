@@ -23,6 +23,7 @@ function SSLManager(config) {
      *      [deployHookType] : {String}
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
+     *      [patchVersion] : {Number}
      *      [test] : {Boolean}
      * }} config
      * @constructor
@@ -34,6 +35,7 @@ function SSLManager(config) {
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
+        patchBuild = 1,
         debug = [],
         nodeManager,
         baseUrl,
@@ -152,6 +154,30 @@ function SSLManager(config) {
             result: 0
         };
     };
+    
+    me.reinstall = function (){
+        var settings = {};
+
+        settings = {
+            nodeId              : config.nodeId,
+            customDomains       : me.getCustomDomains(),
+            nodeGroup           : config.nodeGroup || "",
+            deployHook          : config.deployHook || "",
+            deployHookType      : config.deployHookType || "",
+            undeployHook        : config.undeployHook || "",
+            undeployHookType    : config.undeployHookType || ""
+        };
+
+        return jelastic.marketplace.jps.install({
+            appid: appid,
+            session: session,
+            jps: me.getFileUrl("manifest.jps"),
+            envName: me.getEnvName(),
+            settings: settings,
+            nodeGroup: config.nodeGroup || "",
+            writeOutputTasks: false
+        });
+    };
 
     me.uninstall = function () {
         var autoUpdateScript = nodeManager.getScriptPath("auto-update-ssl-cert.sh");
@@ -259,7 +285,13 @@ function SSLManager(config) {
             }
         }
 
-        resp = me.install(true);
+        if (config.patchVersion == patchBuild) {
+            resp = me.install(true);
+        } else {
+            me.logAction("PatchLEAutoUpdate");
+            resp = me.reinstall();
+        }
+
         me.logAction("EndUpdateLEFromContainer", resp);
 
         return resp;
@@ -446,6 +478,7 @@ function SSLManager(config) {
             scriptBody = new Transport().get(url);
 
             config.token = Random.getPswd(64);
+            config.patchVersion = patchBuild;
 
             scriptBody = me.replaceText(scriptBody, config);
 
@@ -653,6 +686,10 @@ function SSLManager(config) {
     };
 
     me.undeploy = function undeploy() {
+        if (config.patchVersion != patchBuild) {
+            return { result : 0 };
+        }
+        
         if (config.undeployHook) {
             return me.evalHook(config.undeployHook, config.undeployHookType);
         }
