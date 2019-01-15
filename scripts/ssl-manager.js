@@ -287,8 +287,9 @@ function SSLManager(config) {
         if (config.patchVersion == patchBuild) {
             resp = me.install(true);
         } else {
-            me.logAction("PatchLEAutoUpdate");
+            me.logAction("StartPatchLEAutoUpdate");
             resp = me.reinstall();
+            me.logAction("EndPatchLEAutoUpdate", resp);
         }
 
         me.logAction("EndUpdateLEFromContainer", resp);
