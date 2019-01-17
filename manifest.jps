@@ -129,6 +129,16 @@ onAfterClone:
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
 
+onAfterConfirmTransfer:
+  installScript:
+    customDomains: ${settings.customDomains}
+    nodeId: ${settings.nodeId}
+    nodeGroup: ${targetNodes.nodeGroup}
+    deployHook: ${settings.deployHook}
+    deployHookType: ${settings.deployHookType}
+    undeployHook: ${settings.undeployHook}
+    undeployHookType: ${settings.undeployHookType}
+
 actions:
   installScript:
     script: /scripts/create-installation-script.js?_r=${fn.random}
