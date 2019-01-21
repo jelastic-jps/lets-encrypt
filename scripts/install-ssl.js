@@ -1,6 +1,7 @@
 //@url('/${scriptName}')
 
 var action = getParam("action", "install"),
+    patchVersion  = getParam("patchVersion"),
     token  = getParam("token"),
     isTask = getParam("task"),
     baseUrl = "${baseUrl}";
@@ -30,6 +31,7 @@ function run() {
         deployHookType   : "${deployHookType}",
         undeployHook     : "${undeployHook}",
         undeployHookType : "${undeployHookType}",
+        patchVersion     : "${patchVersion}",
         test             : "${test}"
     });
 
