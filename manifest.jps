@@ -89,16 +89,6 @@ onAfterRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
     action: restore-scripts
 
-onAfterConfirmTransfer:
-  installScript:
-    customDomains: ${settings.customDomains}
-    nodeId: ${settings.nodeId}
-    nodeGroup: ${settings.nodeGroup}
-    deployHook: ${settings.deployHook}
-    deployHookType: ${settings.deployHookType}
-    undeployHook: ${settings.undeployHook}
-    undeployHookType: ${settings.undeployHookType}
-
 buttons:
   - confirmText: Do you want to update attached SSL certificate(s)?
     loadingText: Updating...
