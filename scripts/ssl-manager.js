@@ -153,7 +153,7 @@ function SSLManager(config) {
             result: 0
         };
     };
-    
+
     me.reinstall = function (){
         var settings = {};
 
@@ -393,6 +393,7 @@ function SSLManager(config) {
 
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
+            REGEX_EXTRA_GROUP = /.*[2-9]/,
             id = config.nodeId,
             nodes,
             resp;
@@ -403,6 +404,10 @@ function SSLManager(config) {
 
             group = resp.group;
             config.nodeGroup = group;
+        }
+
+        if (REGEX_EXTRA_GROUP.test(group)) {
+            nodeManager.setExtraLayer();
         }
 
         resp = nodeManager.getEnvInfo();
@@ -425,6 +430,10 @@ function SSLManager(config) {
 
                 nodeManager.setNodeId(config.nodeId);
                 nodeManager.setNodeIp(config.nodeIp);
+
+                if (nodeManager.isExtraLayer() && node.url) {
+                    nodeManager.setEnvDomain(node.url.replace(/http:\/\//, ''));
+                }
             }
 
             if (id) break;
@@ -689,7 +698,7 @@ function SSLManager(config) {
         if (config.patchVersion != patchBuild) {
             return { result : 0 };
         }
-        
+
         if (config.undeployHook) {
             return me.evalHook(config.undeployHook, config.undeployHookType);
         }
@@ -879,6 +888,7 @@ function SSLManager(config) {
         var me = this,
             bCustomSSLSupported,
             sBackupPath,
+            extra = false,
             envInfo,
             nodeIp,
             node;
@@ -929,6 +939,18 @@ function SSLManager(config) {
             nodeIp = ip;
         };
 
+        me.setEnvDomain = function (envDomain) {
+            config.envDomain = envDomain;
+        };
+
+        me.setExtraLayer = function (value) {
+            extra = value || true;
+        };
+
+        me.isExtraLayer = function () {
+            return !!extra;
+        };
+
         me.getNode = function () {
             var resp,
                 nodes;
@@ -965,22 +987,26 @@ function SSLManager(config) {
         };
 
         me.getEntryPointGroup = function () {
-            var group,
-                nodes;
+            var BL = "bl",
+                LB = "lb",
+                CP = "cp",
+                group,
+                nodes,
+                resp;
 
-            var resp = me.getEnvInfo();
+            resp = me.getEnvInfo();
             if (resp.result != 0) return resp;
 
             nodes = resp.nodes;
 
             for (var i = 0, node; node = nodes[i]; i++) {
-                if (node.nodeGroup == 'lb' || node.nodeGroup == 'bl') {
+                if (node.nodeGroup == LB || node.nodeGroup == BL) {
                     group = node.nodeGroup;
                     break;
                 }
             }
 
-            return { result : 0, group : group || "cp" };
+            return { result : 0, group : group || CP };
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
