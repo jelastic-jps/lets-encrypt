@@ -393,7 +393,6 @@ function SSLManager(config) {
 
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
-            REGEX_EXTRA_GROUP = /.*[2-9]/,
             id = config.nodeId,
             nodes,
             resp;
@@ -404,10 +403,6 @@ function SSLManager(config) {
 
             group = resp.group;
             config.nodeGroup = group;
-        }
-
-        if (REGEX_EXTRA_GROUP.test(group)) {
-            nodeManager.setExtraLayer();
         }
 
         resp = nodeManager.getEnvInfo();
@@ -431,7 +426,7 @@ function SSLManager(config) {
                 nodeManager.setNodeId(config.nodeId);
                 nodeManager.setNodeIp(config.nodeIp);
 
-                if (nodeManager.isExtraLayer() && node.url) {
+                if (nodeManager.isExtraLayer(group) && node.url) {
                     nodeManager.setEnvDomain(node.url.replace(/http:\/\//, ''));
                 }
             }
@@ -886,9 +881,11 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
+            BL = "bl",
+            LB = "lb",
+            CP = "cp",
             bCustomSSLSupported,
             sBackupPath,
-            extra = false,
             envInfo,
             nodeIp,
             node;
@@ -943,12 +940,8 @@ function SSLManager(config) {
             config.envDomain = envDomain;
         };
 
-        me.setExtraLayer = function (value) {
-            extra = value || true;
-        };
-
-        me.isExtraLayer = function () {
-            return !!extra;
+        me.isExtraLayer = function (group) {
+            return !(group === BL || group === LB || group === CP);
         };
 
         me.getNode = function () {
@@ -987,10 +980,7 @@ function SSLManager(config) {
         };
 
         me.getEntryPointGroup = function () {
-            var BL = "bl",
-                LB = "lb",
-                CP = "cp",
-                group,
+            var group,
                 nodes,
                 resp;
 
