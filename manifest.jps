@@ -40,6 +40,7 @@ targetNodes:
     - apache-ruby
     - apache-python
     - nginxruby
+    - litespeedphp
 
 requiredFeatures: extip
 
