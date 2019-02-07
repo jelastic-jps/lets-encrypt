@@ -104,7 +104,7 @@ onInstall:
   installScript:
     customDomains: ${settings.customDomains}
     nodeId: ${settings.nodeId}
-    nodeGroup: ${settings.nodeGroup}
+    nodeGroup: ${targetNodes.nodeGroup}
     deployHook: ${settings.deployHook}
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
@@ -123,7 +123,7 @@ onAfterClone:
   nodeGroup: ${targetNodes.nodeGroup}
   settings:
     customDomains: ''
-    nodeGroup: ${settings.nodeGroup}
+    nodeGroup: ${targetNodes.nodeGroup}
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
 

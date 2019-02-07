@@ -153,7 +153,7 @@ function SSLManager(config) {
             result: 0
         };
     };
-    
+
     me.reinstall = function (){
         var settings = {};
 
@@ -425,6 +425,10 @@ function SSLManager(config) {
 
                 nodeManager.setNodeId(config.nodeId);
                 nodeManager.setNodeIp(config.nodeIp);
+
+                if (nodeManager.isExtraLayer(group) && node.url) {
+                    nodeManager.setEnvDomain(node.url.replace(/http:\/\//, ''));
+                }
             }
 
             if (id) break;
@@ -689,7 +693,7 @@ function SSLManager(config) {
         if (config.patchVersion != patchBuild) {
             return { result : 0 };
         }
-        
+
         if (config.undeployHook) {
             return me.evalHook(config.undeployHook, config.undeployHookType);
         }
@@ -877,6 +881,9 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
+            BL = "bl",
+            LB = "lb",
+            CP = "cp",
             bCustomSSLSupported,
             sBackupPath,
             envInfo,
@@ -929,6 +936,14 @@ function SSLManager(config) {
             nodeIp = ip;
         };
 
+        me.setEnvDomain = function (envDomain) {
+            config.envDomain = envDomain;
+        };
+
+        me.isExtraLayer = function (group) {
+            return !(group === BL || group === LB || group === CP);
+        };
+
         me.getNode = function () {
             var resp,
                 nodes;
@@ -966,21 +981,22 @@ function SSLManager(config) {
 
         me.getEntryPointGroup = function () {
             var group,
-                nodes;
+                nodes,
+                resp;
 
-            var resp = me.getEnvInfo();
+            resp = me.getEnvInfo();
             if (resp.result != 0) return resp;
 
             nodes = resp.nodes;
 
             for (var i = 0, node; node = nodes[i]; i++) {
-                if (node.nodeGroup == 'lb' || node.nodeGroup == 'bl') {
+                if (node.nodeGroup == LB || node.nodeGroup == BL) {
                     group = node.nodeGroup;
                     break;
                 }
             }
 
-            return { result : 0, group : group || "cp" };
+            return { result : 0, group : group || CP };
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
