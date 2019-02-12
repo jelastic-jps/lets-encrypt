@@ -109,7 +109,7 @@ function SSLManager(config) {
         var sSkippedDomains = me.getSkippedDomains();
 
         if (sSkippedDomains) {
-            sSkippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following invalid domain names: \n > * " + me.formatDomains(sSkippedDomains, true) + "\n > \n > Remove these DNS records from the [Let's Encrypt settings](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings or fix them via your domain registrar admin panel, and reinstall/update the add-on.";
+            sSkippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following invalid domain names: \n > * " + me.formatDomains(sSkippedDomains, true) + "\n > \n > Remove these DNS records from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings or fix them via your domain registrar admin panel, and reinstall/update the add-on.";
         }
 
         resp.skippedDomains = sSkippedDomains || "";
