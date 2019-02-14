@@ -109,7 +109,7 @@ function SSLManager(config) {
         var sSkippedDomains = me.getSkippedDomains();
 
         if (sSkippedDomains) {
-            sSkippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following invalid domain names: \n > * " + me.formatDomains(sSkippedDomains, true) + "\n > \n > Remove these DNS records from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings or fix them via your domain registrar admin panel, and reinstall/update the add-on.";
+            sSkippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(sSkippedDomains, true) + "\n > \n > Fix their DNS records via your domain registrar admin panel, and reinstall/update the add-on or remove them from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
         }
 
         resp.skippedDomains = sSkippedDomains || "";
@@ -405,7 +405,7 @@ function SSLManager(config) {
         var domainRegex;
 
         if (domains) {
-            domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z-9-]{2,24}(\n|$)/;
+            domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9-]{2,24}(\n|$)/;
 
             domains = me.parseDomains(domains);
 
