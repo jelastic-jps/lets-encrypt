@@ -447,7 +447,7 @@ function SSLManager(config) {
             return domains.replace(/ -d /g, '\n > * ');
         }
 
-        return domains ? domains.replace(/ -d/g, ',') : "";
+        return domains ? domains.replace(/ -d/g, ', ') : "";
     };
 
     me.getEnvName = function () {
