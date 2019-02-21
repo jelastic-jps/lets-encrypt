@@ -100,6 +100,19 @@ function SSLManager(config) {
         }
 
         me.exec(me.sendResp, resp, isUpdate);
+        me.exec(me.checkSkippedDomainsInSuccess, resp);
+
+        return resp;
+    };
+
+    me.checkSkippedDomainsInSuccess = function checkSkippedDomainsInSuccess(resp) {
+        var sSkippedDomains = me.getSkippedDomains();
+
+        if (sSkippedDomains) {
+            sSkippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(sSkippedDomains, true) + "\n > \n > Fix their DNS records via your domain registrar admin panel, and reinstall/update the add-on or remove them from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
+        }
+
+        resp.skippedDomains = sSkippedDomains || "";
 
         return resp;
     };
@@ -154,8 +167,18 @@ function SSLManager(config) {
         };
     };
 
-    me.reinstall = function (){
-        var settings = {};
+    me.reinstall = function reinstall(){
+        var settings = {},
+            resp;
+
+        me.logAction("StartPatchLEAutoUpdate");
+        nodeManager.setBackupCSScript();
+        resp = me.exec(me.backupScripts);
+
+        if (resp.result != 0) {
+            me.logAction("ErrorPatchLEAutoUpdate", resp);
+            return resp;
+        }
 
         settings = {
             nodeId              : config.nodeId,
@@ -167,7 +190,7 @@ function SSLManager(config) {
             undeployHookType    : config.undeployHookType || ""
         };
 
-        return jelastic.marketplace.jps.install({
+        resp = jelastic.marketplace.jps.install({
             appid: appid,
             session: session,
             jps: me.getFileUrl("manifest.jps"),
@@ -176,6 +199,14 @@ function SSLManager(config) {
             nodeGroup: config.nodeGroup || "",
             writeOutputTasks: false
         });
+
+        me.logAction("EndPatchLEAutoUpdate", resp);
+
+        if (resp.result != 0) {
+            me.exec(me.restoreDataIfNeeded);
+        }
+
+        return resp;
     };
 
     me.uninstall = function () {
@@ -202,11 +233,11 @@ function SSLManager(config) {
         ]);
     };
 
-    me.backupScripts = function () {
+    me.backupScripts = function backupScripts() {
         var backupPath = nodeManager.getBackupPath(),
             logPath = nodeManager.getLogPath();
 
-        return me.execAll([
+        return me.exec([
             [ me.cmd, "mkdir -p %(backupPath)", {
                 backupPath: backupPath
             }],
@@ -232,7 +263,7 @@ function SSLManager(config) {
         ])
     };
 
-    me.restoreScripts = function () {
+    me.restoreScripts = function restoreScripts() {
         var backupPath = nodeManager.getBackupPath(),
             logPath = nodeManager.getLogPath();
 
@@ -258,6 +289,14 @@ function SSLManager(config) {
             }]
         ])
     };
+
+    me.restoreCron = function restoreCron() {
+        me.logAction("AutoPatchLECronRestore");
+
+        return me.exec(me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
+            backupPath: nodeManager.getBackupPath()
+        });
+    },
 
     me.autoUpdate = function () {
         var resp;
@@ -287,9 +326,7 @@ function SSLManager(config) {
         if (config.patchVersion == patchBuild) {
             resp = me.install(true);
         } else {
-            me.logAction("StartPatchLEAutoUpdate");
             resp = me.reinstall();
-            me.logAction("EndPatchLEAutoUpdate", resp);
         }
 
         me.logAction("EndUpdateLEFromContainer", resp);
@@ -297,7 +334,32 @@ function SSLManager(config) {
         return resp;
     };
 
-    this.checkEnvAccessAndUpdate = function (errResp) {
+    me.restoreCSScript = function restoreCSScript() {
+        var oResp,
+            sCode = nodeManager.getCSScriptCode();
+
+        me.logAction("AutoPatchLEScriptRestore");
+        return jelastic.dev.scripting.CreateScript(config.scriptName, "js", sCode);
+    };
+
+    me.restoreDataIfNeeded = function () {
+        var oResp = getScript(config.scriptName);
+
+        if (oResp.result == Response.SCRIPT_NOT_FOUND) {
+            me.logAction("AutoPatchLEAddOnRemoved");
+
+            if (nodeManager.getCSScriptCode()) {
+                me.exec([
+                    [ me.restoreCSScript ],
+                    [ me.restoreScripts ]
+                ]);
+            }
+        }
+
+        return { result : 0 };
+    };
+
+    me.checkEnvAccessAndUpdate = function (errResp) {
         var errorMark = "session [xxx"; //mark of error access to a shared env
 
         if (errResp.result == Response.USER_NOT_AUTHENTICATED && errResp.error.indexOf(errorMark) > -1) {
@@ -377,6 +439,15 @@ function SSLManager(config) {
 
     me.getSkippedDomains = function () {
         return config.skippedDomains || "";
+    };
+
+    me.formatDomains = function (domains, bList) {
+
+        if (bList) {
+            return domains.replace(/ -d /g, '\n > * ');
+        }
+
+        return domains ? domains.replace(/ -d/g, ', ') : "";
     };
 
     me.getEnvName = function () {
@@ -756,7 +827,8 @@ function SSLManager(config) {
     };
 
     me.sendResp = function sendResp(resp, isUpdate) {
-        var action = isUpdate ? "updated" : "installed";
+        var action = isUpdate ? "updated" : "installed",
+            sSkippedDomains = me.getSkippedDomains();
 
         if (resp.result != 0) {
             return me.sendErrResp(resp);
@@ -768,13 +840,13 @@ function SSLManager(config) {
                 ENVIRONMENT : config.envDomain,
                 ACTION : action,
                 UPDATED_DOMAINS: "Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>",
-                SKIPPED_DOMAINS: me.getSkippedDomains() ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.getSkippedDomains().replace(/ -d/g, ',') + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
+                SKIPPED_DOMAINS: me.getSkippedDomains() ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(me.getSkippedDomains()) + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
             }
         );
     };
 
     me.formatUpdatedDomains = function formatUpdatedDomains() {
-        var sDomains = me.getCustomDomains().replace(/ -d/g, ','),
+        var sDomains = me.formatDomains(me.getCustomDomains()),
             aDomains = [],
             sDomain,
             sResp = "";
@@ -885,6 +957,7 @@ function SSLManager(config) {
             LB = "lb",
             CP = "cp",
             bCustomSSLSupported,
+            oBackupScript,
             sBackupPath,
             envInfo,
             nodeIp,
@@ -938,6 +1011,20 @@ function SSLManager(config) {
 
         me.setEnvDomain = function (envDomain) {
             config.envDomain = envDomain;
+        };
+
+        me.setBackupCSScript = function () {
+            oBackupScript = getScript(config.scriptName);
+        };
+
+        me.getBackupCSScript = function () {
+            return oBackupScript || {};
+        };
+
+        me.getCSScriptCode = function () {
+            var oScript = me.getBackupCSScript().script;
+
+            return oScript ? oScript.code : "";
         };
 
         me.isExtraLayer = function (group) {
@@ -1078,6 +1165,10 @@ function SSLManager(config) {
 
     function getPlatformVersion() {
         return jelastic.system.service.GetVersion().version.split("-").shift();
+    }
+
+    function getScript(name) {
+        return jelastic.dev.scripting.GetScript(name);
     }
 
     function compareVersions(a, b) {

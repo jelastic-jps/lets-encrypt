@@ -95,11 +95,12 @@ function validateDNSSettings(){
         }
 
         [[ ! -z "$validated_domains" ]] && {
-            sed -i "s/^domain=.*/domain='$(echo $validated_domains | sed "s/ / -d /g")'/g" "${SETTING_PATH}"
+            sed -i "s/^domain=.*/domain='$(echo $validated_domains | sed "s/ / -d /g")'/g" "${SETTING_PATH}";
         } || {
-            sed -i "s/^domain=.*/domain=''/g" "${SETTING_PATH}"
-            echo "Error: SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings. Adjust configurations within your domain admin panel."
-            exit 1 ;
+            sed -i "s/^domain=.*/domain='$(echo $appdomain)'/g" "${SETTING_PATH}";
+            test_params='--test-cert --break-my-certs ';
+#            echo "Error: SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings. Adjust configurations within your domain admin panel."
+#            exit 1 ;
         }
     }
 
