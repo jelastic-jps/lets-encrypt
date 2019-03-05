@@ -95,7 +95,7 @@ buttons:
     loadingText: Updating...
     action: update
     caption: Update Now
-    successText: SSL certificate files have been successfully updated!
+    successText: /text/success.md
   - caption: Configure
     settings: main
     action: installScript
@@ -159,10 +159,7 @@ actions:
   update:
     - callScript:
         action: auto-update
-    - if (jelastic.system.service.GetVersion().version.split('-').shift() >= '5.1'):
-        return:
-          type: success
-          message: SSL certificate files have been successfully updated!
+
   delete:
     script: |
       jelastic.dev.scripting.DeleteScript('${env.envName}-${globals.scriptSufix}');
