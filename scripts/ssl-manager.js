@@ -34,7 +34,7 @@ function SSLManager(config) {
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
-        patchBuild = 2,
+        patchBuild = 3,
         debug = [],
         nodeManager,
         baseUrl,
