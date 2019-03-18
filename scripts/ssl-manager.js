@@ -34,7 +34,7 @@ function SSLManager(config) {
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
-        patchBuild = 2,
+        patchBuild = 1,
         debug = [],
         nodeManager,
         baseUrl,
@@ -242,7 +242,7 @@ function SSLManager(config) {
                 backupPath: backupPath
             }],
 
-            [ me.cmd, "cd %(letsencryptPath); hash tar2 2>/dev/null && echo tar || yum install tar -y; tar -czvf backup.tar . >> %(logPath); mv backup.tar %(backupPath)", {
+            [ me.cmd, "cd %(letsencryptPath); hash tar 2>/dev/null && echo tar || yum install tar -y; tar -czvf backup.tar . >> %(logPath); mv backup.tar %(backupPath)", {
                 logPath: logPath,
                 backupPath: backupPath,
                 letsencryptPath: nodeManager.getPath("opt/letsencrypt")
@@ -272,7 +272,7 @@ function SSLManager(config) {
                 backupPath: backupPath
             }],
 
-            [ me.cmd, "hash tar2 2>/dev/null && echo tar || yum install tar -y; mkdir -p %(settingsPath) && cd %(settingsPath) && tar -xzvf %(backupPath)/backup.tar > %(logPath)", {
+            [ me.cmd, "hash tar 2>/dev/null && echo tar || yum install tar -y; mkdir -p %(settingsPath) && cd %(settingsPath) && tar -xzvf %(backupPath)/backup.tar > %(logPath)", {
                 backupPath: backupPath,
                 logPath: logPath,
                 settingsPath: nodeManager.getPath("opt/letsencrypt"),
