@@ -12,6 +12,8 @@ RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt
 
 [[ -z "$WGET" || -z "$OPENSSL" || -z "$GREP" || -z "$SED" || -z "$GIT" ]] && { echo "PATH not set with neccessary commands"; exit 3 ; }
 
+updateScripts
+
 [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh"  ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
 
@@ -38,11 +40,8 @@ function validateLatestVersion(){
    local latest_revision=$($GIT ls-remote $BASE_REPO_URL | grep master | awk '{ print $1}');
    [ -f "$revision_state_path" ] && current_revision=$(cat $revision_state_path);
    [ "$latest_revision" != "$current_revision" ] && {
-        $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/auto-update-ssl-cert.sh -O /tmp/auto-update-ssl-cert.sh
-        $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/install-le.sh -O /tmp/install-le.sh
-        $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/validation.sh -O /tmp/validation.sh
-        $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/generate-ssl-cert.sh -O /tmp/generate-ssl-cert.sh
-        [  -s /tmp/auto-update-ssl-cert.sh -a -s /tmp/install-le.sh -a -s /tmp/validation.sh -a -s /tmp/generate-ssl-cert.sh ] && {
+
+        [ -a -s /tmp/auto-update-ssl-cert.sh -a -s /tmp/install-le.sh -a -s /tmp/validation.sh -a -s /tmp/generate-ssl-cert.sh ] && {
             mv /tmp/install-le.sh /root/install-le.sh
             mv /tmp/auto-update-ssl-cert.sh  /root/auto-update-ssl-cert.sh
             mv /tmp/generate-ssl-cert.sh /root/generate-ssl-cert.sh
@@ -51,6 +50,13 @@ function validateLatestVersion(){
             echo $latest_revision > $revision_state_path
         }
    }
+}
+
+function updateScripts(){
+    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/auto-update-ssl-cert.sh -O /tmp/auto-update-ssl-cert.sh
+    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/install-le.sh -O /tmp/install-le.sh
+    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/validation.sh -O /tmp/validation.sh
+    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/generate-ssl-cert.sh -O /tmp/generate-ssl-cert.sh
 }
 
 
