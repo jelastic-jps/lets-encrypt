@@ -405,7 +405,7 @@ function SSLManager(config) {
         var domainRegex;
 
         if (domains) {
-            domainRegex = /^(.*([.*-]{0,61}[.*])?\.)+[a-zA-Z0-9-]{2,24}(\n|$)/; ///^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9-]{2,24}(\n|$)/;
+            domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9-]{2,24}(\n|$)/;
 
             domains = me.parseDomains(domains);
 
