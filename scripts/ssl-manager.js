@@ -870,9 +870,9 @@ function SSLManager(config) {
             targetAppid: config.envAppid,
             search: {"appstore":"1","app_id":"letsencrypt-ssl-addon", "nodeGroup": {"!=":config.nodeGroup}}
         });
-        me.logAction("GetApps", resp);
 
         if (resp.result != 0) return resp;
+        me.logAction("isMoreLEAppInstalled", { result: 0 });
 
         resp = resp.response;
         return !!(resp.apps && resp.apps.length);
