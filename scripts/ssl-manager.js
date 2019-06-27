@@ -761,7 +761,7 @@ function SSLManager(config) {
     };
 
     me.undeploy = function undeploy() {
-        if (config.patchVersion != patchBuild || me.isMoreLEAppInstalled()) {
+        if (config.patchVersion != patchBuild || me.exec(me.isMoreLEAppInstalled)) {
             return { result : 0 };
         }
 
