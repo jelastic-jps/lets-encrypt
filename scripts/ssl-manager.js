@@ -324,6 +324,12 @@ function SSLManager(config) {
         }
 
         if (config.patchVersion == patchBuild) {
+
+            me.exec([
+                [ me.initEntryPoint ],
+                [ me.validateEntryPoint ]
+            ]);
+
             resp = me.install(true);
         } else {
             resp = me.reinstall();
@@ -468,7 +474,7 @@ function SSLManager(config) {
             nodes,
             resp;
 
-        if (!id && !group) {
+        if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
             resp = nodeManager.getEntryPointGroup();
             if (resp.result != 0) return resp;
 
@@ -482,8 +488,7 @@ function SSLManager(config) {
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
-            if ((id && node.id != id) ||
-                (!id && node.nodeGroup != group)) continue;
+            if (node.nodeGroup != group) continue;
 
             if (!node.extIPs || node.extIPs.length == 0) {
                 resp = me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
@@ -1031,6 +1036,10 @@ function SSLManager(config) {
             return !(group === BL || group === LB || group === CP);
         };
 
+        me.isBalancerLayer = function (group) {
+            return !!(group == LB || group == BL);
+        };
+
         me.getNode = function () {
             var resp,
                 nodes;
@@ -1077,7 +1086,7 @@ function SSLManager(config) {
             nodes = resp.nodes;
 
             for (var i = 0, node; node = nodes[i]; i++) {
-                if (node.nodeGroup == LB || node.nodeGroup == BL) {
+                if (nodeManager.isBalancerLayer(node.nodeGroup)) {
                     group = node.nodeGroup;
                     break;
                 }
