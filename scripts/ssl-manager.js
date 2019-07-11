@@ -871,11 +871,13 @@ function SSLManager(config) {
             search: {"appstore":"1","app_id":"letsencrypt-ssl-addon", "nodeGroup": {"!=":config.nodeGroup}}
         });
 
-        if (resp.result != 0) return resp;
-        me.logAction("isMoreLEAppInstalled", { result: 0 });
+        me.logAction("isMoreLEAppInstalled", resp);
+        if (resp.result != 0) {
+            return true; // don't removeSSL if GetApps fails
+        }
 
         resp = resp.response;
-        return !!(resp.apps && resp.apps.length);
+        return !!(resp && resp.apps && resp.apps.length);
     };
 
     me.sendErrResp = function sendErrResp(resp) {
