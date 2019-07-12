@@ -766,7 +766,7 @@ function SSLManager(config) {
     };
 
     me.undeploy = function undeploy() {
-        if (config.patchVersion != patchBuild) {
+        if (config.patchVersion != patchBuild || me.exec(me.isMoreLEAppInstalled)) {
             return { result : 0 };
         }
 
@@ -866,6 +866,23 @@ function SSLManager(config) {
         }
 
         return sResp || "";
+    };
+    
+    me.isMoreLEAppInstalled = function isMoreLEAppInstalled () {
+        var resp;
+
+        resp = jelastic.dev.scripting.Eval("appstore", session, "GetApps", {
+            targetAppid: config.envAppid,
+            search: {"appstore":"1","app_id":"letsencrypt-ssl-addon", "nodeGroup": {"!=":config.nodeGroup}}
+        });
+
+        me.logAction("isMoreLEAppInstalled", resp);
+        if (resp.result != 0) {
+            return true; // don't removeSSL if GetApps fails
+        }
+
+        resp = resp.response;
+        return !!(resp && resp.apps && resp.apps.length);
     };
 
     me.sendErrResp = function sendErrResp(resp) {

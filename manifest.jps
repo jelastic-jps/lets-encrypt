@@ -141,7 +141,7 @@ actions:
   installScript:
     script: /scripts/create-installation-script.js?_r=${fn.random}
     params:
-      scriptName: ${env.envName}-${globals.scriptSufix}
+      scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
       baseUrl: ${baseUrl}
       cronTime: 0 ${fn.random(1,6)},${fn.random(10,20)} * * *
       customDomains: ${this.customDomains}
@@ -153,7 +153,7 @@ actions:
       undeployHookType: ${this.undeployHookType}
   callScript:
     script: |
-      var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {action:'${this.action}'});
+      var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
   update:
@@ -162,7 +162,7 @@ actions:
 
   delete:
     script: |
-      jelastic.dev.scripting.DeleteScript('${env.envName}-${globals.scriptSufix}');
+      jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
 
 success: /text/success.md
