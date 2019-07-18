@@ -41,6 +41,8 @@ targetNodes:
     - apache-python
     - nginxruby
     - litespeedphp
+    - lemp
+    - llsmp
 
 requiredFeatures: extip
 
