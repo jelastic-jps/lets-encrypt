@@ -41,6 +41,7 @@ targetNodes:
     - apache-python
     - nginxruby
     - litespeedphp
+    - litespeedadc
     - lemp
     - llsmp
 
