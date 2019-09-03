@@ -503,7 +503,7 @@ function SSLManager(config) {
                 nodeManager.setNodeIp(config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
-                    nodeManager.setEnvDomain(node.url.replace(/http:\/\//, ''));
+                    nodeManager.setEnvDomain(node.url.replace(/https?:\/\//, ''));
                 }
             }
 
