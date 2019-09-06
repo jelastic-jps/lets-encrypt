@@ -484,7 +484,7 @@ function SSLManager(config) {
 
         resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
 
-        if (resp.result == 2002) return {
+        if (resp.result == com.hivext.api.Response.FILE_PATH_NOT_EXIST) return {
             result: 0
         }
         if (resp.result != 0) return resp;
