@@ -537,6 +537,7 @@ function SSLManager(config) {
                 config.nodeIp = node.address;
 
                 nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
+                nodeManager.setNodeGroup(config.webroot ? CP : config.nodeGroup);
                 nodeManager.setNodeIp(config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
@@ -1062,7 +1063,11 @@ function SSLManager(config) {
         };
 
         me.setNodeIp = function (ip) {
-            nodeIp = ip;
+            config.nodeIp = nodeIp = ip;
+        };
+
+        me.setNodeGroup = function (group) {
+            config.nodeGroup = group;
         };
 
         me.setEnvDomain = function (envDomain) {
