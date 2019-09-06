@@ -91,6 +91,7 @@ function SSLManager(config) {
 
     me.install = function (isUpdate) {
         var resp = me.exec([
+            [ me.initEntryPoint ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
