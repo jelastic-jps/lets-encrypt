@@ -33,6 +33,9 @@ function SSLManager(config) {
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         Random = com.hivext.api.utils.Random,
         me = this,
+        BL = "bl",
+        LB = "lb",
+        CP = "cp",
         isValidToken = false,
         patchBuild = 1,
         debug = [],
@@ -468,11 +471,45 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.initCustomConfigs = function() {
+        var CUSTOM_CONFIG = "/var/lib/jelastic/keys/letsencrypt/settings-custom",
+            configs = [],
+            body,
+            resp,
+            tmp;
+
+        function convertToBoolean(value) {
+            return value === "true" ? true : (value === "false" ? false : value);
+        }
+
+        resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
+
+        if (resp.result == 2002) return {
+            result: 0
+        }
+        if (resp.result != 0) return resp;
+
+        body = resp.body.replace(/\n$/, '');
+        configs = body.split('\n');
+
+        for (var i = 0, n = configs.length; i < n; i++) {
+            tmp = configs[i].split('=');
+            config[tmp[0]] = convertToBoolean(tmp[1].replace(/\"/g, ""));
+        }
+
+        return {
+            result: 0
+        }
+    };
+
+
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
             nodes,
             resp;
+
+        me.exec([ me.initCustomConfigs ]);
 
         if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
             resp = nodeManager.getEntryPointGroup();
@@ -499,7 +536,7 @@ function SSLManager(config) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
 
-                nodeManager.setNodeId(config.nodeId);
+                nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
                 nodeManager.setNodeIp(config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
@@ -975,9 +1012,6 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
-            BL = "bl",
-            LB = "lb",
-            CP = "cp",
             bCustomSSLSupported,
             oBackupScript,
             sBackupPath,
@@ -1092,6 +1126,25 @@ function SSLManager(config) {
             return envInfo;
         };
 
+        me.getMasterIdByLayer = function(group) {
+            var nodes,
+                resp,
+                id;
+
+            group = group || CP;
+            resp = me.getEnvInfo();
+            nodes = resp.nodes;
+
+            for (var i = 0, node; node = nodes[i]; i++) {
+                if (node.ismaster && node.nodeGroup == group) {
+                    id = node.id;
+                    break;
+                }
+            }
+
+            return id;
+        };
+
         me.getEntryPointGroup = function () {
             var group,
                 nodes,
@@ -1135,7 +1188,7 @@ function SSLManager(config) {
             if (!disableLogging) {
                 log("cmd: " + command);
             }
-
+            
             if (values.nodeGroup) {
                 resp = jelastic.env.control.ExecCmdByGroup(envName, session, values.nodeGroup, toJSON([{ command: command }]), true, false, "root");
             } else {
@@ -1145,8 +1198,8 @@ function SSLManager(config) {
             return resp;
         };
 
-        me.readFile = function (path) {
-            return jelastic.env.file.Read(envName, session, path, null, null, nodeId);
+        me.readFile = function (path, group) {
+            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId || me.getMasterIdByLayer(group));
         };
 
         me.checkCustomSSL = function () {
