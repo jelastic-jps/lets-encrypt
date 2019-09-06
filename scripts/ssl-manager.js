@@ -93,6 +93,7 @@ function SSLManager(config) {
         var resp = me.exec([
             [ me.initEntryPoint ],
             [ me.installLetsEncrypt ],
+            [ me.initCustomConfigs ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
             [ me.updateGeneratedCustomDomains ]
@@ -498,6 +499,12 @@ function SSLManager(config) {
             config[tmp[0]] = convertToBoolean(tmp[1].replace(/\"/g, ""));
         }
 
+        jelastic.marketplace.console.WriteLog("config.webroot22 -> " + config.webroot);
+        jelastic.marketplace.console.WriteLog("config.webroot22 ? nodeManager.getMasterIdByLayer(CP) : config.nodeId -> " + config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
+        nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
+        nodeManager.setNodeGroup(config.webroot ? CP : config.nodeGroup);
+        nodeManager.setNodeIp(config.webroot ? nodeManager.getMasterIpByLayer(CP) : config.nodeIp);
+
         return {
             result: 0
         }
@@ -509,8 +516,6 @@ function SSLManager(config) {
             id = config.nodeId,
             nodes,
             resp;
-
-        me.exec([ me.initCustomConfigs ]);
 
         if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
             resp = nodeManager.getEntryPointGroup();
