@@ -536,6 +536,8 @@ function SSLManager(config) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
 
+                jelastic.marketplace.console.WriteLog("config.webroot -> " + config.webroot);
+                jelastic.marketplace.console.WriteLog("config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId -> " + config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
                 nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
                 nodeManager.setNodeGroup(config.webroot ? CP : config.nodeGroup);
                 nodeManager.setNodeIp(config.webroot ? nodeManager.getMasterIpByLayer(CP) : config.nodeIp);
