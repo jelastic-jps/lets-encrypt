@@ -4,6 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 
 [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh"  ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
+[ -f "${DIR}/var/lib/jelastic/keys/letsencrypt/settings-custom"  ] && source "${DIR}/var/lib/jelastic/keys/letsencrypt/settings-custom"
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
@@ -16,6 +17,9 @@ git pull origin master
 #Parameters for test certificates
 test_params='';
 [ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
+
+webroot_params='';
+[[ "$webroot" == "true" && ! -z "$webroot_path" ]] && { webroot_params="-a webroot --webroot-path ${webroot_path}"; } || { webroot_params=' --standalone '; }
 
 #Validate settings
 validateExtIP
