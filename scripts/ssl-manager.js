@@ -538,7 +538,7 @@ function SSLManager(config) {
 
                 nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
                 nodeManager.setNodeGroup(config.webroot ? CP : config.nodeGroup);
-                nodeManager.setNodeIp(config.nodeIp);
+                nodeManager.setNodeIp(config.webroot ? nodeManager.getMasterIpByLayer(CP) : config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
                     nodeManager.setEnvDomain(node.url.replace(/http:\/\//, ''));
@@ -1149,6 +1149,26 @@ function SSLManager(config) {
 
             return id;
         };
+
+        me.getMasterIpByLayer = function(group) {
+            var nodes,
+                resp,
+                address;
+
+            group = group || CP;
+            resp = me.getEnvInfo();
+            nodes = resp.nodes;
+
+            for (var i = 0, node; node = nodes[i]; i++) {
+                if (node.ismaster && node.nodeGroup == group) {
+                    address = node.address;
+                    break;
+                }
+            }
+
+            return address;
+        };
+
 
         me.getEntryPointGroup = function () {
             var group,
