@@ -1112,9 +1112,7 @@ function SSLManager(config) {
         };
         
         me.getEntryNodeIps = function() {
-            var fileName = "validation.sh",
-            url = me.getScriptUrl(fileName);
-
+            jelastic.marketplace.console.WriteLog("config.webroot22 before resp -> ");
             var resp = nodeManager.cmd([
                 "IP=$(which ip)",
                 "EXT_IPs=$($IP a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')",
