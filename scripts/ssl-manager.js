@@ -1115,8 +1115,8 @@ function SSLManager(config) {
             jelastic.marketplace.console.WriteLog("config.webroot22 before resp -> ");
             var resp = nodeManager.cmd([
                 "IP=$(which ip)",
-                "EXT_IPs=$($IP a | sed -En \'s/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p\')",
-                "EXT_IPs_v6=$($IP a | sed -En \'s/inet6 ::1\/128//;s/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p\')",
+                "EXT_IPs=$($IP a | sed -En \'s/127.0.0.1//;s\/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p\')",
+                "EXT_IPs_v6=$($IP a | sed -En \'s/inet6 ::1\/128//;s\/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p\')",
                 "echo \"IP4-$EXT_IPs\"",
                 "echo \"IP6-$EXT_IPs_v6\""
             ], {});
