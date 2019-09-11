@@ -501,9 +501,16 @@ function SSLManager(config) {
 
         jelastic.marketplace.console.WriteLog("config.webroot22 -> " + config.webroot);
         jelastic.marketplace.console.WriteLog("config.webroot22 ? nodeManager.getMasterIdByLayer(CP) : config.nodeId -> " + config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
-        nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
-        nodeManager.setNodeGroup(config.webroot ? CP : config.nodeGroup);
-        nodeManager.setNodeIp(config.webroot ? nodeManager.getMasterIpByLayer(CP) : config.nodeIp);
+        if (config.webroot) {
+            nodeManager.getEntryNodeIps();
+            nodeManager.setNodeId(nodeManager.getMasterIdByLayer(CP));
+            nodeManager.setNodeGroup(CP);
+            nodeManager.setNodeIp(nodeManager.getMasterIpByLayer(CP));
+        } else {
+            nodeManager.setNodeId(config.nodeId);
+            nodeManager.setNodeGroup(config.nodeGroup);
+            nodeManager.setNodeIp(config.nodeIp);
+        }
 
         return {
             result: 0
@@ -1102,6 +1109,33 @@ function SSLManager(config) {
 
         me.isBalancerLayer = function (group) {
             return !!(group == LB || group == BL);
+        };
+        
+        me.getEntryNodeIps = function() {
+            var fileName = "validation.sh",
+            url = me.getScriptUrl(fileName);
+
+            var resp = nodeManager.cmd([
+                "IP=$(which ip)",
+                "EXT_IPs=$($IP a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')",
+                "EXT_IPs_v6=$($IP a | sed -En 's/inet6 ::1\/128//;s/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p')"
+                "echo 'IP4-$EXT_IPs'",
+                "echo 'IP6-$EXT_IPs_v6'"
+            ], {});
+
+            jelastic.marketplace.console.WriteLog("getEntryNodeIps -> " + resp);
+            if (resp.result == Response.JEM_OPERATION_COULD_NOT_BE_PERFORMED) {
+                resp = resp.responses[0];
+                var error = resp.out + "\n" + (resp.errOut || resp.error || "");
+
+                resp = {
+                    result: Response.JEM_OPERATION_COULD_NOT_BE_PERFORMED,
+                    type: "error",
+                    error: error,
+                    response: error,
+                    message: error
+                };
+            }
         };
 
         me.getNode = function () {
