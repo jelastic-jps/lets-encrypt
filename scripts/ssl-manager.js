@@ -1033,7 +1033,7 @@ function SSLManager(config) {
         };
 
         me.isExtraLayer = function (group) {
-            return !(group === BL || group === LB || group === CP);
+            return !(group == BL || group == LB || group == CP);
         };
 
         me.isBalancerLayer = function (group) {
