@@ -470,7 +470,7 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
-    me.initAddOnExtIp = function (withExtIp) {
+    me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = !!(withExtIp == "true");
 
         return { result: 0 };
