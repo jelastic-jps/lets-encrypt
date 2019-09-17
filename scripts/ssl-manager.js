@@ -396,7 +396,7 @@ function SSLManager(config) {
 
     me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
-            [ me.initAddOnExtIp ],
+            [ me.initAddOnExtIp, config.withExtIp ],
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
