@@ -17,9 +17,9 @@ git pull origin master
 test_params='';
 [ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
 
+echo $withExtIp;
 #Validate settings
-validateExtIP
-validateDNSSettings
+if [ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
 validateCertBot
 
 #Kill hanged certificate requests
