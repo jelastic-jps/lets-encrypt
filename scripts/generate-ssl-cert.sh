@@ -19,7 +19,8 @@ test_params='';
 
 echo $withExtIp;
 #Validate settings
-if [ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
+[ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
+
 validateCertBot
 
 #Kill hanged certificate requests
