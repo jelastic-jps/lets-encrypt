@@ -17,7 +17,6 @@ git pull origin master
 test_params='';
 [ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
 
-echo $withExtIp;
 #Validate settings
 [ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
 
