@@ -23,6 +23,7 @@ function SSLManager(config) {
      *      [deployHookType] : {String}
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
+     *      [withExtIp] : {Boolean}
      *      [test] : {Boolean}
      * }} config
      * @constructor
@@ -395,6 +396,7 @@ function SSLManager(config) {
 
     me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
+            [  ],
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
@@ -468,6 +470,12 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.initAddOnExtIp = function (withExtIp) {
+        config.withExtIp = !!(withExtIp == "true");
+
+        return { result: 0 };
+    };
+
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
@@ -490,9 +498,11 @@ function SSLManager(config) {
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
 
-            if (!node.extIPs || node.extIPs.length == 0) {
-                resp = me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
-                if (resp.result != 0) return resp;
+            if (config.withExtIp) {
+                if (!node.extIPs || node.extIPs.length == 0) {
+                    resp = me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
+                    if (resp.result != 0) return resp;
+                }
             }
 
             if (id || node.ismaster) {
@@ -515,7 +525,13 @@ function SSLManager(config) {
 
     me.validateEntryPoint = function validateEntryPoint() {
         var fileName = "validation.sh",
-            url = me.getScriptUrl(fileName);
+            url = me.getScriptUrl(fileName),
+            VALIDATE_IP = "validateExtIP",
+            VALIDATE_DNS = "validateDNSSettings '%(domain)'";
+
+        //TODO rewrite
+
+        if (config.withExtIp) VALIDATE_IP = VALIDATE_DNS = '';
 
         var resp = nodeManager.cmd([
             "mkdir -p $(dirname %(path))",
@@ -523,8 +539,8 @@ function SSLManager(config) {
             "wget --no-check-certificate '%(url)' -O '%(path)'",
             "chmod +x %(path) >> %(log)",
             "source %(path)",
-            "validateExtIP",
-            "validateDNSSettings '%(domain)'"
+            VALIDATE_IP,
+            VALIDATE_DNS
         ], {
             url : url,
             logPath : nodeManager.getLogPath(),
@@ -625,7 +641,8 @@ function SSLManager(config) {
                 "appdomain='%(appdomain)'",
                 "baseDir='%(baseDir)'",
                 "test='%(test)'",
-                "primarydomain='%(primarydomain)'"
+                "primarydomain='%(primarydomain)'",
+                "withExtIp='%(withExtIp)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
                 email : config.email || "",
@@ -634,7 +651,8 @@ function SSLManager(config) {
                 appdomain : envDomain || "",
                 test : config.test || !customDomains,
                 primarydomain: primaryDomain,
-                letsEncryptEnv : config.letsEncryptEnv || ""
+                letsEncryptEnv : config.letsEncryptEnv || "",
+                withExtIp : config.withExtIp || ""
             }),
             path : nodeManager.getPath(path)
         });
@@ -766,7 +784,7 @@ function SSLManager(config) {
     };
 
     me.undeploy = function undeploy() {
-        if (config.patchVersion != patchBuild) {
+        if (config.patchVersion != patchBuild || me.exec(me.isMoreLEAppInstalled)) {
             return { result : 0 };
         }
 
@@ -866,6 +884,23 @@ function SSLManager(config) {
         }
 
         return sResp || "";
+    };
+    
+    me.isMoreLEAppInstalled = function isMoreLEAppInstalled () {
+        var resp;
+
+        resp = jelastic.dev.scripting.Eval("appstore", session, "GetApps", {
+            targetAppid: config.envAppid,
+            search: {"appstore":"1","app_id":"letsencrypt-ssl-addon", "nodeGroup": {"!=":config.nodeGroup}}
+        });
+
+        me.logAction("isMoreLEAppInstalled", resp);
+        if (resp.result != 0) {
+            return true; // don't removeSSL if GetApps fails
+        }
+
+        resp = resp.response;
+        return !!(resp && resp.apps && resp.apps.length);
     };
 
     me.sendErrResp = function sendErrResp(resp) {
