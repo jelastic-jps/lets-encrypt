@@ -31,6 +31,7 @@ function run() {
         deployHookType   : "${deployHookType}",
         undeployHook     : "${undeployHook}",
         undeployHookType : "${undeployHookType}",
+        withExtIp        : "${withExtIp}",
         patchVersion     : "${patchVersion}",
         test             : "${test}"
     });
