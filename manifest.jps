@@ -41,18 +41,21 @@ targetNodes:
     - apache-python
     - nginxruby
     - litespeedphp
+    - litespeedadc
+    - lemp
+    - llsmp
 
 requiredFeatures: extip
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/dzotic9/lets-encrypt/master
 logo: images/lets-encrypt.png
 
 description:
   text: /text/description.md
   short: Free tool to configure support of secured SSL connection for an environment,
     by either internal or custom domain name.
-    
+
 globals:
   scriptSufix: letsencrypt-ssl
 
@@ -81,6 +84,12 @@ settings:
     - type: string
       name: undeployHookType
       inputType: hidden
+    - type: list
+      name: withExtIp
+      default: true
+      values:
+        true: with ext IP
+        false: without ext IP
 
 onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
@@ -109,6 +118,7 @@ onInstall:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
+    withExtIp: ${settings.withExtIp}
 
 onUninstall:
   - callScript:
@@ -141,7 +151,7 @@ actions:
   installScript:
     script: /scripts/create-installation-script.js?_r=${fn.random}
     params:
-      scriptName: ${env.envName}-${globals.scriptSufix}
+      scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
       baseUrl: ${baseUrl}
       cronTime: 0 ${fn.random(1,6)},${fn.random(10,20)} * * *
       customDomains: ${this.customDomains}
@@ -151,9 +161,10 @@ actions:
       deployHookType: ${this.deployHookType}
       undeployHook: ${this.undeployHook}
       undeployHookType: ${this.undeployHookType}
+      withExtIp: ${this.withExtIp}
   callScript:
     script: |
-      var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {action:'${this.action}'});
+      var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
   update:
@@ -162,7 +173,7 @@ actions:
 
   delete:
     script: |
-      jelastic.dev.scripting.DeleteScript('${env.envName}-${globals.scriptSufix}');
+      jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
 
 success: /text/success.md
