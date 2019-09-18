@@ -777,6 +777,7 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
+            log("config.withExtIp ->" + config.withExtIp);
             if (config.withExtIp) return me.exec(me.bindSSL);
             else return me.exec([
                 [ me.bindSSL],
