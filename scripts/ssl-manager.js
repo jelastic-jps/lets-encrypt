@@ -860,8 +860,10 @@ function SSLManager(config) {
 
         if (cert_key.body && chain.body && cert.body) {
             if (config.withExtIp) {
+                log("config.withExtIp - in if -> ");
                 resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
             } else {
+                log("config.withExtIp - in else -> ");
                 resp = jelastic.env.binder.AddSSLCert(config.envName, session, cert_key.body, cert.body, chain.body);
             }
         } else {
