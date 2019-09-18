@@ -89,7 +89,7 @@ function SSLManager(config) {
 
     me.install = function (isUpdate) {
         var resp = me.exec([
-            [ me.initAddOnExtIp ],
+            [ me.initAddOnExtIp, config.withExtIp ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
