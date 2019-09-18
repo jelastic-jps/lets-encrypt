@@ -863,6 +863,10 @@ function SSLManager(config) {
             chain    = nodeManager.readFile("/tmp/fullchain.url"),
             resp;
 
+        log("cert_key ->" + cert_key);
+        log("cert ->" + cert);
+        log("chain ->" + chain);
+
         if (cert_key.body && chain.body && cert.body) {
             log("config.withExtIp - in first if -> ");
             if (config.withExtIp) {
