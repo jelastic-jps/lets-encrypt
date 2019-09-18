@@ -851,7 +851,7 @@ function SSLManager(config) {
         log("resp - GetSSLCerts -> " + resp);
         if (resp.result != 0) return resp;
 
-        resp = jelastic.env.binder.BindSSLCert(config.envName, resp.responses[0].id);
+        resp = jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[0].id);
         log("resp - BindSSLCert -> " + resp);
 
         return resp;
