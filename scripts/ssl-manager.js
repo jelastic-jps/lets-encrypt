@@ -777,7 +777,11 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            return me.exec(me.bindSSL);
+            if (config.withExtIp) return me.exec(me.bindSSL);
+            else return me.exec([
+                [ me.bindSSL],
+                [ me.bindSSLCerts ]
+            ]);
         }
 
         return { result : 0 };
@@ -826,6 +830,27 @@ function SSLManager(config) {
         return resp.response || resp
     };
 
+    me.readCerts = function readCerts() {
+        return {
+            key: nodeManager.readFile("/tmp/privkey.url"),
+            cert: nodeManager.readFile("/tmp/cert.url"),
+            chain: nodeManager.readFile("/tmp/fullchain.url")
+        }
+    };
+
+    me.bindSSLCerts = function bindSSLCerts() {
+        var resp;
+
+        resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
+        log("resp - GetSSLCerts -> " + resp);
+        if (resp.result != 0) return resp;
+
+        resp = jelastic.env.binder.BindSSLCert(config.envName, resp.sslCerts[0]);
+        log("resp - BindSSLCert -> " + resp);
+
+        return resp;
+    };
+
     me.bindSSL = function bindSSL() {
         var cert_key = nodeManager.readFile("/tmp/privkey.url"),
             cert     = nodeManager.readFile("/tmp/cert.url"),
@@ -833,7 +858,11 @@ function SSLManager(config) {
             resp;
 
         if (cert_key.body && chain.body && cert.body) {
-            resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
+            if (config.withExtIp) {
+                resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
+            } else {
+                resp = jelastic.env.binder.AddSSLCert(config.envName, session, cert_key.body, cert.body, chain.body);
+            }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
                 key   : cert_key,
