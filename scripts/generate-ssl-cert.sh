@@ -80,3 +80,4 @@ while [[ "$1" != "" ]]; do
 done
 
 uploadCerts $certdir;
+#[ "$withExtIp" == "true" ] && { uploadCerts $certdir; }
