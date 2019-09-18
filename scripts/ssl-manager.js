@@ -782,8 +782,7 @@ function SSLManager(config) {
             log("!!config.withExtIp ->" + !!config.withExtIp);
             if (config.withExtIp) {
                 return me.exec(me.bindSSL);
-            }
-            else {
+            } else {
                 return me.exec([
                     [ me.bindSSL ],
                     [ me.bindSSLCerts ]
@@ -865,6 +864,7 @@ function SSLManager(config) {
             resp;
 
         if (cert_key.body && chain.body && cert.body) {
+            log("config.withExtIp - in first if -> ");
             if (config.withExtIp) {
                 log("config.withExtIp - in if -> ");
                 resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
