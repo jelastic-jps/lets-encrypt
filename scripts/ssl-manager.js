@@ -473,8 +473,6 @@ function SSLManager(config) {
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = !!(withExtIp == "true");
 
-        log("initAddOnExtIp ->" + !!withExtIp);
-        log("initAddOnExtIp ->" + !!config.withExtIp);
         return { result: 0 };
     };
 
@@ -644,7 +642,7 @@ function SSLManager(config) {
                 "baseDir='%(baseDir)'",
                 "test='%(test)'",
                 "primarydomain='%(primarydomain)'",
-                "withExtIp='%(withExtIp)'"
+                "withExtIp=%(withExtIp)"
             ].join("\n"), {
                 domain: customDomains || envDomain,
                 email : config.email || "",
