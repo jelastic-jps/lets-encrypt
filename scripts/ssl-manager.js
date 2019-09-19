@@ -851,7 +851,8 @@ function SSLManager(config) {
         log("resp - GetSSLCerts -> " + resp);
         if (resp.result != 0) return resp;
 
-        resp = jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[0].id);
+        log("resp - withextDomain -> ");
+        resp = jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[0].id, null, "sni-letest.jele.io");
         log("resp - BindSSLCert -> " + resp);
 
         return resp;
