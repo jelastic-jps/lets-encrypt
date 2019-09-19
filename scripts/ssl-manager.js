@@ -845,14 +845,15 @@ function SSLManager(config) {
     };
 
     me.bindSSLCerts = function bindSSLCerts() {
-        var resp;
+        var SLB = "SLB",
+            resp;
 
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
         log("resp - GetSSLCerts -> " + resp);
         if (resp.result != 0) return resp;
 
         log("resp - withextDomain -> ");
-        resp = jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[0].id, null, "sni-letest.jele.io");
+        resp = jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[resp.responses.length - 1].id, SLB, config.customDomains);
         log("resp - BindSSLCert -> " + resp);
 
         return resp;
