@@ -12,7 +12,7 @@ var baseDir          = getParam("baseDir", "/"),
     undeployHookType = getParam("undeployHookType", ""),
     withExtIp        = getParam("withExtIp", ""),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
-    test             = getParam("test", "");
+    test             = getParam("test", "true");
 
 function run() {
     var SSLManager = use("scripts/ssl-manager.js", {
