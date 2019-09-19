@@ -531,8 +531,6 @@ function SSLManager(config) {
             VALIDATE_IP = "validateExtIP",
             VALIDATE_DNS = "validateDNSSettings '%(domain)'";
 
-        //TODO rewrite
-
         if (config.withExtIp) VALIDATE_IP = VALIDATE_DNS = '';
 
         var resp = nodeManager.cmd([
@@ -779,8 +777,6 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            log("config.withExtIp ->" + config.withExtIp);
-            log("!!config.withExtIp ->" + !!config.withExtIp);
             if (config.withExtIp) {
                 return me.exec(me.bindSSL);
             } else {
@@ -804,11 +800,7 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            if (config.withExtIp) {
-                return me.exec(me.removeSSL);
-            } else {
-                return me.exec(me.removeSSLCert);
-            }
+            return config.withExtIp ? me.exec(me.removeSSL) : me.exec(me.removeSSLCert);
         }
 
         return { result : 0 };
@@ -854,14 +846,9 @@ function SSLManager(config) {
             resp;
 
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
-        log("resp - GetSSLCerts -> " + resp);
         if (resp.result != 0) return resp;
 
-        log("resp - withextDomain -> ");
-        resp = jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[resp.responses.length - 1].id, SLB, config.customDomains);
-        log("resp - BindSSLCert -> " + resp);
-
-        return resp;
+        return jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[resp.responses.length - 1].id, SLB, config.customDomains);
     };
 
     me.bindSSL = function bindSSL() {
@@ -870,17 +857,10 @@ function SSLManager(config) {
             chain    = nodeManager.readFile("/tmp/fullchain.url"),
             resp;
 
-        log("cert_key ->" + cert_key);
-        log("cert ->" + cert);
-        log("chain ->" + chain);
-
         if (cert_key.body && chain.body && cert.body) {
-            log("config.withExtIp - in first if -> ");
             if (config.withExtIp) {
-                log("config.withExtIp - in if -> ");
                 resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
             } else {
-                log("config.withExtIp - in else -> ");
                 resp = jelastic.env.binder.AddSSLCert(config.envName, session, cert_key.body, cert.body, chain.body);
             }
         } else {
@@ -903,25 +883,14 @@ function SSLManager(config) {
             sslCerts;
 
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
-        log("resp - GetSSLCerts -> " + resp);
         if (resp.result != 0) return resp;
 
         sslCerts = resp.responses;
-
-        log("resp - RemoveExtDomain -> ");
         resp = jelastic.env.binder.RemoveExtDomain(config.envName, session, config.customDomains);
-        log("resp - RemoveExtDomain -> " + resp);
+        if (resp.result != 0) return resp;
 
-        log("resp - withextDomain 2 -> ");
-        resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
-        log("resp - withextDomain2 -> " + resp);
-
-        return resp
+        return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
     }
-
-    me.UnbindSSLCert = function UnbindSSLCert() {
-        return jelastic.env.binder.UnbindSSLCert(config.envName, session);
-    };
 
     me.sendResp = function sendResp(resp, isUpdate) {
         var action = isUpdate ? "updated" : "installed",
