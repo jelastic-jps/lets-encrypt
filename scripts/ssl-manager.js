@@ -218,6 +218,7 @@ function SSLManager(config) {
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
                 scriptPath : autoUpdateScript
             }],
+            [ me.initAddOnExtIp, config.withExtIp ],
 
             me.undeploy,
 
@@ -803,7 +804,11 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            return me.exec(me.removeSSL);
+            if (config.withExtIp) {
+                return me.exec(me.removeSSL);
+            } else {
+                return me.exec(me.UnbindSSLCert);
+            }
         }
 
         return { result : 0 };
@@ -891,6 +896,10 @@ function SSLManager(config) {
 
     me.removeSSL = function removeSSL() {
         return jelastic.env.binder.RemoveSSL(config.envName, session);
+    };
+
+    me.UnbindSSLCert = function UnbindSSLCert() {
+        return jelastic.env.binder.UnbindSSLCert(config.envName, session);
     };
 
     me.sendResp = function sendResp(resp, isUpdate) {
