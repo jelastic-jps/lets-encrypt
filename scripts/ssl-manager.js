@@ -905,6 +905,10 @@ function SSLManager(config) {
         log("resp - GetSSLCerts -> " + resp);
         if (resp.result != 0) return resp;
 
+        log("resp - RemoveExtDomain -> ");
+        resp = jelastic.env.binder.RemoveExtDomain(config.envName, session, config.customDomains);
+        log("resp - RemoveExtDomain -> " + resp);
+
         log("resp - withextDomain -> ");
         resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, resp.responses[resp.responses.length - 1].id);
         log("resp - withextDomain -> " + resp);
