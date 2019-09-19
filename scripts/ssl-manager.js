@@ -906,9 +906,9 @@ function SSLManager(config) {
         if (resp.result != 0) return resp;
 
         log("resp - withextDomain -> ");
-        resp = jelastic.env.binder.removeSSLCerts(config.envName, session, resp.responses[resp.responses.length - 1].id);
+        resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, resp.responses[resp.responses.length - 1].id);
         log("resp - withextDomain -> " + resp);
-        
+
         return resp
     }
 
