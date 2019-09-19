@@ -807,7 +807,7 @@ function SSLManager(config) {
             if (config.withExtIp) {
                 return me.exec(me.removeSSL);
             } else {
-                return me.exec(me.UnbindSSLCert);
+                return me.exec(me.removeSSLCert);
             }
         }
 
@@ -897,6 +897,20 @@ function SSLManager(config) {
     me.removeSSL = function removeSSL() {
         return jelastic.env.binder.RemoveSSL(config.envName, session);
     };
+
+    me.removeSSLCert = function removeSSLCert() {
+        var resp;
+
+        resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
+        log("resp - GetSSLCerts -> " + resp);
+        if (resp.result != 0) return resp;
+
+        log("resp - withextDomain -> ");
+        resp = jelastic.env.binder.removeSSLCerts(config.envName, session, resp.responses[resp.responses.length - 1].id);
+        log("resp - withextDomain -> " + resp);
+        
+        return resp
+    }
 
     me.UnbindSSLCert = function UnbindSSLCert() {
         return jelastic.env.binder.UnbindSSLCert(config.envName, session);
