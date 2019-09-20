@@ -518,6 +518,7 @@ function SSLManager(config) {
         var BUSY_RESULT = 2330,
             resp;
 
+        log("bindExtDomains - isBusy onfig.envName -> " + onfig.envName);
         resp = jelastic.environment.binder.CheckExtDomain(config.envName, session, domain);
         log("resp CheckExtDomain ->" + resp);
         if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
