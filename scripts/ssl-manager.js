@@ -511,14 +511,14 @@ function SSLManager(config) {
     };
 
     me.bindExtDomain = function(domain) {
-        return jelastic.env.binder.BindExtDomain(config.envDomain, session, domain);
+        return jelastic.env.binder.BindExtDomain(config.envName, session, domain);
     };
 
     me.isBusyExtDomain = function (domain) {
         var BUSY_RESULT = 2330,
             resp;
 
-        resp = jelastic.environment.binder.CheckExtDomain(config.envDomain, session, domain);
+        resp = jelastic.environment.binder.CheckExtDomain(config.envName, session, domain);
         log("resp CheckExtDomain ->" + resp);
         if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
 
