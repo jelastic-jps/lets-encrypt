@@ -479,11 +479,11 @@ function SSLManager(config) {
     };
 
     me.bindExtDomains = function bindExtDomains() {
-        var resp,
+        var customDomains = config.customDomains,
             busyDomains = [],
-            customDomains = config.customDomains;
-
-        log("bindExtDomains - customDomains -> " + customDomains);
+            freeDomains = [],
+            domain,
+            resp;
 
         if (customDomains) {
             customDomains = me.parseDomains(customDomains);
@@ -493,25 +493,24 @@ function SSLManager(config) {
         log("bindExtDomains - customDomains -> " + customDomains.length);
 
         for (var i = 0, n = customDomains.length; i < n; i++) {
-            log("bindExtDomains - customDomains[i] -> " + customDomains[i]);
-            if (me.isBusyExtDomain(customDomains[i])) {
-                log("bindExtDomains - isBusyExtDomain -> ");
-                busyDomains.push(customDomains[i]);
-            } else {
-                log("bindExtDomains - bindExtDomain -> ");
-                resp = me.bindExtDomain(customDomains[i]);
-                if (resp.result != 0) return resp;
-            }
+            domain = customDomains[i];
+            log("bindExtDomains - customDomains[i] -> " + domain);
+            me.isBusyExtDomain(domain) ? busyDomains.push(domain) : freeDomains.push(domain);
         }
 
         nodeManager.setBusyDomains(busyDomains);
-        log("bindExtDomains - getBusyDomains -> " + nodeManager.getBusyDomains());
+        nodeManager.setAvailableDomains(freeDomains);
+
+        log("bindExtDomains - getBusyDomains -> " + nodeManager.getAvailableDomains());
+        if (nodeManager.getAvailableDomains().length) {
+            return jelastic.env.binder.BindExtDomains({
+                envName: config.envName,
+                session: session,
+                extDomains: nodeManager.getAvailableDomains().join(";")
+            });
+        }
 
         return { result: 0 };
-    };
-
-    me.bindExtDomain = function(domain) {
-        return jelastic.env.binder.BindExtDomain(config.envName, session, domain);
     };
 
     me.isBusyExtDomain = function (domain) {
@@ -519,7 +518,11 @@ function SSLManager(config) {
             resp;
 
         log("bindExtDomains - isBusy onfig.envName -> " + config.envName);
-        resp = jelastic.environment.binder.CheckExtDomain(config.envName, session, domain);
+        resp = jelastic.environment.binder.CheckExtDomain({
+            appid: config.envName,
+            session: session,
+            extdomain: domain
+        });
         log("resp CheckExtDomain ->" + resp);
         if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
 
@@ -931,8 +934,8 @@ function SSLManager(config) {
         if (resp.result != 0) return resp;
 
         sslCerts = resp.responses;
-        resp = jelastic.env.binder.RemoveExtDomain(config.envName, session, config.customDomains);
-        if (resp.result != 0) return resp;
+        // resp = jelastic.env.binder.RemoveExtDomain(config.envName, session, config.customDomains);
+        // if (resp.result != 0) return resp;
 
         return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
     }
@@ -1139,6 +1142,14 @@ function SSLManager(config) {
 
         me.setEnvDomain = function (envDomain) {
             config.envDomain = envDomain;
+        };
+
+        me.setAvailableDomains = function(domains) {
+            config.availableDomains = domains;
+        };
+
+        me.getAvailableDomains = function(domains) {
+            return config.availableDomains || [];
         };
 
         me.setBusyDomains = function(domains) {
