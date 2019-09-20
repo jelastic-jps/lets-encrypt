@@ -490,17 +490,22 @@ function SSLManager(config) {
         }
 
         log("bindExtDomains - customDomains -> " + customDomains);
+        log("bindExtDomains - customDomains -> " + customDomains.length);
 
         for (var i = 0, n = customDomains.length; i < n; i++) {
+            log("bindExtDomains - customDomains[i] -> " + customDomains[i]);
             if (me.isBusyExtDomain(customDomains[i])) {
+                log("bindExtDomains - isBusyExtDomain -> ");
                 busyDomains.push(customDomains[i]);
             } else {
+                log("bindExtDomains - bindExtDomain -> ");
                 resp = me.bindExtDomain(customDomains[i]);
                 if (resp.result != 0) return resp;
             }
         }
 
         nodeManager.setBusyDomains(busyDomains);
+        log("bindExtDomains - getBusyDomains -> " + nodeManager.getBusyDomains());
 
         return { result: 0 };
     };
