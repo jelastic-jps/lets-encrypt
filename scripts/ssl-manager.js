@@ -478,6 +478,47 @@ function SSLManager(config) {
         return { result: 0 };
     };
 
+    me.bindExtDomains = function bindExtDomains() {
+        var resp,
+            busyDomains = [],
+            customDomains = config.customDomains;
+
+        log("bindExtDomains - customDomains -> " + customDomains);
+
+        if (customDomains) {
+            customDomains = me.parseDomains(customDomains);
+        }
+
+        log("bindExtDomains - customDomains -> " + customDomains);
+
+        for (var i = 0, n = customDomains.length; i < n; i++) {
+            if (me.isBusyExtDomain(customDomains[i])) {
+                busyDomains.push(customDomains[i]);
+            } else {
+                resp = me.bindExtDomain(customDomains[i]);
+                if (resp.result != 0) return resp;
+            }
+        }
+
+        nodeManager.setBusyDomains(busyDomains);
+
+        return { result: 0 };
+    };
+
+    me.bindExtDomain = function(domain) {
+        return jelastic.env.binder.BindExtDomain(config.envDomain, session, domain);
+    };
+
+    me.isBusyExtDomain = function (domain) {
+        var BUSY_RESULT = 2330,
+            resp;
+
+        resp = jelastic.environment.binder.CheckExtDomain(config.envDomain, session, domain);
+        if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
+
+        return resp.result == BUSY_RESULT ? true : false;
+    };
+
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
@@ -505,6 +546,8 @@ function SSLManager(config) {
                     resp = me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
                     if (resp.result != 0) return resp;
                 }
+            } else {
+                me.exec([ me.bindExtDomains ]);
             }
 
             if (id || node.ismaster) {
@@ -776,15 +819,17 @@ function SSLManager(config) {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
 
-        if (nodeManager.checkCustomSSL()) {
-            if (config.withExtIp) {
-                return me.exec(me.bindSSL);
-            } else {
-                return me.exec([
-                    [ me.bindSSL ],
-                    [ me.bindSSLCerts ]
-                ]);
-            }
+        if (nodeManager.checkCustomSSL() || !config.withExtIp) {
+            return me.exec(me.bindSSL);
+
+            // if (config.withExtIp) {
+            //     return me.exec(me.bindSSL);
+            // } else {
+            //     return me.exec([
+            //         [ me.bindSSL ],
+            //         [ me.bindSSLCerts ]
+            //     ]);
+            // }
         }
 
         return { result : 0 };
@@ -833,14 +878,6 @@ function SSLManager(config) {
         return resp.response || resp
     };
 
-    me.readCerts = function readCerts() {
-        return {
-            key: nodeManager.readFile("/tmp/privkey.url"),
-            cert: nodeManager.readFile("/tmp/cert.url"),
-            chain: nodeManager.readFile("/tmp/fullchain.url")
-        }
-    };
-
     me.bindSSLCerts = function bindSSLCerts() {
         var SLB = "SLB",
             resp;
@@ -862,6 +899,7 @@ function SSLManager(config) {
                 resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
             } else {
                 resp = jelastic.env.binder.AddSSLCert(config.envName, session, cert_key.body, cert.body, chain.body);
+                me.exec(me.bindSSLCerts);
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
@@ -1094,6 +1132,14 @@ function SSLManager(config) {
 
         me.setEnvDomain = function (envDomain) {
             config.envDomain = envDomain;
+        };
+
+        me.setBusyDomains = function(domains) {
+            config.busyDomains = domains;
+        };
+
+        me.getBusyDomains = function() {
+            return config.busyDomains || [];
         };
 
         me.setBackupCSScript = function () {
