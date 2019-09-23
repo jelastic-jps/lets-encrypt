@@ -935,11 +935,11 @@ function SSLManager(config) {
         if (cert_key.body && chain.body && cert.body) {
             if (config.withExtIp) {
                 resp = jelastic.env.binder.BindSSL({
-                    envName: config.envName,
-                    session: session,
-                    cert_key: cert_key.body,
-                    cert: cert.body,
-                    intermediate: chain.body
+                    "envName": config.envName,
+                    "session": session,
+                    "cert_key": cert_key.body,
+                    "cert": cert.body,
+                    "intermediate": chain.body
                 });
             } else {
                 resp = jelastic.env.binder.AddSSLCert({
