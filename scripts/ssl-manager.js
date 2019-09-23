@@ -518,6 +518,7 @@ function SSLManager(config) {
             domain = customDomains[i];
 
             log("bindedDomains - bindedDomains -> " + bindedDomains);
+            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0]);
             log("bindedDomains - domain -> " + domain);
             log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf(domain));
             log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf("sni-letest3"));
