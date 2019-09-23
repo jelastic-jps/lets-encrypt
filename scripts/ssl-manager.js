@@ -493,7 +493,7 @@ function SSLManager(config) {
             domains.push(domain.domain);
         }
 
-        config.bindedDomains = domains;
+        config.bindedDomains = domains.join(",");
 
         return { result: 0 };
     };
@@ -521,7 +521,7 @@ function SSLManager(config) {
             log("bindedDomains - bindedDomains1 -> " + bindedDomains[0].indexOf("sni-letest4.jele.io"));
             log("bindedDomains - bindedDomains2 -> " + bindedDomains[0].indexOf("sni-letest3.jele.io"));
             log("bindedDomains - bindedDomains -> " + bindedDomains[1].indexOf("sni-letest3.jele.io"));
-            log("bindedDomains - bindedDomains2 -> " + bindedDomains.indexOf("sni-letest3.jele.io"));
+            log("bindedDomains - bindedDomains2 via , -> " + bindedDomains.indexOf("sni-letest3.jele.io"));
             log("bindedDomains - domain -> " + domain);
             log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf(domain));
             log("bindedDomains - bindedDomains.indexOf(domain) - sni-letest -> " + bindedDomains.indexOf("sni-letest"));
