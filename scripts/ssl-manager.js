@@ -519,9 +519,10 @@ function SSLManager(config) {
 
             log("bindedDomains - bindedDomains -> " + bindedDomains);
             log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0]);
+            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0].indexOf("sni-letest"));
             log("bindedDomains - domain -> " + domain);
             log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf(domain));
-            log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf("sni-letest3"));
+            log("bindedDomains - bindedDomains.indexOf(domain) - sni-letest -> " + bindedDomains.indexOf("sni-letest"));
             if (bindedDomains.indexOf(domain) != -1) {
                 log("bindedDomains - in indexOf -> " + domain);
                 readyToGenerate.push(domain);
