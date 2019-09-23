@@ -518,12 +518,11 @@ function SSLManager(config) {
             domain = customDomains[i];
 
             log("bindedDomains - bindedDomains -> " + bindedDomains);
-            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0]);
-            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0].indexOf("sni-letest"));
-            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0].indexOf("sni-letest3"));
-            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0].indexOf("sni-letest3."));
-            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0].indexOf("sni-letest3.jele"));
-            log("bindedDomains - bindedDomains[0] -> " + bindedDomains[0].indexOf("sni-letest3.jele.io"));
+            log("bindedDomains - bindedDomains1 -> " + bindedDomains.indexOf("sni-letest"));
+            log("bindedDomains - bindedDomains2 -> " + bindedDomains.indexOf("sni-letest3"));
+            log("bindedDomains - bindedDomains3 -> " + bindedDomains.indexOf("sni-letest3."));
+            log("bindedDomains - bindedDomains -> " + bindedDomains.indexOf("sni-letest3.jele"));
+            log("bindedDomains - bindedDomains -> " + bindedDomains.indexOf("sni-letest3.jele.io"));
             log("bindedDomains - domain -> " + domain);
             log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf(domain));
             log("bindedDomains - bindedDomains.indexOf(domain) - sni-letest -> " + bindedDomains.indexOf("sni-letest"));
