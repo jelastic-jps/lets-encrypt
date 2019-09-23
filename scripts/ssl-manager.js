@@ -917,6 +917,8 @@ function SSLManager(config) {
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
         if (resp.result != 0) return resp;
 
+        log("in bindSSLCerts" + resp);
+        log("in bindSSLCerts resp.responses[resp.responses.length - 1].id" + resp.responses[resp.responses.length - 1].id);
         return jelastic.env.binder.BindSSLCert({
             envName:config.envName,
             session: session,
