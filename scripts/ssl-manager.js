@@ -529,8 +529,8 @@ function SSLManager(config) {
 
         log("setSkippedDomains - busyDomains -> " + busyDomains);
         log("setCustomDomains - readyToGenerate -> " + readyToGenerate);
-        me.setSkippedDomains(busyDomains);
-        me.setCustomDomains(readyToGenerate);
+        me.setSkippedDomains(busyDomains.join(" "));
+        me.setCustomDomains(readyToGenerate.join(" "));
 
         log("bindExtDomains - getCustomDomains -> " + me.getCustomDomains());
         if (freeDomains.length) {
