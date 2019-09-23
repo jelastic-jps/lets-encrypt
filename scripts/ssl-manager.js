@@ -511,29 +511,14 @@ function SSLManager(config) {
             customDomains = me.parseDomains(customDomains);
         }
 
-        log("bindExtDomains - customDomains.length -> " + customDomains.length);
-
         for (var i = 0, n = customDomains.length; i < n; i++) {
             domain = customDomains[i];
 
-            log("bindedDomains - bindedDomains -> " + bindedDomains);
-            log("bindedDomains - bindedDomains1 -> " + bindedDomains[0]);
-            log("bindedDomains - bindedDomains1 -> " + bindedDomains[0].indexOf("sni-letest4.jele.io"));
-            log("bindedDomains - bindedDomains2 -> " + bindedDomains[0].indexOf("sni-letest3.jele.io"));
-            log("bindedDomains - bindedDomains -> " + bindedDomains[1].indexOf("sni-letest3.jele.io"));
-            log("bindedDomains - bindedDomains2 via , -> " + bindedDomains.indexOf("sni-letest3.jele.io"));
-            log("bindedDomains - bindedDomains2 via , -> " + bindedDomains.indexOf(domain));
-            log("bindedDomains - domain -> " + domain);
-            log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf(domain));
-            log("bindedDomains - bindedDomains.indexOf(domain) - sni-letest -> " + bindedDomains.indexOf("sni-letest"));
             if (bindedDomains.indexOf(domain) != -1) {
-                log("bindedDomains - in indexOf -> " + domain);
                 readyToGenerate.push(domain);
                 continue;
             }
 
-            log("bindExtDomains - customDomains[i] -> " + domain);
-            log("bindedDomains - me.isBusyExtDomain(domain) -> " + me.isBusyExtDomain(domain));
             if (me.isBusyExtDomain(domain)) {
                 busyDomains.push(domain)
             } else {
@@ -541,9 +526,6 @@ function SSLManager(config) {
                 freeDomains.push(domain);
             }
         }
-
-        // nodeManager.setBusyDomains(busyDomains);
-        // nodeManager.setAvailableDomains(freeDomains);
 
         log("setSkippedDomains - busyDomains -> " + busyDomains);
         log("setCustomDomains - readyToGenerate -> " + readyToGenerate);
