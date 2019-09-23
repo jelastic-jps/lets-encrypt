@@ -728,7 +728,7 @@ function SSLManager(config) {
                 "baseDir='%(baseDir)'",
                 "test='%(test)'",
                 "primarydomain='%(primarydomain)'",
-                "withExtIp=%(withExtIp)",
+                "withExtIp='%(withExtIp)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
@@ -921,7 +921,13 @@ function SSLManager(config) {
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
         if (resp.result != 0) return resp;
 
-        return jelastic.env.binder.BindSSLCert(config.envName, session, resp.responses[resp.responses.length - 1].id, SLB, config.customDomains);
+        return jelastic.env.binder.BindSSLCert({
+            envName:config.envName,
+            session: session,
+            certId: resp.responses[resp.responses.length - 1].id,
+            entryPoint: SLB,
+            extDomains: config.customDomains
+        });
     };
 
     me.bindSSL = function bindSSL() {
@@ -932,9 +938,21 @@ function SSLManager(config) {
 
         if (cert_key.body && chain.body && cert.body) {
             if (config.withExtIp) {
-                resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
+                resp = jelastic.env.binder.BindSSL({
+                    envName: config.envName
+                    session: session,
+                    cert_key: cert_key.body,
+                    cert: cert.body,
+                    intermediate: chain.body
+                });
             } else {
-                resp = jelastic.env.binder.AddSSLCert(config.envName, session, cert_key.body, cert.body, chain.body);
+                resp = jelastic.env.binder.AddSSLCert({
+                    envName: config.envName,
+                    session: session,
+                    key: cert_key.body,
+                    cert: cert.body,
+                    interm: chain.body});
+                log("after AddSSLCert");
                 me.exec(me.bindSSLCerts);
             }
         } else {
