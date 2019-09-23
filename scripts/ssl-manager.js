@@ -532,8 +532,8 @@ function SSLManager(config) {
 
         // nodeManager.setBusyDomains(busyDomains);
         // nodeManager.setAvailableDomains(freeDomains);
-        nodeManager.setSkippedDomains(busyDomains.join(" -d "));
-        nodeManager.setCustomDomains(readyToGenerate.join(" -d "));
+        me.setSkippedDomains(busyDomains.join(" -d "));
+        me.setCustomDomains(readyToGenerate.join(" -d "));
 
         log("bindExtDomains - getBusyDomains -> " + nodeManager.getAvailableDomains());
         if (nodeManager.getAvailableDomains().length) {
