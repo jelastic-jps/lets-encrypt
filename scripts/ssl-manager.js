@@ -535,8 +535,8 @@ function SSLManager(config) {
         me.setSkippedDomains(busyDomains.join(" -d "));
         me.setCustomDomains(readyToGenerate.join(" -d "));
 
-        log("bindExtDomains - getBusyDomains -> " + nodeManager.getAvailableDomains());
-        if (nodeManager.getAvailableDomains().length) {
+        log("bindExtDomains - getCustomDomains -> " + me.getCustomDomains());
+        if (freeDomains.length) {
             return jelastic.env.binder.BindExtDomains({
                 envName: config.envName,
                 session: session,
@@ -732,7 +732,8 @@ function SSLManager(config) {
                 "baseDir='%(baseDir)'",
                 "test='%(test)'",
                 "primarydomain='%(primarydomain)'",
-                "withExtIp=%(withExtIp)"
+                "withExtIp=%(withExtIp)",
+                "skipped_domains=%(skipped)"
             ].join("\n"), {
                 domain: customDomains || envDomain,
                 email : config.email || "",
@@ -742,7 +743,8 @@ function SSLManager(config) {
                 test : config.test || !customDomains,
                 primarydomain: primaryDomain,
                 letsEncryptEnv : config.letsEncryptEnv || "",
-                withExtIp : config.withExtIp || ""
+                withExtIp : config.withExtIp || "",
+                skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
         });
@@ -1172,21 +1174,21 @@ function SSLManager(config) {
             config.envDomain = envDomain;
         };
 
-        me.setAvailableDomains = function(domains) {
-            config.availableDomains = domains;
-        };
+        // me.setAvailableDomains = function(domains) {
+        //     config.availableDomains = domains;
+        // };
+        //
+        // me.getAvailableDomains = function(domains) {
+        //     return config.availableDomains || [];
+        // };
 
-        me.getAvailableDomains = function(domains) {
-            return config.availableDomains || [];
-        };
-
-        me.setBusyDomains = function(domains) {
-            config.busyDomains = domains;
-        };
-
-        me.getBusyDomains = function() {
-            return config.busyDomains || [];
-        };
+        // me.setBusyDomains = function(domains) {
+        //     config.busyDomains = domains;
+        // };
+        //
+        // me.getBusyDomains = function() {
+        //     return config.busyDomains || [];
+        // };
 
         me.setBackupCSScript = function () {
             oBackupScript = getScript(config.scriptName);
