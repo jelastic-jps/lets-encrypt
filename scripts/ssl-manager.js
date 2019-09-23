@@ -513,13 +513,13 @@ function SSLManager(config) {
 
         log("bindExtDomains - customDomains.length -> " + customDomains.length);
 
-        log("bindedDomains - bindedDomains -> " + bindedDomains);
         for (var i = 0, n = customDomains.length; i < n; i++) {
             domain = customDomains[i];
 
             log("bindedDomains - bindedDomains -> " + bindedDomains);
             log("bindedDomains - bindedDomains1 -> " + bindedDomains[0]);
             log("bindedDomains - bindedDomains1 -> " + bindedDomains[0].indexOf("sni-letest4.jele.io"));
+            log("bindedDomains - bindedDomains2 -> " + bindedDomains[0].indexOf("sni-letest3.jele.io"));
             log("bindedDomains - bindedDomains -> " + bindedDomains[1].indexOf("sni-letest3.jele.io"));
             log("bindedDomains - bindedDomains2 -> " + bindedDomains.indexOf("sni-letest3.jele.io"));
             log("bindedDomains - domain -> " + domain);
