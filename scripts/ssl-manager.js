@@ -529,7 +529,7 @@ function SSLManager(config) {
 
         me.setSkippedDomains(busyDomains.join(" "));
         me.setCustomDomains(readyToGenerate.join(" "));
-        
+
         if (freeDomains.length) {
             return jelastic.env.binder.BindExtDomains({
                 envName: config.envName,
@@ -935,7 +935,7 @@ function SSLManager(config) {
         if (cert_key.body && chain.body && cert.body) {
             if (config.withExtIp) {
                 resp = jelastic.env.binder.BindSSL({
-                    envName: config.envName
+                    envName: config.envName,
                     session: session,
                     cert_key: cert_key.body,
                     cert: cert.body,
@@ -947,7 +947,8 @@ function SSLManager(config) {
                     session: session,
                     key: cert_key.body,
                     cert: cert.body,
-                    interm: chain.body});
+                    interm: chain.body
+                });
                 log("after AddSSLCert");
                 me.exec(me.bindSSLCerts);
             }
