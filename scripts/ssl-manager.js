@@ -516,12 +516,15 @@ function SSLManager(config) {
         for (var i = 0, n = customDomains.length; i < n; i++) {
             domain = customDomains[i];
 
+            log("bindedDomains - bindedDomains -> " + bindedDomains);
             if (bindedDomains.indexOf(domain) != -1) {
+                log("bindedDomains - in indexOf -> " + domain);
                 readyToGenerate.push(domain);
                 continue;
             }
 
             log("bindExtDomains - customDomains[i] -> " + domain);
+            log("bindedDomains - me.isBusyExtDomain(domain) -> " + me.isBusyExtDomain(domain));
             if (me.isBusyExtDomain(domain)) {
                 busyDomains.push(domain)
             } else {
@@ -532,6 +535,9 @@ function SSLManager(config) {
 
         // nodeManager.setBusyDomains(busyDomains);
         // nodeManager.setAvailableDomains(freeDomains);
+
+        log("setSkippedDomains - busyDomains -> " + busyDomains);
+        log("setCustomDomains - readyToGenerate -> " + readyToGenerate);
         me.setSkippedDomains(busyDomains.join(" -d "));
         me.setCustomDomains(readyToGenerate.join(" -d "));
 
@@ -551,7 +557,6 @@ function SSLManager(config) {
         var BUSY_RESULT = 2330,
             resp;
 
-        log("bindExtDomains - isBusy onfig.envName -> " + config.envName);
         resp = jelastic.environment.binder.CheckExtDomain({
             appid: config.envName,
             session: session,
@@ -733,7 +738,7 @@ function SSLManager(config) {
                 "test='%(test)'",
                 "primarydomain='%(primarydomain)'",
                 "withExtIp=%(withExtIp)",
-                "skipped_domains=%(skipped)"
+                "skipped_domains='%(skipped)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
                 email : config.email || "",
