@@ -516,6 +516,11 @@ function SSLManager(config) {
         for (var i = 0, n = customDomains.length; i < n; i++) {
             domain = customDomains[i];
 
+            if (bindedDomains.indexOf(domain) != -1) {
+                readyToGenerate.push(domain);
+                continue;
+            }
+
             log("bindExtDomains - customDomains[i] -> " + domain);
             if (me.isBusyExtDomain(domain)) {
                 busyDomains.push(domain)
@@ -523,27 +528,20 @@ function SSLManager(config) {
                 readyToGenerate.push(domain);
                 freeDomains.push(domain);
             }
-
-            if (bindedDomains.indexOf(domain) != -1) {
-                readyToGenerate.push(domain);
-            }
         }
 
-        nodeManager.setBusyDomains(busyDomains);
-        nodeManager.setAvailableDomains(freeDomains);
+        // nodeManager.setBusyDomains(busyDomains);
+        // nodeManager.setAvailableDomains(freeDomains);
+        nodeManager.setSkippedDomains(busyDomains.join(" -d "));
+        nodeManager.setCustomDomains(readyToGenerate.join(" -d "));
 
         log("bindExtDomains - getBusyDomains -> " + nodeManager.getAvailableDomains());
         if (nodeManager.getAvailableDomains().length) {
             return jelastic.env.binder.BindExtDomains({
                 envName: config.envName,
                 session: session,
-                extDomains: nodeManager.getAvailableDomains().join(";")
+                extDomains: freeDomains.join(";")
             });
-        }
-
-        if (readyToGenerate.length) {
-            nodeManager.setAvailableDomains(readyToGenerate);
-            log("bindExtDomains - readyToGenerate -> " + nodeManager.getAvailableDomains());
         }
 
         return { result: 0 };
