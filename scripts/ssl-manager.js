@@ -513,10 +513,12 @@ function SSLManager(config) {
 
         log("bindExtDomains - customDomains.length -> " + customDomains.length);
 
+        log("bindedDomains - bindedDomains -> " + bindedDomains);
         for (var i = 0, n = customDomains.length; i < n; i++) {
             domain = customDomains[i];
 
-            log("bindedDomains - bindedDomains -> " + bindedDomains);
+            log("bindedDomains - domain -> " + domain);
+            log("bindedDomains - bindedDomains.indexOf(domain) -> " + bindedDomains.indexOf(domain));
             if (bindedDomains.indexOf(domain) != -1) {
                 log("bindedDomains - in indexOf -> " + domain);
                 readyToGenerate.push(domain);
