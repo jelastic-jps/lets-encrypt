@@ -617,7 +617,7 @@ function SSLManager(config) {
             VALIDATE_IP = "validateExtIP",
             VALIDATE_DNS = "validateDNSSettings '%(domain)'";
 
-        if (!config.withExtIp) VALIDATE_IP = VALIDATE_DNS = '"echo 1"';
+        if (!config.withExtIp) VALIDATE_IP = VALIDATE_DNS = 'echo 1';
 
         var resp = nodeManager.cmd([
             "mkdir -p $(dirname %(path))",
