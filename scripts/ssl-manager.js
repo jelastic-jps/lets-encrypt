@@ -527,12 +527,9 @@ function SSLManager(config) {
             }
         }
 
-        log("setSkippedDomains - busyDomains -> " + busyDomains);
-        log("setCustomDomains - readyToGenerate -> " + readyToGenerate);
         me.setSkippedDomains(busyDomains.join(" "));
         me.setCustomDomains(readyToGenerate.join(" "));
-
-        log("bindExtDomains - getCustomDomains -> " + me.getCustomDomains());
+        
         if (freeDomains.length) {
             return jelastic.env.binder.BindExtDomains({
                 envName: config.envName,
@@ -553,9 +550,8 @@ function SSLManager(config) {
             session: session,
             extdomain: domain
         });
-        log("resp CheckExtDomain ->" + resp);
-        if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
 
+        if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
         return resp.result == BUSY_RESULT ? true : false;
     };
 
