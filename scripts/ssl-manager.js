@@ -478,8 +478,30 @@ function SSLManager(config) {
         return { result: 0 };
     };
 
+    me.initBindedDomains = function() {
+        var domains = [],
+            domain,
+            resp;
+
+        if (config.bindedDomains) return config.bindedDomains;
+
+        resp = jelastic.env.binder.GetExtDomains(config.envName, session);
+        if (resp.result != 0) return resp;
+
+        for (var i = 0, n = resp.extDomains.length; i < n; i++) {
+            domain = resp.extDomains[i];
+            domains.push(domain.domain);
+        }
+
+        config.bindedDomains = domains;
+
+        return { result: 0 };
+    };
+
     me.bindExtDomains = function bindExtDomains() {
         var customDomains = config.customDomains,
+            bindedDomains = config.bindedDomains,
+            readyToGenerate = [],
             busyDomains = [],
             freeDomains = [],
             domain,
@@ -489,13 +511,22 @@ function SSLManager(config) {
             customDomains = me.parseDomains(customDomains);
         }
 
-        log("bindExtDomains - customDomains -> " + customDomains);
-        log("bindExtDomains - customDomains -> " + customDomains.length);
+        log("bindExtDomains - customDomains.length -> " + customDomains.length);
 
         for (var i = 0, n = customDomains.length; i < n; i++) {
             domain = customDomains[i];
+
             log("bindExtDomains - customDomains[i] -> " + domain);
-            me.isBusyExtDomain(domain) ? busyDomains.push(domain) : freeDomains.push(domain);
+            if (me.isBusyExtDomain(domain)) {
+                busyDomains.push(domain)
+            } else {
+                readyToGenerate.push(domain);
+                freeDomains.push(domain);
+            }
+
+            if (bindedDomains.indexOf(domain) != -1) {
+                readyToGenerate.push(domain);
+            }
         }
 
         nodeManager.setBusyDomains(busyDomains);
@@ -508,6 +539,11 @@ function SSLManager(config) {
                 session: session,
                 extDomains: nodeManager.getAvailableDomains().join(";")
             });
+        }
+
+        if (readyToGenerate.length) {
+            nodeManager.setAvailableDomains(readyToGenerate);
+            log("bindExtDomains - readyToGenerate -> " + nodeManager.getAvailableDomains());
         }
 
         return { result: 0 };
@@ -557,7 +593,10 @@ function SSLManager(config) {
                     if (resp.result != 0) return resp;
                 }
             } else {
-                me.exec([ me.bindExtDomains ]);
+                me.exec([
+                    [ me.initBindedDomains ],
+                    [ me.bindExtDomains ]
+                ]);
             }
 
             if (id || node.ismaster) {
@@ -831,15 +870,6 @@ function SSLManager(config) {
 
         if (nodeManager.checkCustomSSL() || !config.withExtIp) {
             return me.exec(me.bindSSL);
-
-            // if (config.withExtIp) {
-            //     return me.exec(me.bindSSL);
-            // } else {
-            //     return me.exec([
-            //         [ me.bindSSL ],
-            //         [ me.bindSSLCerts ]
-            //     ]);
-            // }
         }
 
         return { result : 0 };
