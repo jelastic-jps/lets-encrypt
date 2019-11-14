@@ -1,3 +1,5 @@
+import com.hivext.api.environment.response.EnvironmentResponse
+
 function SSLManager(config) {
     /**
      * Implements Let's Encrypt SSL management of the Jelastic environment
@@ -490,7 +492,7 @@ function SSLManager(config) {
 
         for (var i = 0, n = resp.extDomains.length; i < n; i++) {
             domain = resp.extDomains[i];
-            domains.push(domain.domain);
+            domains.push(resp.extDomains[i].domain);
         }
 
         config.bindedDomains = domains.join(",");
@@ -542,7 +544,7 @@ function SSLManager(config) {
     };
 
     me.isBusyExtDomain = function (domain) {
-        var BUSY_RESULT = 2330,
+        var BUSY_RESULT = EnvironmentResponse.ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
             resp;
 
         resp = jelastic.environment.binder.CheckExtDomain({
@@ -975,8 +977,6 @@ function SSLManager(config) {
         if (resp.result != 0) return resp;
 
         sslCerts = resp.responses;
-        // resp = jelastic.env.binder.RemoveExtDomain(config.envName, session, config.customDomains);
-        // if (resp.result != 0) return resp;
 
         return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
     }
@@ -1184,22 +1184,6 @@ function SSLManager(config) {
         me.setEnvDomain = function (envDomain) {
             config.envDomain = envDomain;
         };
-
-        // me.setAvailableDomains = function(domains) {
-        //     config.availableDomains = domains;
-        // };
-        //
-        // me.getAvailableDomains = function(domains) {
-        //     return config.availableDomains || [];
-        // };
-
-        // me.setBusyDomains = function(domains) {
-        //     config.busyDomains = domains;
-        // };
-        //
-        // me.getBusyDomains = function() {
-        //     return config.busyDomains || [];
-        // };
 
         me.setBackupCSScript = function () {
             oBackupScript = getScript(config.scriptName);
