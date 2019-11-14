@@ -84,12 +84,6 @@ settings:
     - type: string
       name: undeployHookType
       inputType: hidden
-    - type: list
-      name: withExtIp
-      default: true
-      values:
-        true: with ext IP
-        false: without ext IP
 
 onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
@@ -118,7 +112,7 @@ onInstall:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp}
+    withExtIp: ${settings.withExtIp:true}
 
 onUninstall:
   - callScript:
@@ -136,7 +130,7 @@ onAfterClone:
     nodeGroup: ${targetNodes.nodeGroup}
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp}
+    withExtIp: ${settings.withExtIp:true}
 
 onAfterConfirmTransfer:
   installScript:
@@ -147,7 +141,7 @@ onAfterConfirmTransfer:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp}
+    withExtIp: ${settings.withExtIp:true}
 
 actions:
   installScript:
