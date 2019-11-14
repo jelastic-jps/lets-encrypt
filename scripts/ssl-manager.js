@@ -552,7 +552,7 @@ function SSLManager(config) {
         });
 
         if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
-        return resp.result == BUSY_RESULT ? true : false;
+        return (resp.result == BUSY_RESULT);
     };
 
     me.initEntryPoint = function initEntryPoint() {
