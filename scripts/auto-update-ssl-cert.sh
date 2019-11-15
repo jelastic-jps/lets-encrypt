@@ -18,7 +18,7 @@ function validateLatestVersion(){
    [ -f "$revision_state_path" ] && current_revision=$(cat $revision_state_path);
    [ "$latest_revision" != "$current_revision" ] && {
 
-        [ -a -s /tmp/auto-update-ssl-cert.sh -a -s /tmp/install-le.sh -a -s /tmp/validation.sh -a -s /tmp/generate-ssl-cert.sh ] && {
+        [ -s /tmp/auto-update-ssl-cert.sh -a -s /tmp/install-le.sh -a -s /tmp/validation.sh -a -s /tmp/generate-ssl-cert.sh ] && {
             mv /tmp/install-le.sh /root/install-le.sh
             mv /tmp/auto-update-ssl-cert.sh  /root/auto-update-ssl-cert.sh
             mv /tmp/generate-ssl-cert.sh /root/generate-ssl-cert.sh
