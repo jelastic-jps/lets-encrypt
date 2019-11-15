@@ -46,7 +46,7 @@ function run() {
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
-    jelastic.marketplace.console.WriteLog(EnvironmentResponse.ENVIRONMENT_EXT_DOMAIN_IS_BUSY);
+    
     return new (new Function("return " + body)())(config);
 }
 
