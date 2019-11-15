@@ -542,7 +542,7 @@ function SSLManager(config) {
     };
 
     me.isBusyExtDomain = function (domain) {
-        var BUSY_RESULT = 2330,//EnvironmentResponse.ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
+        var BUSY_RESULT = EnvironmentResponse.ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
             resp;
 
         resp = jelastic.environment.binder.CheckExtDomain({
