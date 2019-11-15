@@ -1,5 +1,6 @@
 //@auth
 //@required(baseUrl, cronTime)
+import com.hivext.api.environment.response.EnvironmentResponse;
 
 var baseDir          = getParam("baseDir", "/"),
     customDomains    = getParam("customDomains"),
