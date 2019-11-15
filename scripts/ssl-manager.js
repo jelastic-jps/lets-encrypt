@@ -1,4 +1,4 @@
-//import com.hivext.api.environment.response.EnvironmentResponse;
+import com.hivext.api.environment.response.EnvironmentResponse;
 
 function SSLManager(config) {
     /**
