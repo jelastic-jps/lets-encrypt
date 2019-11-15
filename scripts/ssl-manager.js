@@ -1,6 +1,5 @@
 //import com.hivext.api.environment.response.EnvironmentResponse;
 
-return "testt";
 function SSLManager(config) {
     /**
      * Implements Let's Encrypt SSL management of the Jelastic environment
