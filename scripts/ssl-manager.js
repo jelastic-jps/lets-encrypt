@@ -1,4 +1,4 @@
-import com.hivext.api.environment.response.EnvironmentResponse;
+//import com.hivext.api.environment.response.EnvironmentResponse;
 
 function SSLManager(config) {
     /**
@@ -9,7 +9,7 @@ function SSLManager(config) {
      *      envDomain : {String}
      *      envAppid : {String}
      *      baseUrl : {String}
-     *      baseDir : {String}     
+     *      baseDir : {String}
      *      scriptName : {String}
      *      cronTime : {String}
      *      email : {String}
@@ -74,11 +74,11 @@ function SSLManager(config) {
             "backup-scripts": me.backupScripts,
             "restore-scripts": me.restoreScripts
         };
-        
+
         if (getParam("uninstall")) {
             action = "uninstall";
         }
-        
+
         if (!actions[action]) {
             return {
                 result : Response.ERROR_UNKNOWN,
@@ -97,7 +97,7 @@ function SSLManager(config) {
             [ me.generateSslCerts ],
             [ me.updateGeneratedCustomDomains ]
         ]);
-        
+
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
             resp = me.exec(me.deploy);
@@ -146,7 +146,7 @@ function SSLManager(config) {
 
         //log("ActionLog: " + oResp);
     };
-    
+
     me.updateGeneratedCustomDomains = function () {
         var setting = "opt/letsencrypt/settings",
             resp;
@@ -157,9 +157,9 @@ function SSLManager(config) {
         ], {
             setting : nodeManager.getPath(setting)
         });
-        
+
         if (resp.result != 0) return resp;
-        
+
         resp = resp.responses ? resp.responses[0] : resp;
         resp = resp.out.replace(/\'/g, "").split("\n");
 
@@ -303,47 +303,47 @@ function SSLManager(config) {
         });
     },
 
-    me.autoUpdate = function () {
-        var resp;
+        me.autoUpdate = function () {
+            var resp;
 
-        if (getPlatformVersion() < "4.9.5") {
-            return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
-        }
-
-        if (!config.isTask) {
-            me.logAction("StartUpdateLEFromContainer");
-            
-            if (!session && me.hasValidToken()) {
-                session = signature;
+            if (getPlatformVersion() < "4.9.5") {
+                return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
             }
 
-            resp = nodeManager.getEnvInfo();
+            if (!config.isTask) {
+                me.logAction("StartUpdateLEFromContainer");
 
-            if (resp.result == 0) {
-                resp = log("checkPermissions");
+                if (!session && me.hasValidToken()) {
+                    session = signature;
+                }
+
+                resp = nodeManager.getEnvInfo();
+
+                if (resp.result == 0) {
+                    resp = log("checkPermissions");
+                }
+
+                if (resp && resp.result != 0) {
+                    return me.checkEnvAccessAndUpdate(resp);
+                }
             }
 
-            if (resp && resp.result != 0) {
-                return me.checkEnvAccessAndUpdate(resp);
+            if (config.patchVersion == patchBuild) {
+
+                me.exec([
+                    [ me.initEntryPoint ],
+                    [ me.validateEntryPoint ]
+                ]);
+
+                resp = me.install(true);
+            } else {
+                resp = me.reinstall();
             }
-        }
 
-        if (config.patchVersion == patchBuild) {
+            me.logAction("EndUpdateLEFromContainer", resp);
 
-            me.exec([
-                [ me.initEntryPoint ],
-                [ me.validateEntryPoint ]
-            ]);
-
-            resp = me.install(true);
-        } else {
-            resp = me.reinstall();
-        }
-
-        me.logAction("EndUpdateLEFromContainer", resp);
-
-        return resp;
-    };
+            return resp;
+        };
 
     me.restoreCSScript = function restoreCSScript() {
         var oResp,
@@ -383,7 +383,7 @@ function SSLManager(config) {
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
         me.logAction("AddLEAutoUpdateTask");
-        
+
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
@@ -444,7 +444,7 @@ function SSLManager(config) {
     me.getCustomDomains = function () {
         return config.customDomains;
     };
-    
+
     me.setSkippedDomains = function (domains) {
         config.skippedDomains = domains;
     };
@@ -544,7 +544,7 @@ function SSLManager(config) {
     };
 
     me.isBusyExtDomain = function (domain) {
-        var BUSY_RESULT = EnvironmentResponse.ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
+        var BUSY_RESULT = 2330,
             resp;
 
         resp = jelastic.environment.binder.CheckExtDomain({
@@ -857,7 +857,7 @@ function SSLManager(config) {
     };
 
     me.deploy = function deploy() {
-        if (config.deployHook) 
+        if (config.deployHook)
         {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
@@ -1017,7 +1017,7 @@ function SSLManager(config) {
 
         return sResp || "";
     };
-    
+
     me.isMoreLEAppInstalled = function isMoreLEAppInstalled () {
         var resp;
 
