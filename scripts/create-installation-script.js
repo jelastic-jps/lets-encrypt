@@ -36,7 +36,6 @@ function run() {
         envAppid         : "${env.appid}",
         email            : "${user.email}"
     });
-    return "test";
 
     jelastic.local.ReturnResult(
         SSLManager.creteScriptAndInstall()
