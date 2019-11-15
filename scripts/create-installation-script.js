@@ -10,10 +10,12 @@ var baseDir          = getParam("baseDir", "/"),
     deployHookType   = getParam("deployHookType", ""),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
+    withExtIp        = getParam("withExtIp", "true"),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
     test             = getParam("test", "");
 
 function run() {
+    return "test";
     var SSLManager = use("scripts/ssl-manager.js", {
         appId            : appId,
         session          : session,
@@ -28,6 +30,7 @@ function run() {
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
         undeployHookType : replace(undeployHookType),
+        withExtIp        : withExtIp,
         test             : test,
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
