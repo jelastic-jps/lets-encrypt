@@ -15,7 +15,6 @@ var baseDir          = getParam("baseDir", "/"),
     test             = getParam("test", "");
 
 function run() {
-    return "test";
     var SSLManager = use("scripts/ssl-manager.js", {
         appId            : appId,
         session          : session,
