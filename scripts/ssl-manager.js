@@ -1,4 +1,4 @@
-import com.hivext.api.environment.response.EnvironmentResponse
+import com.hivext.api.environment.response.EnvironmentResponse;
 
 function SSLManager(config) {
     /**
@@ -979,7 +979,7 @@ function SSLManager(config) {
         sslCerts = resp.responses;
 
         return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
-    }
+    };
 
     me.sendResp = function sendResp(resp, isUpdate) {
         var action = isUpdate ? "updated" : "installed",
