@@ -112,7 +112,7 @@ onInstall:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp:true}
+    withExtIp: ${settings.withExtIp}
 
 onUninstall:
   - callScript:
@@ -130,7 +130,7 @@ onAfterClone:
     nodeGroup: ${targetNodes.nodeGroup}
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp:true}
+    withExtIp: ${settings.withExtIp}
 
 onAfterConfirmTransfer:
   installScript:
@@ -141,7 +141,7 @@ onAfterConfirmTransfer:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp:true}
+    withExtIp: ${settings.withExtIp}
 
 actions:
   installScript:
