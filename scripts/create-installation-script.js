@@ -10,7 +10,7 @@ var baseDir          = getParam("baseDir", "/"),
     deployHookType   = getParam("deployHookType", ""),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
-    withExtIp        = getParam("withExtIp", ""),
+    withExtIp        = getParam("withExtIp", "true"),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
     test             = getParam("test", "");
 
