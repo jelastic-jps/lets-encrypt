@@ -1,6 +1,3 @@
-//import com.hivext.api.environment.response.EnvironmentResponse;
-
-return "testt";
 function SSLManager(config) {
     /**
      * Implements Let's Encrypt SSL management of the Jelastic environment
@@ -35,6 +32,7 @@ function SSLManager(config) {
     var Response = com.hivext.api.Response,
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
+        ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
@@ -545,7 +543,7 @@ function SSLManager(config) {
     };
 
     me.isBusyExtDomain = function (domain) {
-        var BUSY_RESULT = EnvironmentResponse.ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
+        var BUSY_RESULT = ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
             resp;
 
         resp = jelastic.environment.binder.CheckExtDomain({
