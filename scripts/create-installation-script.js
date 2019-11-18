@@ -29,7 +29,7 @@ function run() {
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
         undeployHookType : replace(undeployHookType),
-        withExtIp        : withExtIp,
+        withExtIp        : replace(withExtIp),
         test             : test,
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
