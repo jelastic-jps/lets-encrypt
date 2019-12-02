@@ -553,7 +553,7 @@ function SSLManager(config) {
                 nodeManager.setNodeIp(config.webroot ? nodeManager.getMasterIpByLayer(CP) : config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
-                    nodeManager.setEnvDomain(node.url.replace(/http:\/\//, ''));
+                    nodeManager.setEnvDomain(node.url.replace(/https?:\/\//, ''));
                 }
             }
 
@@ -1110,7 +1110,7 @@ function SSLManager(config) {
         };
 
         me.isExtraLayer = function (group) {
-            return !(group === BL || group === LB || group === CP);
+            return !(group == BL || group == LB || group == CP);
         };
 
         me.isBalancerLayer = function (group) {
