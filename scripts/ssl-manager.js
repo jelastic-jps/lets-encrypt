@@ -577,6 +577,8 @@ function SSLManager(config) {
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
+            
+            me.initAddOnExtIp(config.withExtIp);
 
             if (config.withExtIp) {
                 if (!node.extIPs || node.extIPs.length == 0) {
