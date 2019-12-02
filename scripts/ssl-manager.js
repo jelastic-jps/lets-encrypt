@@ -736,7 +736,7 @@ function SSLManager(config) {
                 test : config.test || !customDomains,
                 primarydomain: primaryDomain,
                 letsEncryptEnv : config.letsEncryptEnv || "",
-                withExtIp : config.withExtIp || "",
+                withExtIp : config.withExtIp,
                 skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
