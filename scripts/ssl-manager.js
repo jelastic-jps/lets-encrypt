@@ -49,6 +49,7 @@ function SSLManager(config) {
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
     nodeManager.setBackupPath("var/lib/jelastic/keys/letsencrypt");
+    nodeManager.setCustomSettingsPath("/var/lib/jelastic/keys/letsencrypt/settings-custom");
 
     me.auth = function (token) {
         if (!config.session && String(token).replace(/\s/g, "") != config.token) {
@@ -474,7 +475,7 @@ function SSLManager(config) {
     };
 
     me.initCustomConfigs = function() {
-        var CUSTOM_CONFIG = "/var/lib/jelastic/keys/letsencrypt/settings-custom",
+        var CUSTOM_CONFIG = nodeManager.getCustomSettingsPath(),
             configs = [],
             body,
             resp,
@@ -1025,6 +1026,7 @@ function SSLManager(config) {
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
             bCustomSSLSupported,
+            sCustomSettingsPath,
             oBackupScript,
             sBackupPath,
             envInfo,
@@ -1067,6 +1069,14 @@ function SSLManager(config) {
 
         me.getBackupPath = function () {
             return sBackupPath;
+        };
+        
+        me.setCustomSettingsPath = function (path) {
+            sCustomSettingsPath = baseDir + path;
+        };
+        
+        me.getCustomSettingsPath = function() {
+            return sCustomSettingsPath;
         };
 
         me.setNodeId = function (id) {
