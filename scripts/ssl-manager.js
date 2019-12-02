@@ -49,7 +49,7 @@ function SSLManager(config) {
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
     nodeManager.setBackupPath("var/lib/jelastic/keys/letsencrypt");
-    nodeManager.setCustomSettingsPath("/var/lib/jelastic/keys/letsencrypt/settings-custom");
+    nodeManager.setCustomSettingsPath("var/lib/jelastic/keys/letsencrypt/settings-custom");
 
     me.auth = function (token) {
         if (!config.session && String(token).replace(/\s/g, "") != config.token) {
