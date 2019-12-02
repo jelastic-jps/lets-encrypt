@@ -499,8 +499,6 @@ function SSLManager(config) {
             config[tmp[0]] = convertToBoolean(tmp[1].replace(/\"/g, ""));
         }
 
-        jelastic.marketplace.console.WriteLog("config.webroot22 -> " + config.webroot);
-        jelastic.marketplace.console.WriteLog("config.webroot22 ? nodeManager.getMasterIdByLayer(CP) : config.nodeId -> " + config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
         if (config.webroot) {
             nodeManager.getEntryNodeIps();
             nodeManager.setNodeId(nodeManager.getMasterIdByLayer(CP));
@@ -549,8 +547,6 @@ function SSLManager(config) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
 
-                jelastic.marketplace.console.WriteLog("config.webroot -> " + config.webroot);
-                jelastic.marketplace.console.WriteLog("config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId -> " + config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
                 nodeManager.setNodeId(config.webroot ? nodeManager.getMasterIdByLayer(CP) : config.nodeId);
                 nodeManager.setNodeGroup(config.webroot ? CP : config.nodeGroup);
                 nodeManager.setNodeIp(config.webroot ? nodeManager.getMasterIpByLayer(CP) : config.nodeIp);
@@ -1121,7 +1117,6 @@ function SSLManager(config) {
                 "echo \"IP6-$EXT_IPs_v6\""
             ], {});
 
-            jelastic.marketplace.console.WriteLog("getEntryNodeIps -> " + resp);
             if (resp.result == Response.JEM_OPERATION_COULD_NOT_BE_PERFORMED) {
                 resp = resp.responses[0];
                 var error = resp.out + "\n" + (resp.errOut || resp.error || "");
