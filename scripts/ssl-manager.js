@@ -474,7 +474,7 @@ function SSLManager(config) {
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
-        config.withExtIp = !!(withExtIp == "true");
+        config.withExtIp = (typeof withExtIp === "boolean") ? !!withExtIp : !!(withExtIp == "true");
 
         return { result: 0 };
     };
