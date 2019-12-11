@@ -10,6 +10,7 @@ var baseDir          = getParam("baseDir", "/"),
     deployHookType   = getParam("deployHookType", ""),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
+    withExtIp        = getParam("withExtIp", "true"),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
     test             = getParam("test", "");
 
@@ -28,6 +29,7 @@ function run() {
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
         undeployHookType : replace(undeployHookType),
+        withExtIp        : replace(withExtIp) || "true",
         test             : test,
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
@@ -43,7 +45,7 @@ function run() {
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
-
+    
     return new (new Function("return " + body)())(config);
 }
 

@@ -18,8 +18,8 @@ test_params='';
 [ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
 
 #Validate settings
-validateExtIP
-validateDNSSettings
+[ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
+
 validateCertBot
 
 #Kill hanged certificate requests
@@ -80,3 +80,4 @@ while [[ "$1" != "" ]]; do
 done
 
 uploadCerts $certdir;
+#[ "$withExtIp" == "true" ] && { uploadCerts $certdir; }

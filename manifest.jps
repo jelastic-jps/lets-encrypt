@@ -55,7 +55,7 @@ description:
   text: /text/description.md
   short: Free tool to configure support of secured SSL connection for an environment,
     by either internal or custom domain name.
-    
+
 globals:
   scriptSufix: letsencrypt-ssl
 
@@ -112,6 +112,7 @@ onInstall:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
+    withExtIp: ${settings.withExtIp}
 
 onUninstall:
   - callScript:
@@ -129,6 +130,7 @@ onAfterClone:
     nodeGroup: ${targetNodes.nodeGroup}
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
+    withExtIp: ${settings.withExtIp}
 
 onAfterConfirmTransfer:
   installScript:
@@ -139,6 +141,7 @@ onAfterConfirmTransfer:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
+    withExtIp: ${settings.withExtIp}
 
 actions:
   installScript:
@@ -154,6 +157,7 @@ actions:
       deployHookType: ${this.deployHookType}
       undeployHook: ${this.undeployHook}
       undeployHookType: ${this.undeployHookType}
+      withExtIp: ${this.withExtIp}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
