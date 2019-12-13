@@ -330,7 +330,7 @@ function SSLManager(config) {
         if (config.patchVersion == patchBuild) {
 
             me.exec([
-                [ me.initAddOnExtIp, config.withExtIp || true ],
+                [ me.initAddOnExtIp, config.withExtIp ],
                 [ me.initEntryPoint ],
                 [ me.validateEntryPoint ]
             ]);
@@ -475,7 +475,16 @@ function SSLManager(config) {
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
-        config.withExtIp = ((withExtIp != "false" && withExtIp != false) || !jelastic.env.binder.GetExtDomains);
+        if (!jelastic.env.binder.GetExtDomains) {
+            config.withExtIp = true;
+            return { result: 0 };
+        }
+        
+        if (typeof withExtIp == "boolean") {
+            config.withExtIp = withExtIp;
+        } else {
+            config.withExtIp = String(withExtIp) != "false");
+        }
         return { result: 0 };
     };
 
