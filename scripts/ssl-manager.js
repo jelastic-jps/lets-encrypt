@@ -330,6 +330,7 @@ function SSLManager(config) {
         if (config.patchVersion == patchBuild) {
 
             me.exec([
+                [ me.initAddOnExtIp, config.withExtIp || true ],
                 [ me.initEntryPoint ],
                 [ me.validateEntryPoint ]
             ]);
