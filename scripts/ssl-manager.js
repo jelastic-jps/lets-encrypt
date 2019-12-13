@@ -475,8 +475,8 @@ function SSLManager(config) {
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
-        config.withExtIp = (typeof withExtIp === "boolean") ? !!withExtIp : !!(withExtIp == "true");
-
+        config.withExtIp = ((withExtIp != "false" && withExtIp != false) || !jelastic.env.binder.GetExtDomains);
+        jelastic.marketplace.console.WriteLog("config.withExtIp->" + config.withExtIp);
         return { result: 0 };
     };
 
