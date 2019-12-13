@@ -330,6 +330,7 @@ function SSLManager(config) {
         if (config.patchVersion == patchBuild) {
 
             me.exec([
+                [ me.initAddOnExtIp, config.withExtIp || true ],
                 [ me.initEntryPoint ],
                 [ me.validateEntryPoint ]
             ]);
@@ -473,7 +474,7 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
-    me.initAddOnExtIp = function initAddOnExtIp(withExtIp || "true") {
+    me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = (typeof withExtIp === "boolean") ? !!withExtIp : !!(withExtIp == "true");
 
         return { result: 0 };
