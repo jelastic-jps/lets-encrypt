@@ -65,7 +65,7 @@ settings:
       name: customDomains
       vtype: domainlist
       caption: External Domain(s)
-      placeholder: leave the field blank to create a dummy SSL certificate
+      placeholder: leave blank to get a test certificate for this environment domain
       required: false
     - type: string
       name: nodeId
