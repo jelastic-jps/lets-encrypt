@@ -65,6 +65,7 @@ settings:
       name: customDomains
       vtype: domainlist
       caption: External Domain(s)
+      placeholder: leave blank to get a test certificate for this environment domain
       required: false
     - type: string
       name: nodeId
