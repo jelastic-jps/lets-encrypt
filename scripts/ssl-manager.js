@@ -91,6 +91,7 @@ function SSLManager(config) {
     me.install = function (isUpdate) {
         var resp = me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initFalbackToFake, config.fallbackToFake ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
@@ -401,6 +402,7 @@ function SSLManager(config) {
     me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initFalbackToFake, config.fallbackToFake ],
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
@@ -474,9 +476,17 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.initBoolValue = function initBoolValue(value) {
+        return typeof value == "boolean" ? value : String(value) != "false";
+    };
+
+    me.initFalbackToFake = function initFalbackToFake(fake) {
+        config.fallbackToFake = me.initBoolValue(fake);
+        return { result: 0 };
+    };
+
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
-        config.withExtIp = ((typeof withExtIp == "boolean") ? withExtIp : String(withExtIp) != "false")
-            || !jelastic.env.binder.GetExtDomains;
+        config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
         return { result: 0 };
     };
 
@@ -685,6 +695,7 @@ function SSLManager(config) {
         var params = { token : config.token };
 
         if (action) params.action = action;
+        params.fallbackToFake = config.fallbackToFake;
 
         var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
 
@@ -778,6 +789,12 @@ function SSLManager(config) {
         resp = me.analyzeSslResponse(
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
+
+        if (config.action == "install" && config.fallbackToFake && resp.result != 0) {
+            resp = me.analyzeSslResponse(
+                me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToFake ? " fake" : ""))
+            );
+        }
 
         //removing redirect
         me.exec(me.manageDnat, "remove");
