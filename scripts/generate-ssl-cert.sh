@@ -15,8 +15,7 @@ git pull origin master
 
 #Parameters for test certificates
 test_params='';
-[ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
-[ "$1" == "fake" ] && { test_params='--test-cert --break-my-certs '; }
+[ "$test" == "true" -o "$1" == "fake" ] && { test_params='--test-cert --break-my-certs '; }
 
 #Validate settings
 [ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }

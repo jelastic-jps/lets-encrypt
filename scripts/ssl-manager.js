@@ -91,7 +91,7 @@ function SSLManager(config) {
     me.install = function (isUpdate) {
         var resp = me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
-            [ me.initFalbackToFake, config.fallbackToFake ],
+            [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
@@ -402,7 +402,7 @@ function SSLManager(config) {
     me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
-            [ me.initFalbackToFake, config.fallbackToFake ],
+            [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
@@ -481,7 +481,7 @@ function SSLManager(config) {
     };
 
     me.initFalbackToFake = function initFalbackToFake(fake) {
-        config.fallbackToFake = me.initBoolValue(fake);
+        config.fallbackToX1 = me.initBoolValue(fake);
         return { result: 0 };
     };
 
@@ -695,7 +695,7 @@ function SSLManager(config) {
         var params = { token : config.token };
 
         if (action) params.action = action;
-        params.fallbackToFake = config.fallbackToFake;
+        params.fallbackToX1 = config.fallbackToX1;
 
         var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
 
@@ -790,9 +790,9 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
-        if (config.action == "install" && config.fallbackToFake && resp.result != 0) {
+        if (config.action == "install" && config.fallbackToX1 && resp.result != 0) {
             resp = me.analyzeSslResponse(
-                me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToFake ? " fake" : ""))
+                me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
             );
         }
 

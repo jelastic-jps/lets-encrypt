@@ -32,7 +32,7 @@ function run() {
         undeployHook     : "${undeployHook}",
         undeployHookType : "${undeployHookType}",
         withExtIp        : "${withExtIp}",
-        fallbackToFake   : "${fallbackToFake}",
+        fallbackToX1     : "${fallbackToX1}",
         patchVersion     : "${patchVersion}",
         test             : "${test}"
     });
