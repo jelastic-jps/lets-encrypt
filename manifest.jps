@@ -102,7 +102,7 @@ buttons:
     successText: /text/success.md
   - caption: Configure
     settings: main
-    action: installScript
+    action: configure
 
 onInstall:
   installScript:
@@ -114,6 +114,7 @@ onInstall:
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    fallbackToX1: ${settings.fallbackToX1:false}
 
 onUninstall:
   - callScript:
@@ -159,6 +160,7 @@ actions:
       undeployHook: ${this.undeployHook}
       undeployHookType: ${this.undeployHookType}
       withExtIp: ${this.withExtIp}
+      fallbackToX1: ${this.fallbackToX1:false}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
@@ -167,6 +169,16 @@ actions:
   update:
     - callScript:
         action: auto-update
+  configure:
+    installScript:
+      customDomains: ${settings.customDomains}
+      nodeId: ${settings.nodeId}
+      nodeGroup: ${targetNodes.nodeGroup}
+      deployHook: ${settings.deployHook}
+      deployHookType: ${settings.deployHookType}
+      undeployHook: ${settings.undeployHook}
+      undeployHookType: ${settings.undeployHookType}
+      withExtIp: ${settings.withExtIp}
 
   delete:
     script: |
