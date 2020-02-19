@@ -49,7 +49,7 @@ requiredFeatures: extip
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
-logo: images/lets-encrypt.png
+logo: images/letsencrypt.png
 
 description:
   text: /text/description.md
