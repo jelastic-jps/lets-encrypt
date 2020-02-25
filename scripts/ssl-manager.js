@@ -33,7 +33,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
-        REGENERATE_CERTS = 4,
+        ANCIENT_VERSION_OF_PYTHON = 4,
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
@@ -813,7 +813,7 @@ function SSLManager(config) {
         //removing redirect
         me.exec(me.manageDnat, "remove");
 
-        if (resp.result && resp.result == REGENERATE_CERTS) {
+        if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
             resp = me.tryRegenerateSsl();
         }
 
@@ -836,10 +836,8 @@ function SSLManager(config) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
 
-            if (resp && resp.exitStatus && resp.exitStatus == REGENERATE_CERTS) {
-                return {
-                    result: REGENERATE_CERTS
-                }
+            if (resp && resp.exitStatus && resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) {
+                return { result: ANCIENT_VERSION_OF_PYTHON };
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
