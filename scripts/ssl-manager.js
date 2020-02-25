@@ -814,7 +814,7 @@ function SSLManager(config) {
         me.exec(me.manageDnat, "remove");
 
         if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
-            log("Ancient version of Python");
+            log("WARNING: Ancient version of Python");
             resp = me.exec(me.tryRegenerateSsl);
         }
 
