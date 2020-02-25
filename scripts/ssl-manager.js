@@ -33,6 +33,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
+        REGENERATE_CERTS = 4,
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
@@ -238,15 +239,15 @@ function SSLManager(config) {
         ]);
     };
 
-    me.backupEffOrgPackages = function() {
+    me.backupEffPackages = function() {
         var backupPath = nodeManager.getBackupPath(),
             logPath = nodeManager.getLogPath();
 
         return me.exec([
-            [ me.cmd, "[ -d '%(effOrgPath)' ] && { cd %(effOrgPath); hash tar 2>/dev/null && echo tar || yum install tar -y; tar -czvf eff.org.tar . >> %(logPath); mv eff.org.tar %(backupPath); rm -rf %(effOrgPath); } || echo 0;", {
+            [ me.cmd, "[ -d '%(effPath)' ] && { cd %(effPath); hash tar 2>/dev/null && echo tar || yum install tar -y; tar -czvf eff.org.tar . >> %(logPath); mv eff.org.tar %(backupPath); rm -rf %(effPath); } || echo 0;", {
                 logPath: logPath,
                 backupPath: backupPath,
-                effOrgPath: nodeManager.getPath("opt/eff.org")
+                effPath: nodeManager.getPath("opt/eff.org")
             }],
         ]);
     };
@@ -812,15 +813,19 @@ function SSLManager(config) {
         //removing redirect
         me.exec(me.manageDnat, "remove");
 
-        if (resp.result && resp.result == 4) {
-            resp = me.execAll([
-                [ me.backupEffOrgPackages ],
-                [ me.installLetsEncrypt ],
-                [ me.generateSslCerts ]
-            ]);
+        if (resp.result && resp.result == REGENERATE_CERTS) {
+            resp = me.tryRegenerateSsl();
         }
 
         return resp;
+    };
+
+    me.tryRegenerateSsl = function () {
+        return me.execAll([
+            [ me.backupEffPackages ],
+            [ me.installLetsEncrypt ],
+            [ me.generateSslCerts ]
+        ]);
     };
 
     me.analyzeSslResponse = function (resp) {
@@ -831,9 +836,9 @@ function SSLManager(config) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
 
-            if (resp && resp.exitStatus && resp.exitStatus == 4) {
+            if (resp && resp.exitStatus && resp.exitStatus == REGENERATE_CERTS) {
                 return {
-                    result: 4
+                    result: REGENERATE_CERTS
                 }
             }
 
