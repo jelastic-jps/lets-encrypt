@@ -44,10 +44,10 @@ iptables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 ip6tables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 
 if [ "$result_code" != "0" ]; then
-    [[ $resp == *"You have an ancient version of Python"* ]] && need_reinstall=true;
+    [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
 fi
 
-[[ $need_reinstall == true ]] && exit 4; #reinstall packages
+[[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
 [[ $result_code != "0" ]] && { echo "$resp"; exit 1; } #general result error
 
 #To be sure that r/w access
