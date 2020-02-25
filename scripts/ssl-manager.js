@@ -814,13 +814,14 @@ function SSLManager(config) {
         me.exec(me.manageDnat, "remove");
 
         if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
-            resp = me.tryRegenerateSsl();
+            log("Ancient version of Python");
+            resp = me.exec(me.tryRegenerateSsl);
         }
 
         return resp;
     };
 
-    me.tryRegenerateSsl = function () {
+    me.tryRegenerateSsl = function tryRegenerateSsl() {
         return me.execAll([
             [ me.backupEffPackages ],
             [ me.installLetsEncrypt ],
