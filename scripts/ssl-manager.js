@@ -97,7 +97,7 @@ function SSLManager(config) {
             [ me.generateSslCerts ],
             [ me.updateGeneratedCustomDomains ]
         ]);
-        
+
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
             resp = me.exec(me.deploy);
@@ -235,6 +235,19 @@ function SSLManager(config) {
                     autoUpdateScript
                 ].join(" ")
             }]
+        ]);
+    };
+
+    me.backupEffOrgPackages = function() {
+        var backupPath = nodeManager.getBackupPath(),
+            logPath = nodeManager.getLogPath();
+
+        return me.exec([
+            [ me.cmd, "[ -d '%(effOrgPath)' ] && { cd %(effOrgPath); hash tar 2>/dev/null && echo tar || yum install tar -y; tar -czvf eff.org.tar . >> %(logPath); mv eff.org.tar %(backupPath); rm -rf %(effOrgPath); } || echo 0;", {
+                logPath: logPath,
+                backupPath: backupPath,
+                effOrgPath: nodeManager.getPath("opt/eff.org")
+            }],
         ]);
     };
 
@@ -799,6 +812,14 @@ function SSLManager(config) {
         //removing redirect
         me.exec(me.manageDnat, "remove");
 
+        if (resp.result && resp.result == 4) {
+            resp = me.execAll([
+                [ me.backupEffOrgPackages ],
+                [ me.installLetsEncrypt ],
+                [ me.generateSslCerts ]
+            ]);
+        }
+
         return resp;
     };
 
@@ -809,6 +830,12 @@ function SSLManager(config) {
         if (resp.responses) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
+
+            if (resp && resp.exitStatus && resp.exitStatus == 4) {
+                return {
+                    result: 4
+                }
+            }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
             resp.out = out.substring(out.length - 400);
