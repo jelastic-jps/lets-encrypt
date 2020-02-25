@@ -837,7 +837,7 @@ function SSLManager(config) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
 
-            if (resp && resp.exitStatus && resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) {
+            if (resp && resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) {
                 return { result: ANCIENT_VERSION_OF_PYTHON };
             }
 
