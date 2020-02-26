@@ -33,6 +33,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
+        ANCIENT_VERSION_OF_PYTHON = 4,
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
@@ -97,7 +98,7 @@ function SSLManager(config) {
             [ me.generateSslCerts ],
             [ me.updateGeneratedCustomDomains ]
         ]);
-        
+
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
             resp = me.exec(me.deploy);
@@ -235,6 +236,19 @@ function SSLManager(config) {
                     autoUpdateScript
                 ].join(" ")
             }]
+        ]);
+    };
+
+    me.backupEffPackages = function() {
+        var backupPath = nodeManager.getBackupPath(),
+            logPath = nodeManager.getLogPath();
+
+        return me.exec([
+            [ me.cmd, "[ -d '%(effPath)' ] && { cd %(effPath); hash tar 2>/dev/null && echo tar || yum install tar -y; tar -czvf eff.org.tar . >> %(logPath); mv eff.org.tar %(backupPath); rm -rf %(effPath); } || echo 0;", {
+                logPath: logPath,
+                backupPath: backupPath,
+                effPath: nodeManager.getPath("opt/eff.org")
+            }],
         ]);
     };
 
@@ -799,7 +813,20 @@ function SSLManager(config) {
         //removing redirect
         me.exec(me.manageDnat, "remove");
 
+        if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
+            log("WARNING: Ancient version of Python");
+            resp = me.exec(me.tryRegenerateSsl);
+        }
+
         return resp;
+    };
+
+    me.tryRegenerateSsl = function tryRegenerateSsl() {
+        return me.execAll([
+            [ me.backupEffPackages ],
+            [ me.installLetsEncrypt ],
+            [ me.generateSslCerts ]
+        ]);
     };
 
     me.analyzeSslResponse = function (resp) {
@@ -809,6 +836,10 @@ function SSLManager(config) {
         if (resp.responses) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
+
+            if (resp && resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) {
+                return { result: ANCIENT_VERSION_OF_PYTHON };
+            }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
             resp.out = out.substring(out.length - 400);

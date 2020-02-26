@@ -32,14 +32,23 @@ iptables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 ip6tables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
 ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
+result_code=0;
 
 #Request for certificates
-$DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --logs-dir $DIR/var/log/letsencrypt
+resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --logs-dir $DIR/var/log/letsencrypt)
+result_code=$?;
 
 iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
 ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
 iptables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 ip6tables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+
+if [ "$result_code" != "0" ]; then
+    [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
+fi
+
+[[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
+[[ $result_code != "0" ]] && { echo "$resp"; exit 1; } #general result error
 
 #To be sure that r/w access
 mkdir -p /tmp/
