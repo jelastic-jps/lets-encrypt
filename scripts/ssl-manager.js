@@ -23,6 +23,7 @@ function SSLManager(config) {
      *      [deployHookType] : {String}
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
+     *      [withExtIp] : {Boolean}
      *      [test] : {Boolean}
      * }} config
      * @constructor
@@ -31,6 +32,8 @@ function SSLManager(config) {
     var Response = com.hivext.api.Response,
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
+        ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
+        ANCIENT_VERSION_OF_PYTHON = 4,
         Random = com.hivext.api.utils.Random,
         me = this,
         BL = "bl",
@@ -93,13 +96,15 @@ function SSLManager(config) {
     me.install = function (isUpdate) {
         var resp = me.exec([
             [ me.initEntryPoint ],
+            [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.installLetsEncrypt ],
             [ me.initCustomConfigs ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
             [ me.updateGeneratedCustomDomains ]
         ]);
-        
+
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
             resp = me.exec(me.deploy);
@@ -222,6 +227,7 @@ function SSLManager(config) {
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
                 scriptPath : autoUpdateScript
             }],
+            [ me.initAddOnExtIp, config.withExtIp ],
 
             me.undeploy,
 
@@ -236,6 +242,19 @@ function SSLManager(config) {
                     autoUpdateScript
                 ].join(" ")
             }]
+        ]);
+    };
+
+    me.backupEffPackages = function() {
+        var backupPath = nodeManager.getBackupPath(),
+            logPath = nodeManager.getLogPath();
+
+        return me.exec([
+            [ me.cmd, "[ -d '%(effPath)' ] && { cd %(effPath); hash tar 2>/dev/null && echo tar || yum install tar -y; tar -czvf eff.org.tar . >> %(logPath); mv eff.org.tar %(backupPath); rm -rf %(effPath); } || echo 0;", {
+                logPath: logPath,
+                backupPath: backupPath,
+                effPath: nodeManager.getPath("opt/eff.org")
+            }],
         ]);
     };
 
@@ -332,6 +351,7 @@ function SSLManager(config) {
         if (config.patchVersion == patchBuild) {
 
             me.exec([
+                [ me.initAddOnExtIp, config.withExtIp ],
                 [ me.initEntryPoint ],
                 [ me.validateEntryPoint ]
             ]);
@@ -401,6 +421,8 @@ function SSLManager(config) {
 
     me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
+            [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
@@ -516,6 +538,96 @@ function SSLManager(config) {
         }
     };
 
+    me.initBoolValue = function initBoolValue(value) {
+        return typeof value == "boolean" ? value : String(value) != "false";
+    };
+
+    me.initFalbackToFake = function initFalbackToFake(fake) {
+        config.fallbackToX1 = me.initBoolValue(fake);
+        return { result: 0 };
+    };
+
+    me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
+        config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
+        return { result: 0 };
+    };
+
+    me.initBindedDomains = function() {
+        var domains = [],
+            domain,
+            resp;
+
+        if (config.bindedDomains) return config.bindedDomains;
+
+        resp = jelastic.env.binder.GetExtDomains(config.envName, session);
+        if (resp.result != 0) return resp;
+
+        for (var i = 0, n = resp.extDomains.length; i < n; i++) {
+            domain = resp.extDomains[i];
+            domains.push(resp.extDomains[i].domain);
+        }
+
+        config.bindedDomains = domains.join(",");
+
+        return { result: 0 };
+    };
+
+    me.bindExtDomains = function bindExtDomains() {
+        var customDomains = config.customDomains,
+            bindedDomains = config.bindedDomains,
+            readyToGenerate = [],
+            busyDomains = [],
+            freeDomains = [],
+            domain,
+            resp;
+
+        if (customDomains) {
+            customDomains = me.parseDomains(customDomains);
+        }
+
+        for (var i = 0, n = customDomains.length; i < n; i++) {
+            domain = customDomains[i];
+
+            if (bindedDomains.indexOf(domain) != -1) {
+                readyToGenerate.push(domain);
+                continue;
+            }
+
+            if (me.isBusyExtDomain(domain)) {
+                busyDomains.push(domain);
+            } else {
+                readyToGenerate.push(domain);
+                freeDomains.push(domain);
+            }
+        }
+
+        me.setSkippedDomains(busyDomains.join(" "));
+        me.setCustomDomains(readyToGenerate.join(" "));
+
+        if (freeDomains.length) {
+            return jelastic.env.binder.BindExtDomains({
+                envName: config.envName,
+                session: session,
+                extDomains: freeDomains.join(";")
+            });
+        }
+
+        return { result: 0 };
+    };
+
+    me.isBusyExtDomain = function (domain) {
+        var BUSY_RESULT = ENVIRONMENT_EXT_DOMAIN_IS_BUSY,
+            resp;
+
+        resp = jelastic.environment.binder.CheckExtDomain({
+            appid: config.envName,
+            session: session,
+            extdomain: domain
+        });
+
+        if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
+        return !!(resp.result == BUSY_RESULT);
+    };
 
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
@@ -538,10 +650,19 @@ function SSLManager(config) {
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
+            
+            me.initAddOnExtIp(config.withExtIp);
 
-            if (!node.extIPs || node.extIPs.length == 0) {
-                resp = me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
-                if (resp.result != 0) return resp;
+            if (config.withExtIp) {
+                if (!node.extIPs || node.extIPs.length == 0) {
+                    resp = me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
+                    if (resp.result != 0) return resp;
+                }
+            } else {
+                me.exec([
+                    [ me.initBindedDomains ],
+                    [ me.bindExtDomains ]
+                ]);
             }
 
             if (id || node.ismaster) {
@@ -565,7 +686,11 @@ function SSLManager(config) {
 
     me.validateEntryPoint = function validateEntryPoint() {
         var fileName = "validation.sh",
-            url = me.getScriptUrl(fileName);
+            url = me.getScriptUrl(fileName),
+            VALIDATE_IP = "validateExtIP",
+            VALIDATE_DNS = "validateDNSSettings '%(domain)'";
+
+        if (!config.withExtIp) VALIDATE_IP = VALIDATE_DNS = 'echo 1';
 
         var resp = nodeManager.cmd([
             "mkdir -p $(dirname %(path))",
@@ -573,8 +698,8 @@ function SSLManager(config) {
             "wget --no-check-certificate '%(url)' -O '%(path)'",
             "chmod +x %(path) >> %(log)",
             "source %(path)",
-            "validateExtIP",
-            "validateDNSSettings '%(domain)'"
+            VALIDATE_IP,
+            VALIDATE_DNS
         ], {
             url : url,
             logPath : nodeManager.getLogPath(),
@@ -633,6 +758,7 @@ function SSLManager(config) {
         var params = { token : config.token };
 
         if (action) params.action = action;
+        params.fallbackToX1 = config.fallbackToX1;
 
         var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
 
@@ -675,7 +801,9 @@ function SSLManager(config) {
                 "appdomain='%(appdomain)'",
                 "baseDir='%(baseDir)'",
                 "test='%(test)'",
-                "primarydomain='%(primarydomain)'"
+                "primarydomain='%(primarydomain)'",
+                "withExtIp='%(withExtIp)'",
+                "skipped_domains='%(skipped)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
                 email : config.email || "",
@@ -684,7 +812,9 @@ function SSLManager(config) {
                 appdomain : envDomain || "",
                 test : config.test || !customDomains,
                 primarydomain: primaryDomain,
-                letsEncryptEnv : config.letsEncryptEnv || ""
+                letsEncryptEnv : config.letsEncryptEnv || "",
+                withExtIp : config.withExtIp,
+                skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
         });
@@ -723,10 +853,29 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
+        if (config.action == "install" && config.fallbackToX1 && resp.result != 0) {
+            resp = me.analyzeSslResponse(
+                me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
+            );
+        }
+
         //removing redirect
         me.exec(me.manageDnat, "remove");
 
+        if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
+            log("WARNING: Ancient version of Python");
+            resp = me.exec(me.tryRegenerateSsl);
+        }
+
         return resp;
+    };
+
+    me.tryRegenerateSsl = function tryRegenerateSsl() {
+        return me.execAll([
+            [ me.backupEffPackages ],
+            [ me.installLetsEncrypt ],
+            [ me.generateSslCerts ]
+        ]);
     };
 
     me.analyzeSslResponse = function (resp) {
@@ -736,6 +885,10 @@ function SSLManager(config) {
         if (resp.responses) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
+
+            if (resp && resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) {
+                return { result: ANCIENT_VERSION_OF_PYTHON };
+            }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
             resp.out = out.substring(out.length - 400);
@@ -808,7 +961,7 @@ function SSLManager(config) {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
 
-        if (nodeManager.checkCustomSSL()) {
+        if (nodeManager.checkCustomSSL() || !config.withExtIp) {
             return me.exec(me.bindSSL);
         }
 
@@ -825,7 +978,7 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            return me.exec(me.removeSSL);
+            return config.withExtIp ? me.exec(me.removeSSL) : me.exec(me.removeSSLCert);
         }
 
         return { result : 0 };
@@ -858,6 +1011,22 @@ function SSLManager(config) {
         return resp.response || resp
     };
 
+    me.bindSSLCerts = function bindSSLCerts() {
+        var SLB = "SLB",
+            resp;
+
+        resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
+        if (resp.result != 0) return resp;
+
+        return jelastic.env.binder.BindSSLCert({
+            envName:config.envName,
+            session: session,
+            certId: resp.responses[resp.responses.length - 1].id,
+            entryPoint: SLB,
+            extDomains: config.customDomains
+        });
+    };
+
     me.bindSSL = function bindSSL() {
         var cert_key = nodeManager.readFile("/tmp/privkey.url"),
             cert     = nodeManager.readFile("/tmp/cert.url"),
@@ -865,7 +1034,25 @@ function SSLManager(config) {
             resp;
 
         if (cert_key.body && chain.body && cert.body) {
-            resp = jelastic.env.binder.BindSSL(config.envName, session, cert_key.body, cert.body, chain.body);
+            if (config.withExtIp) {
+                resp = jelastic.env.binder.BindSSL({
+                    "envName": config.envName,
+                    "session": session,
+                    "cert_key": cert_key.body,
+                    "cert": cert.body,
+                    "intermediate": chain.body
+                });
+            } else {
+                resp = jelastic.env.binder.AddSSLCert({
+                    envName: config.envName,
+                    session: session,
+                    key: cert_key.body,
+                    cert: cert.body,
+                    interm: chain.body
+                });
+                log("after AddSSLCert");
+                me.exec(me.bindSSLCerts);
+            }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
                 key   : cert_key,
@@ -879,6 +1066,18 @@ function SSLManager(config) {
 
     me.removeSSL = function removeSSL() {
         return jelastic.env.binder.RemoveSSL(config.envName, session);
+    };
+
+    me.removeSSLCert = function removeSSLCert() {
+        var resp,
+            sslCerts;
+
+        resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
+        if (resp.result != 0) return resp;
+
+        sslCerts = resp.responses;
+
+        return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
     };
 
     me.sendResp = function sendResp(resp, isUpdate) {

@@ -16,14 +16,14 @@ git pull origin master
 
 #Parameters for test certificates
 test_params='';
-[ "$test" == "true" ] && { test_params='--test-cert --break-my-certs '; }
+[ "$test" == "true" -o "$1" == "fake" ] && { test_params='--test-cert --break-my-certs '; }
 
 webroot_params='';
 [[ "$webroot" == "true" && ! -z "$webroot_path" ]] && { webroot_params="-a webroot --webroot-path ${webroot_path}"; } || { webroot_params=' --standalone '; }
 
 #Validate settings
-validateExtIP
-validateDNSSettings
+[ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
+
 validateCertBot
 
 #Kill hanged certificate requests
@@ -36,22 +36,30 @@ iptables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 ip6tables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
 ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
+result_code=0;
 
 #Request for certificates
-
-$DIR/opt/letsencrypt/letsencrypt-auto certonly $webroot_params $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --logs-dir $DIR/var/log/letsencrypt
+resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $webroot_params $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt)
+result_code=$?;
 
 iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
 ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
 iptables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 ip6tables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
 
+if [ "$result_code" != "0" ]; then
+    [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
+fi
+
+[[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
+[[ $result_code != "0" ]] && { echo "$resp"; exit 1; } #general result error
+
 #To be sure that r/w access
 mkdir -p /tmp/
 chmod -R 777 /tmp/
 appdomain=$(cut -d"." -f2- <<< $appdomain)
 
-certdir=$(sed -nr '/^[[:digit:]-]{10} [[:digit:]:]{8},[[:digit:]]+:.*:[[:alnum:]\.]*:Reporting to user: Congratulations![[:alnum:][:space:]].*$/{n;p}' $DIR/var/log/letsencrypt/letsencrypt.log | sed  's/\/[[:alpha:]]*.pem//'| tail -n 1 )
+certdir=$(sed -nr '/^[[:digit:]-]{10} [[:digit:]:]{8},[[:digit:]]+:.*:[[:alnum:]\._]*:Reporting to user: Congratulations![[:alnum:][:space:]].*$/{n;p}' $DIR/var/log/letsencrypt/letsencrypt.log | sed  's/\/[[:alpha:]]*.pem//'| tail -n 1 )
 
 mkdir -p $DIR/var/lib/jelastic/keys/
 rm -f $DIR/var/lib/jelastic/keys/*.pem
@@ -85,3 +93,4 @@ while [[ "$1" != "" ]]; do
 done
 
 uploadCerts $certdir;
+#[ "$withExtIp" == "true" ] && { uploadCerts $certdir; }
