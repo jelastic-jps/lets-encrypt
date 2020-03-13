@@ -24,6 +24,7 @@ function SSLManager(config) {
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
      *      [withExtIp] : {Boolean}
+     *      [webroot] : {Boolean}
      *      [test] : {Boolean}
      * }} config
      * @constructor
@@ -36,6 +37,9 @@ function SSLManager(config) {
         ANCIENT_VERSION_OF_PYTHON = 4,
         Random = com.hivext.api.utils.Random,
         me = this,
+        BL = "bl",
+        LB = "lb",
+        CP = "cp",
         isValidToken = false,
         patchBuild = 1,
         debug = [],
@@ -49,6 +53,7 @@ function SSLManager(config) {
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
     nodeManager.setBackupPath("var/lib/jelastic/keys/letsencrypt");
+    nodeManager.setCustomSettingsPath("var/lib/jelastic/keys/letsencrypt/settings-custom");
 
     me.auth = function (token) {
         if (!config.session && String(token).replace(/\s/g, "") != config.token) {
@@ -92,7 +97,10 @@ function SSLManager(config) {
     me.install = function (isUpdate) {
         var resp = me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
+            [ me.initEntryPoint ],
+            [ me.initCustomConfigs ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig ],
             [ me.generateSslCerts ],
@@ -187,6 +195,7 @@ function SSLManager(config) {
 
         settings = {
             nodeId              : config.nodeId,
+            webroot             : config.webroot || "",
             customDomains       : me.getCustomDomains(),
             nodeGroup           : config.nodeGroup || "",
             deployHook          : config.deployHook || "",
@@ -346,6 +355,7 @@ function SSLManager(config) {
 
             me.exec([
                 [ me.initAddOnExtIp, config.withExtIp ],
+                [ me.initWebrootMethod, config.webroot ],
                 [ me.initEntryPoint ],
                 [ me.validateEntryPoint ]
             ]);
@@ -416,6 +426,7 @@ function SSLManager(config) {
     me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
@@ -490,6 +501,33 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.initCustomConfigs = function() {
+        var CUSTOM_CONFIG = nodeManager.getCustomSettingsPath(),
+            configs = [],
+            body,
+            resp,
+            tmp;
+
+        resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
+
+        if (resp.result == Response.FILE_PATH_NOT_EXIST) return {
+            result: 0
+        }
+        if (resp.result != 0) return resp;
+
+        body = resp.body.replace(/\n$/, '');
+        configs = body.split('\n');
+
+        for (var i = 0, n = configs.length; i < n; i++) {
+            tmp = configs[i].split('=');
+            config[tmp[0]] = me.initBoolValue(tmp[1].replace(/\"/g, ""));
+        }
+
+        return {
+            result: 0
+        }
+    };
+
     me.initBoolValue = function initBoolValue(value) {
         return typeof value == "boolean" ? value : String(value) != "false";
     };
@@ -501,6 +539,23 @@ function SSLManager(config) {
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
+        return { result: 0 };
+    };
+
+    me.initWebrootMethod = function initWebrootMethod(webroot) {
+        config.webroot = me.initBoolValue(webroot);
+
+        if (config.webroot) {
+            nodeManager.getEntryNodeIps();
+            nodeManager.setNodeId(nodeManager.getMasterIdByLayer(CP));
+            nodeManager.setNodeGroup(CP);
+            nodeManager.setNodeIp(nodeManager.getMasterIpByLayer(CP));
+        } else {
+            nodeManager.setNodeId(config.nodeId || nodeManager.getMasterIdByLayer(config.nodeGroup));
+            nodeManager.setNodeGroup(config.nodeGroup);
+            nodeManager.setNodeIp(config.nodeIp);
+        }
+
         return { result: 0 };
     };
 
@@ -587,12 +642,14 @@ function SSLManager(config) {
             nodes,
             resp;
 
-        if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
-            resp = nodeManager.getEntryPointGroup();
-            if (resp.result != 0) return resp;
+        if (!config.webroot) {
+            if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
+                resp = nodeManager.getEntryPointGroup();
+                if (resp.result != 0) return resp;
 
-            group = resp.group;
-            config.nodeGroup = group;
+                group = resp.group;
+                config.nodeGroup = group;
+            }
         }
 
         resp = nodeManager.getEnvInfo();
@@ -620,9 +677,6 @@ function SSLManager(config) {
             if (id || node.ismaster) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
-
-                nodeManager.setNodeId(config.nodeId);
-                nodeManager.setNodeIp(config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
                     nodeManager.setEnvDomain(node.url.replace(/https?:\/\//, ''));
@@ -754,6 +808,7 @@ function SSLManager(config) {
                 "test='%(test)'",
                 "primarydomain='%(primarydomain)'",
                 "withExtIp='%(withExtIp)'",
+                "webroot='%(webroot)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
@@ -765,6 +820,7 @@ function SSLManager(config) {
                 primarydomain: primaryDomain,
                 letsEncryptEnv : config.letsEncryptEnv || "",
                 withExtIp : config.withExtIp,
+                webroot : config.webroot,
                 skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
@@ -868,6 +924,8 @@ function SSLManager(config) {
 
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
+        if (config.webroot) return { result: 0 }
+        
         return nodeManager.cmd(
             "ip a | grep -q  '%(nodeIp)' || { iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE; }",
             {
@@ -1175,10 +1233,8 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
-            BL = "bl",
-            LB = "lb",
-            CP = "cp",
             bCustomSSLSupported,
+            sCustomSettingsPath,
             oBackupScript,
             sBackupPath,
             envInfo,
@@ -1222,13 +1278,25 @@ function SSLManager(config) {
         me.getBackupPath = function () {
             return sBackupPath;
         };
+        
+        me.setCustomSettingsPath = function (path) {
+            sCustomSettingsPath = baseDir + path;
+        };
+        
+        me.getCustomSettingsPath = function() {
+            return sCustomSettingsPath;
+        };
 
         me.setNodeId = function (id) {
-            nodeId = id;
+            config.nodeId = nodeId = id;
         };
 
         me.setNodeIp = function (ip) {
-            nodeIp = ip;
+            config.nodeIp = nodeIp = ip;
+        };
+
+        me.setNodeGroup = function (group) {
+            config.nodeGroup = group;
         };
 
         me.setEnvDomain = function (envDomain) {
@@ -1255,6 +1323,29 @@ function SSLManager(config) {
 
         me.isBalancerLayer = function (group) {
             return !!(group == LB || group == BL);
+        };
+        
+        me.getEntryNodeIps = function() {
+            var resp = nodeManager.cmd([
+                "IP=$(which ip)",
+                "EXT_IPs=$($IP a | sed -En \'s/127.0.0.1//;s\/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p\')",
+                "EXT_IPs_v6=$($IP a | sed -En \'s/inet6 ::1\/128//;s\/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p\')",
+                "echo \"IP4-$EXT_IPs\"",
+                "echo \"IP6-$EXT_IPs_v6\""
+            ], {});
+
+            if (resp.result == Response.JEM_OPERATION_COULD_NOT_BE_PERFORMED) {
+                resp = resp.responses[0];
+                var error = resp.out + "\n" + (resp.errOut || resp.error || "");
+
+                resp = {
+                    result: Response.JEM_OPERATION_COULD_NOT_BE_PERFORMED,
+                    type: "error",
+                    error: error,
+                    response: error,
+                    message: error
+                };
+            }
         };
 
         me.getNode = function () {
@@ -1291,6 +1382,45 @@ function SSLManager(config) {
 
             return envInfo;
         };
+
+        me.getMasterIdByLayer = function(group) {
+            var nodes,
+                resp,
+                id;
+
+            group = group || CP;
+            resp = me.getEnvInfo();
+            nodes = resp.nodes;
+
+            for (var i = 0, node; node = nodes[i]; i++) {
+                if (node.ismaster && node.nodeGroup == group) {
+                    id = node.id;
+                    break;
+                }
+            }
+
+            return id;
+        };
+
+        me.getMasterIpByLayer = function(group) {
+            var nodes,
+                resp,
+                address;
+
+            group = group || CP;
+            resp = me.getEnvInfo();
+            nodes = resp.nodes;
+
+            for (var i = 0, node; node = nodes[i]; i++) {
+                if (node.ismaster && node.nodeGroup == group) {
+                    address = node.address;
+                    break;
+                }
+            }
+
+            return address;
+        };
+
 
         me.getEntryPointGroup = function () {
             var group,
@@ -1345,8 +1475,8 @@ function SSLManager(config) {
             return resp;
         };
 
-        me.readFile = function (path) {
-            return jelastic.env.file.Read(envName, session, path, null, null, nodeId);
+        me.readFile = function (path, group) {
+            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId || me.getMasterIdByLayer(group));
         };
 
         me.checkCustomSSL = function () {
