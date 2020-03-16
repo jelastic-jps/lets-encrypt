@@ -11,8 +11,10 @@ var baseDir          = getParam("baseDir", "/"),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
     withExtIp        = getParam("withExtIp", "true"),
+    webroot          = getParam("webroot", "false"),
+    webroot_path     = getParam("webroot_path", ""),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
-    fallbackToX1   = getParam("fallbackToX1", "false"),
+    fallbackToX1     = getParam("fallbackToX1", "false"),
     test             = getParam("test", "");
 
 function run() {
@@ -31,7 +33,9 @@ function run() {
         undeployHook     : replace(undeployHook),
         undeployHookType : replace(undeployHookType),
         withExtIp        : replace(withExtIp) || "true",
-        fallbackToX1   : replace(fallbackToX1) || "false",
+        fallbackToX1     : replace(fallbackToX1) || "false",
+        webroot          : replace(webroot) || "false",
+        webroot_path     : replace(webroot_path) || "",
         test             : test,
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
