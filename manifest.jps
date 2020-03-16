@@ -114,6 +114,8 @@ onInstall:
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    webroot: ${settings.webroot}
+    webroot_path: ${settings.webroot_path}
     fallbackToX1: ${settings.fallbackToX1:false}
 
 onUninstall:
@@ -133,6 +135,8 @@ onAfterClone:
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    webroot: ${settings.webroot}
+    webroot_path: ${settings.webroot_path}
 
 onAfterConfirmTransfer:
   installScript:
@@ -144,6 +148,8 @@ onAfterConfirmTransfer:
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    webroot: ${settings.webroot}
+    webroot_path: ${settings.webroot_path}
 
 actions:
   installScript:
@@ -160,6 +166,8 @@ actions:
       undeployHook: ${this.undeployHook}
       undeployHookType: ${this.undeployHookType}
       withExtIp: ${this.withExtIp}
+      webroot: ${settings.webroot:false}
+      webroot_path: ${settings.webroot_path}
       fallbackToX1: ${this.fallbackToX1:false}
   callScript:
     script: |
@@ -179,6 +187,8 @@ actions:
       undeployHook: ${settings.undeployHook}
       undeployHookType: ${settings.undeployHookType}
       withExtIp: ${settings.withExtIp}
+      webroot: ${settings.webroot}
+      webroot_path: ${settings.webroot_path}
 
   delete:
     script: |
