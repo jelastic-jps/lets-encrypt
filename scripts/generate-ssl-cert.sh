@@ -4,7 +4,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 
 [ -f "${DIR}/opt/letsencrypt/settings" ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh" ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
-[ -f "${DIR}/var/lib/jelastic/keys/letsencrypt/settings-custom" ] && source "${DIR}/var/lib/jelastic/keys/letsencrypt/settings-custom"
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
