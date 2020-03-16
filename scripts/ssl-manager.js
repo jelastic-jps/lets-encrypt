@@ -25,6 +25,7 @@ function SSLManager(config) {
      *      [undeployHookType] : {String}
      *      [withExtIp] : {Boolean}
      *      [webroot] : {Boolean}
+     *      [webroot_path] : {String}
      *      [test] : {Boolean}
      * }} config
      * @constructor
@@ -501,26 +502,27 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
-    me.initCustomConfigs = function() {
+    me.initCustomConfigs = function initCustomConfigs() {
         var CUSTOM_CONFIG = nodeManager.getCustomSettingsPath(),
-            configs = [],
-            body,
-            resp,
-            tmp;
+            properties = new java.util.Properties(),
+            stringReader,
+            propNames,
+            propName,
+            resp;
 
         resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
-
         if (resp.result == Response.FILE_PATH_NOT_EXIST) return {
             result: 0
         }
         if (resp.result != 0) return resp;
 
-        body = resp.body.replace(/\n$/, '');
-        configs = body.split('\n');
+        stringReader = new java.io.StringReader(resp.body.toString());
+        properties.load(stringReader);
+        propNames = properties.propertyNames();
 
-        for (var i = 0, n = configs.length; i < n; i++) {
-            tmp = configs[i].split('=');
-            config[tmp[0]] = me.initBoolValue(tmp[1].replace(/\"/g, ""));
+        while (propNames.hasMoreElements()) {
+            propName = propNames.nextElement().toString();
+            config[propName] = properties.getProperty(propName);
         }
 
         return {
@@ -809,6 +811,7 @@ function SSLManager(config) {
                 "primarydomain='%(primarydomain)'",
                 "withExtIp='%(withExtIp)'",
                 "webroot='%(webroot)'",
+                "webroot_path='%(webroot_path)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
@@ -821,6 +824,7 @@ function SSLManager(config) {
                 letsEncryptEnv : config.letsEncryptEnv || "",
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
+                webroot_path : config.webroot_path || "",
                 skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
@@ -925,7 +929,7 @@ function SSLManager(config) {
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
         if (config.webroot) return { result: 0 }
-        
+
         return nodeManager.cmd(
             "ip a | grep -q  '%(nodeIp)' || { iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE; }",
             {
