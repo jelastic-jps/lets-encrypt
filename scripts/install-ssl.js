@@ -32,6 +32,8 @@ function run() {
         undeployHook     : "${undeployHook}",
         undeployHookType : "${undeployHookType}",
         withExtIp        : "${withExtIp}",
+        webroot          : "${webroot}",
+        webroot_path     : "${webroot_path}",
         fallbackToX1     : "${fallbackToX1}",
         patchVersion     : "${patchVersion}",
         test             : "${test}"
