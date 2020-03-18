@@ -1334,7 +1334,7 @@ function SSLManager(config) {
                 "EXT_IPs_v6=$($IP a | sed -En \'s/inet6 ::1\/128//;s\/.*inet6 (addr:?)?([0-9a-f:]+)\/.*/\2/p\')",
                 "echo \"IP4-$EXT_IPs\"",
                 "echo \"IP6-$EXT_IPs_v6\""
-            ], {});
+            ]);
 
             if (resp.result == Response.JEM_OPERATION_COULD_NOT_BE_PERFORMED) {
                 resp = resp.responses[0];
