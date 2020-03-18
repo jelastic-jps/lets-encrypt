@@ -115,7 +115,7 @@ onInstall:
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
     webroot: ${settings.webroot}
-    webrootPath: ${settings.webroot_path}
+    webrootPath: ${settings.webrootPath}
     fallbackToX1: ${settings.fallbackToX1:false}
 
 onUninstall:
