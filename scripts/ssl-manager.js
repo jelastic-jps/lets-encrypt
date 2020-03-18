@@ -809,7 +809,7 @@ function SSLManager(config) {
                 "primarydomain='%(primarydomain)'",
                 "withExtIp='%(withExtIp)'",
                 "webroot='%(webroot)'",
-                "webroot_path='%(webroot_path)'",
+                "webrootPath='%(webrootPath)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
                 domain: customDomains || envDomain,
