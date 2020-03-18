@@ -542,10 +542,14 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
+        var resp;
+        
         config.webroot = me.initBoolValue(webroot);
 
         if (config.webroot) {
-            nodeManager.getEntryNodeIps();
+            resp = me.exec(nodeManager.getEntryNodeIps);
+            if (resp.result != 0) return resp;
+            
             nodeManager.setNodeId(nodeManager.getMasterIdByLayer(CP));
             nodeManager.setNodeGroup(CP);
             nodeManager.setNodeIp(nodeManager.getMasterIpByLayer(CP));
