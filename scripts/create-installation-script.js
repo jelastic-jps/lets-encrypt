@@ -35,7 +35,7 @@ function run() {
         withExtIp        : replace(withExtIp) || "true",
         fallbackToX1     : replace(fallbackToX1) || "false",
         webroot          : replace(webroot) || "false",
-        webrootPath     : replace(webrootPath) || "",
+        webrootPath      : replace(webrootPath) || "",
         test             : test,
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
