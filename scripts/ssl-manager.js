@@ -25,7 +25,7 @@ function SSLManager(config) {
      *      [undeployHookType] : {String}
      *      [withExtIp] : {Boolean}
      *      [webroot] : {Boolean}
-     *      [webroot_path] : {String}
+     *      [webrootPath] : {String}
      *      [test] : {Boolean}
      * }} config
      * @constructor
