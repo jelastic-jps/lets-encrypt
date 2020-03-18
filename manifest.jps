@@ -167,7 +167,7 @@ actions:
       undeployHookType: ${this.undeployHookType}
       withExtIp: ${this.withExtIp}
       webroot: ${settings.webroot:false}
-      webroot_path: ${settings.webroot_path}
+    webrootPath: ${settings.webroot_path}
       fallbackToX1: ${this.fallbackToX1:false}
   callScript:
     script: |
