@@ -1327,7 +1327,7 @@ function SSLManager(config) {
             return !!(group == LB || group == BL);
         };
         
-        me.getEntryNodeIps = function() {
+        me.getEntryNodeIps = function getEntryNodeIps() {
             var resp = nodeManager.cmd([
                 "IP=$(which ip)",
                 "EXT_IPs=$($IP a | sed -En \'s/127.0.0.1//;s\/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p\')",
@@ -1348,6 +1348,8 @@ function SSLManager(config) {
                     message: error
                 };
             }
+            
+            return resp;
         };
 
         me.getNode = function () {
