@@ -525,9 +525,7 @@ function SSLManager(config) {
             config[propName] = properties.getProperty(propName);
         }
 
-        return {
-            result: 0
-        }
+        return { result: 0 };
     };
 
     me.initBoolValue = function initBoolValue(value) {
