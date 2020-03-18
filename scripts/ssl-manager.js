@@ -511,18 +511,17 @@ function SSLManager(config) {
             resp;
 
         resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
-        if (resp.result == Response.FILE_PATH_NOT_EXIST) return {
-            result: 0
-        }
-        if (resp.result != 0) return resp;
+        if (resp.result != Response.FILE_PATH_NOT_EXIST) {                    
+            if (resp.result != 0) return resp;
 
-        stringReader = new java.io.StringReader(resp.body.toString());
-        properties.load(stringReader);
-        propNames = properties.propertyNames();
+            stringReader = new java.io.StringReader(resp.body.toString());
+            properties.load(stringReader);
+            propNames = properties.propertyNames();
 
-        while (propNames.hasMoreElements()) {
-            propName = propNames.nextElement().toString();
-            config[propName] = properties.getProperty(propName);
+            while (propNames.hasMoreElements()) {
+                propName = propNames.nextElement().toString();
+                config[propName] = properties.getProperty(propName);
+            }
         }
 
         return { result: 0 };
