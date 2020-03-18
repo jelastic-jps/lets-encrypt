@@ -511,7 +511,7 @@ function SSLManager(config) {
             resp;
 
         resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
-        if (resp.result != Response.FILE_PATH_NOT_EXIST) {                    
+        if (resp.result != Response.FILE_PATH_NOT_EXIST) {
             if (resp.result != 0) return resp;
 
             stringReader = new java.io.StringReader(resp.body.toString());
@@ -543,16 +543,16 @@ function SSLManager(config) {
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
         var sMasterIP;
-        
+
         config.webroot = me.initBoolValue(webroot);
 
         if (config.webroot) {
-            sMasterIP = nodeManager.getMasterIdByLayer(CP);
+            sMasterIP = nodeManager.getMasterNode(CP).id;
             nodeManager.setNodeGroup(CP);
             nodeManager.setNodeId(sMasterIP);
             nodeManager.setNodeIp(sMasterIP);
         } else {
-            nodeManager.setNodeId(config.nodeId || nodeManager.getMasterIdByLayer(config.nodeGroup));
+            nodeManager.setNodeId(config.nodeId || nodeManager.getMasterNode(config.nodeGroup).id);
             nodeManager.setNodeGroup(config.nodeGroup);
             nodeManager.setNodeIp(config.nodeIp);
         }
@@ -1349,20 +1349,22 @@ function SSLManager(config) {
                     message: error
                 };
             }
-            
+
             return resp;
         };
 
+        me.getNodes = function() {
+            var resp = me.getEnvInfo();
+            if (resp.result != 0) return resp;
+
+            return resp.nodes;
+        };
+
         me.getNode = function () {
-            var resp,
-                nodes;
+            var nodes;
 
             if (!node && nodeId) {
-                resp = me.getEnvInfo();
-
-                if (resp.result != 0) return resp;
-
-                nodes = resp.nodes;
+                nodes = me.getNodes();
 
                 for (var i = 0, n = nodes.length; i < n; i++) {
                     if (nodes[i].id == nodeId) {
@@ -1388,55 +1390,22 @@ function SSLManager(config) {
             return envInfo;
         };
 
-        me.getMasterIdByLayer = function(group) {
-            var nodes,
-                resp,
-                id;
+        me.getMasterNode = function(group) {
+            var nodes = me.getNodes(),
+                node;
 
-            group = group || CP;
-            resp = me.getEnvInfo();
-            nodes = resp.nodes;
-
-            for (var i = 0, node; node = nodes[i]; i++) {
+            for (var i = 0; node = nodes[i]; i++) {
                 if (node.ismaster && node.nodeGroup == group) {
-                    id = node.id;
-                    break;
+                    return node;
                 }
             }
-
-            return id;
         };
-
-        me.getMasterIpByLayer = function(group) {
-            var nodes,
-                resp,
-                address;
-
-            group = group || CP;
-            resp = me.getEnvInfo();
-            nodes = resp.nodes;
-
-            for (var i = 0, node; node = nodes[i]; i++) {
-                if (node.ismaster && node.nodeGroup == group) {
-                    address = node.address;
-                    break;
-                }
-            }
-
-            return address;
-        };
-
 
         me.getEntryPointGroup = function () {
             var group,
-                nodes,
-                resp;
+                nodes;
 
-            resp = me.getEnvInfo();
-            if (resp.result != 0) return resp;
-
-            nodes = resp.nodes;
-
+            nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
                 if (nodeManager.isBalancerLayer(node.nodeGroup)) {
                     group = node.nodeGroup;
@@ -1481,7 +1450,7 @@ function SSLManager(config) {
         };
 
         me.readFile = function (path, group) {
-            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId || me.getMasterIdByLayer(group));
+            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId || me.getMasterNode(group).id);
         };
 
         me.checkCustomSSL = function () {
