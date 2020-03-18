@@ -822,7 +822,7 @@ function SSLManager(config) {
                 letsEncryptEnv : config.letsEncryptEnv || "",
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
-                webroot_path : config.webroot_path || "",
+                webrootPath : config.webrootPath || "",
                 skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
