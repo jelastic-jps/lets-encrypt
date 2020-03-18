@@ -542,17 +542,15 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        var resp;
+        var sMasterIP;
         
         config.webroot = me.initBoolValue(webroot);
 
         if (config.webroot) {
-            resp = me.exec(nodeManager.getEntryNodeIps);
-            if (resp.result != 0) return resp;
-            
-            nodeManager.setNodeId(nodeManager.getMasterIdByLayer(CP));
+            sMasterIP = nodeManager.getMasterIdByLayer(CP);
             nodeManager.setNodeGroup(CP);
-            nodeManager.setNodeIp(nodeManager.getMasterIpByLayer(CP));
+            nodeManager.setNodeId(sMasterIP);
+            nodeManager.setNodeIp(sMasterIP);
         } else {
             nodeManager.setNodeId(config.nodeId || nodeManager.getMasterIdByLayer(config.nodeGroup));
             nodeManager.setNodeGroup(config.nodeGroup);
