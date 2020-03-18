@@ -33,7 +33,7 @@ function run() {
         undeployHookType : "${undeployHookType}",
         withExtIp        : "${withExtIp}",
         webroot          : "${webroot}",
-        webroot_path     : "${webroot_path}",
+        webrootPath     : "${webrootPath}",
         fallbackToX1     : "${fallbackToX1}",
         patchVersion     : "${patchVersion}",
         test             : "${test}"
