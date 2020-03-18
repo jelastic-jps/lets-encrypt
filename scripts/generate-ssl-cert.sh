@@ -21,7 +21,7 @@ params='';
 [[ -z "$webrootPath" ]] && {
     [[ ! -z ${WEBROOT} ]] && { webroot_path="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
 }
-[[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webroot_path}"; } || { params=' --standalone --http-01-port 12345 '; }
+[[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=' --standalone --http-01-port 12345 '; }
 
 #Validate settings
 [ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
