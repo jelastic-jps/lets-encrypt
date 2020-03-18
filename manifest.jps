@@ -188,7 +188,7 @@ actions:
       undeployHookType: ${settings.undeployHookType}
       withExtIp: ${settings.withExtIp}
       webroot: ${settings.webroot}
-      webroot_path: ${settings.webroot_path}
+    webrootPath: ${settings.webroot_path}
 
   delete:
     script: |
