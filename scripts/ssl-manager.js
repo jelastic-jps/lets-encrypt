@@ -120,13 +120,13 @@ function SSLManager(config) {
     };
 
     me.checkSkippedDomainsInSuccess = function checkSkippedDomainsInSuccess(resp) {
-        var sSkippedDomains = me.getSkippedDomains();
+        var skippedDomains = me.getSkippedDomains();
 
-        if (sSkippedDomains) {
-            sSkippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(sSkippedDomains, true) + "\n > \n > Fix their DNS records via your domain registrar admin panel, and reinstall/update the add-on or remove them from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
+        if (skippedDomains) {
+            skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Fix their DNS records via your domain registrar admin panel, and reinstall/update the add-on or remove them from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
         }
 
-        resp.skippedDomains = sSkippedDomains || "";
+        resp.skippedDomains = skippedDomains || "";
 
         return resp;
     };
@@ -542,21 +542,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        var sMasterIP;
-
         config.webroot = me.initBoolValue(webroot);
-
-        if (config.webroot) {
-            sMasterIP = nodeManager.getMasterNode(CP).id;
-            nodeManager.setNodeGroup(CP);
-            nodeManager.setNodeId(sMasterIP);
-            nodeManager.setNodeIp(sMasterIP);
-        } else {
-            nodeManager.setNodeId(config.nodeId || nodeManager.getMasterNode(config.nodeGroup).id);
-            nodeManager.setNodeGroup(config.nodeGroup);
-            nodeManager.setNodeIp(config.nodeIp);
-        }
-
         return { result: 0 };
     };
 
@@ -659,9 +645,13 @@ function SSLManager(config) {
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
-            if (node.nodeGroup != group) continue;
+            if (node.nodeGroup != (config.webroot ? CP : group)) continue;
             
             me.initAddOnExtIp(config.withExtIp);
+
+            if (config.webroot && node.nodeGroup == CP) {
+                nodeManager.setNodeGroup(CP);
+            }
 
             if (config.withExtIp) {
                 if (!node.extIPs || node.extIPs.length == 0) {
@@ -678,6 +668,9 @@ function SSLManager(config) {
             if (id || node.ismaster) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
+
+                nodeManager.setNodeId(config.nodeId);
+                nodeManager.setNodeIp(config.nodeIp);
 
                 if (nodeManager.isExtraLayer(group) && node.url) {
                     nodeManager.setEnvDomain(node.url.replace(/https?:\/\//, ''));
@@ -968,8 +961,7 @@ function SSLManager(config) {
     };
 
     me.deploy = function deploy() {
-        if (config.deployHook) 
-        {
+        if (config.deployHook) {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
 
@@ -1094,7 +1086,7 @@ function SSLManager(config) {
 
     me.sendResp = function sendResp(resp, isUpdate) {
         var action = isUpdate ? "updated" : "installed",
-            sSkippedDomains = me.getSkippedDomains();
+            skippedDomains = me.getSkippedDomains();
 
         if (resp.result != 0) {
             return me.sendErrResp(resp);
@@ -1106,7 +1098,7 @@ function SSLManager(config) {
                 ENVIRONMENT : config.envDomain,
                 ACTION : action,
                 UPDATED_DOMAINS: "Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>",
-                SKIPPED_DOMAINS: me.getSkippedDomains() ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(me.getSkippedDomains()) + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
+                SKIPPED_DOMAINS: skippedDomains ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
             }
         );
     };
@@ -1390,17 +1382,6 @@ function SSLManager(config) {
             return envInfo;
         };
 
-        me.getMasterNode = function(group) {
-            var nodes = me.getNodes(),
-                node;
-
-            for (var i = 0; node = nodes[i]; i++) {
-                if (node.ismaster && node.nodeGroup == group) {
-                    return node;
-                }
-            }
-        };
-
         me.getEntryPointGroup = function () {
             var group,
                 nodes;
@@ -1450,7 +1431,7 @@ function SSLManager(config) {
         };
 
         me.readFile = function (path, group) {
-            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId || me.getMasterNode(group).id);
+            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId || me.getNode().node.id);
         };
 
         me.checkCustomSSL = function () {
