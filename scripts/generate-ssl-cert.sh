@@ -43,7 +43,7 @@ mkdir -p $DIR/var/log/letsencrypt
 result_code=0;
 
 #Request for certificates
-resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt)
+resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
 result_code=$?;
 
 [[ "$webroot" == "false" ]] && {
@@ -55,9 +55,11 @@ result_code=$?;
 
 if [ "$result_code" != "0" ]; then
     [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
+    [[ $resp == *"does not exist or is not a directory"* ]] && invalid_webroot_dir=true
 fi
 
 [[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
+[[ $invalid_webroot_dir == true ]] && exit 5; #wrong webroot directory or server is not running
 [[ $result_code != "0" ]] && { echo "$resp"; exit 1; } #general result error
 
 #To be sure that r/w access
