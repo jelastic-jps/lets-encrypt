@@ -646,10 +646,6 @@ function SSLManager(config) {
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
-            if (!isBLNodeExists && nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
-                nodeManager.setBalancerMasterNode(node);
-                isBLNodeExists = true;
-            }
             if (node.nodeGroup != group) continue;
             
             me.initAddOnExtIp(config.withExtIp);
@@ -862,11 +858,13 @@ function SSLManager(config) {
                 validationPath : nodeManager.getScriptPath(validationFileName),
                 url : url,
                 path : generateSSLScript
-            }],
-
-            //redirect incoming requests to master node
-            [ me.manageDnat, "add" ]
+            }]
         ]);
+
+        if (!config.webroot) {
+            //redirect incoming requests to master node
+            me.exec(me.manageDnat, "add");
+        }
 
         bUpload = nodeManager.checkCustomSSL();
 
@@ -881,8 +879,10 @@ function SSLManager(config) {
             );
         }
 
-        //removing redirect
-        me.exec(me.manageDnat, "remove");
+        if (!config.webroot) {
+            //removing redirect
+            me.exec(me.manageDnat, "remove");
+        }
 
         if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
             log("WARNING: Ancient version of Python");
@@ -951,8 +951,6 @@ function SSLManager(config) {
 
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
-        if (config.webroot) return { result: 0 };
-
         return nodeManager.cmd(
             "ip a | grep -q  '%(nodeIp)' || { iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE; }",
             {
