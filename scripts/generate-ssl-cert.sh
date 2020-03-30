@@ -23,9 +23,6 @@ params='';
 }
 [[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=' --standalone --http-01-port 12345 '; }
 
-#Validate settings
-[ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
-
 validateCertBot
 
 #Kill hanged certificate requests
