@@ -1351,10 +1351,10 @@ function SSLManager(config) {
         };
 
         me.setBLNodeExists = function (exists) {
-            isBLNodeExists = true;
+            isBLNodeExists = exists;
         };
 
-        me.getBLNodeExists = function (exists) {
+        me.getBLNodeExists = function () {
             return isBLNodeExists || false;
         };
 
@@ -1434,7 +1434,7 @@ function SSLManager(config) {
 
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
-                if (nodeManager.getBLNodeExists() && nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
+                if (!nodeManager.getBLNodeExists() && nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
                     nodeManager.setBalancerMasterNode(node);
                     nodeManager.setBLNodeExists(true);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
