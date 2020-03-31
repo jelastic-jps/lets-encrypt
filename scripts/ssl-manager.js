@@ -43,7 +43,6 @@ function SSLManager(config) {
         LB = "lb",
         CP = "cp",
         isValidToken = false,
-        isBLNodeExists = false,
         patchBuild = 1,
         debug = [],
         nodeManager,
@@ -651,7 +650,7 @@ function SSLManager(config) {
             me.initAddOnExtIp(config.withExtIp);
 
             if (config.withExtIp) {
-                targetNode = (isBLNodeExists) ? nodeManager.getBalancerMasterNode() : node;
+                targetNode = nodeManager.getBLNodeExists() ? nodeManager.getBalancerMasterNode() : node;
                 me.attachExtIpIfNeed(targetNode);
             } else {
                 me.exec([
@@ -693,7 +692,7 @@ function SSLManager(config) {
             VALIDATE_DNS = "validateDNSSettings '%(domain)'",
             validateNodeId;
 
-        validateNodeId = isBLNodeExists ? nodeManager.getBalancerMasterNode().id : config.nodeId;
+        validateNodeId = nodeManager.getBLNodeExists() ? nodeManager.getBalancerMasterNode().id : config.nodeId;
 
         var resp = nodeManager.cmd([
             "mkdir -p $(dirname %(path))",
@@ -1257,6 +1256,7 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
+            isBLNodeExists = false,
             bCustomSSLSupported,
             sCustomSettingsPath,
             oBackupScript,
@@ -1350,12 +1350,20 @@ function SSLManager(config) {
             return !!(group == LB || group == BL);
         };
 
+        me.setBLNodeExists = function (exists) {
+            isBLNodeExists = true;
+        };
+
+        me.getBLNodeExists = function (exists) {
+            return isBLNodeExists || false;
+        };
+
         me.setBalancerMasterNode = function (node) {
             oBLMaster = node;
         };
 
         me.getBalancerMasterNode = function () {
-            return oBLMaster || "";
+            return oBLMaster || {};
         };
         
         me.getEntryNodeIps = function getEntryNodeIps() {
@@ -1426,10 +1434,10 @@ function SSLManager(config) {
 
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
-                if (nodeManager.isBalancerLayer(node.nodeGroup) && !isBLNodeExists && node.ismaster) {
+                if (nodeManager.getBLNodeExists() && nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
                     nodeManager.setBalancerMasterNode(node);
+                    nodeManager.setBLNodeExists(true);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
-                    isBLNodeExists = true;
                     break;
                 }
             }
