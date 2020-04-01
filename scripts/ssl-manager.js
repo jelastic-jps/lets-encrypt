@@ -81,11 +81,11 @@ function SSLManager(config) {
             "backup-scripts": me.backupScripts,
             "restore-scripts": me.restoreScripts
         };
-        
+
         if (getParam("uninstall")) {
             action = "uninstall";
         }
-        
+
         if (!actions[action]) {
             return {
                 result : Response.ERROR_UNKNOWN,
@@ -157,7 +157,7 @@ function SSLManager(config) {
 
         //log("ActionLog: " + oResp);
     };
-    
+
     me.updateGeneratedCustomDomains = function () {
         var setting = "opt/letsencrypt/settings",
             resp;
@@ -168,9 +168,9 @@ function SSLManager(config) {
         ], {
             setting : nodeManager.getPath(setting)
         });
-        
+
         if (resp.result != 0) return resp;
-        
+
         resp = resp.responses ? resp.responses[0] : resp;
         resp = resp.out.replace(/\'/g, "").split("\n");
 
@@ -337,7 +337,7 @@ function SSLManager(config) {
 
         if (!config.isTask) {
             me.logAction("StartUpdateLEFromContainer");
-            
+
             if (!session && me.hasValidToken()) {
                 session = signature;
             }
@@ -410,7 +410,7 @@ function SSLManager(config) {
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
         me.logAction("AddLEAutoUpdateTask");
-        
+
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
@@ -473,7 +473,7 @@ function SSLManager(config) {
     me.getCustomDomains = function () {
         return config.customDomains;
     };
-    
+
     me.setSkippedDomains = function (domains) {
         config.skippedDomains = domains;
     };
@@ -646,11 +646,11 @@ function SSLManager(config) {
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
-            
+
             me.initAddOnExtIp(config.withExtIp);
 
             if (config.withExtIp) {
-                targetNode = nodeManager.getBLNodeExists() ? nodeManager.getBalancerMasterNode() : node;
+                targetNode = nodeManager.getBalancerMasterNode() || node;
                 me.attachExtIpIfNeed(targetNode);
             } else {
                 me.exec([
@@ -690,9 +690,11 @@ function SSLManager(config) {
             url = me.getScriptUrl(fileName),
             VALIDATE_IP = "validateExtIP",
             VALIDATE_DNS = "validateDNSSettings '%(domain)'",
-            validateNodeId;
+            validateNodeId,
+            balancerNode;
 
-        validateNodeId = nodeManager.getBLNodeExists() ? nodeManager.getBalancerMasterNode().id : config.nodeId;
+        balancerNode =  nodeManager.getBalancerMasterNode();
+        validateNodeId = balancerNode ? balancerNode.id : config.nodeId;
 
         var resp = nodeManager.cmd([
             "mkdir -p $(dirname %(path))",
@@ -1148,7 +1150,7 @@ function SSLManager(config) {
 
         return sResp || "";
     };
-    
+
     me.isMoreLEAppInstalled = function isMoreLEAppInstalled () {
         var resp;
 
@@ -1256,7 +1258,6 @@ function SSLManager(config) {
 
     function NodeManager(envName, nodeId, baseDir, logPath) {
         var me = this,
-            isBLNodeExists = false,
             bCustomSSLSupported,
             sCustomSettingsPath,
             oBackupScript,
@@ -1303,11 +1304,11 @@ function SSLManager(config) {
         me.getBackupPath = function () {
             return sBackupPath;
         };
-        
+
         me.setCustomSettingsPath = function (path) {
             sCustomSettingsPath = baseDir + path;
         };
-        
+
         me.getCustomSettingsPath = function() {
             return sCustomSettingsPath;
         };
@@ -1350,14 +1351,6 @@ function SSLManager(config) {
             return !!(group == LB || group == BL);
         };
 
-        me.setBLNodeExists = function (exists) {
-            isBLNodeExists = exists;
-        };
-
-        me.getBLNodeExists = function () {
-            return isBLNodeExists || false;
-        };
-
         me.setBalancerMasterNode = function (node) {
             oBLMaster = node;
         };
@@ -1365,7 +1358,7 @@ function SSLManager(config) {
         me.getBalancerMasterNode = function () {
             return oBLMaster;
         };
-        
+
         me.getEntryNodeIps = function getEntryNodeIps() {
             var resp = nodeManager.cmd([
                 "IP=$(which ip)",
@@ -1434,9 +1427,8 @@ function SSLManager(config) {
 
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
-                if (!nodeManager.getBLNodeExists() && nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
+                if (nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
                     nodeManager.setBalancerMasterNode(node);
-                    nodeManager.setBLNodeExists(true);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
                     break;
                 }
