@@ -1363,7 +1363,7 @@ function SSLManager(config) {
         };
 
         me.getBalancerMasterNode = function () {
-            return oBLMaster || {};
+            return oBLMaster;
         };
         
         me.getEntryNodeIps = function getEntryNodeIps() {
