@@ -105,6 +105,7 @@ function SSLManager(config) {
             [ me.initCustomConfigs ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig ],
+            [ me.validateEntryPoint ],
             [ me.generateSslCerts ],
             [ me.updateGeneratedCustomDomains ]
         ]);
@@ -198,6 +199,8 @@ function SSLManager(config) {
         settings = {
             nodeId              : config.nodeId,
             webroot             : config.webroot || "",
+            webrootPath         : config.webrootPath || "",
+            withExtIp           : config.withExtIp,
             customDomains       : me.getCustomDomains(),
             nodeGroup           : config.nodeGroup || "",
             deployHook          : config.deployHook || "",
@@ -521,7 +524,7 @@ function SSLManager(config) {
 
             while (propNames.hasMoreElements()) {
                 propName = propNames.nextElement().toString();
-                config[propName] = properties.getProperty(propName);
+                config[propName] = String(properties.getProperty(propName));
             }
         }
 
