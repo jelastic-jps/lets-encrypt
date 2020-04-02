@@ -22,6 +22,7 @@ params='';
     [[ ! -z ${WEBROOT} ]] && { webrootPath="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
 }
 [[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=' --standalone --http-01-port 12345 '; }
+[[ -z "$domain" ]] && domain=$appdomain;
 
 validateCertBot
 
