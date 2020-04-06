@@ -4,3 +4,4 @@ Just select a required *Environment* from the list below and specify the attache
 **Note:** 
 * Leave the *External Domain(s)* field blank for issuing a test SSL certificate bound to the internal environment domain.
 * Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).
+* At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let's Encrypt add-on.
