@@ -34,6 +34,8 @@ function SSLManager(config) {
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         ANCIENT_VERSION_OF_PYTHON = 4,
+        CLOUDLET_MEM_AMOUNT = 128,
+        REQUIRED_MEM = 512,
         Random = com.hivext.api.utils.Random,
         me = this,
         isValidToken = false,
@@ -235,7 +237,8 @@ function SSLManager(config) {
                     nodeManager.getScriptPath("validation.sh"),
                     autoUpdateScript
                 ].join(" ")
-            }]
+            }],
+            [ me.removeNodeValidation ]
         ]);
     };
 
@@ -248,7 +251,7 @@ function SSLManager(config) {
                 logPath: logPath,
                 backupPath: backupPath,
                 effPath: nodeManager.getPath("opt/eff.org")
-            }],
+            }]
         ]);
     };
 
@@ -315,7 +318,7 @@ function SSLManager(config) {
         return me.exec(me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
             backupPath: nodeManager.getBackupPath()
         });
-    },
+    };
 
     me.autoUpdate = function () {
         var resp;
@@ -413,7 +416,12 @@ function SSLManager(config) {
         return isValidToken;
     };
 
-    me.creteScriptAndInstall = function createInstallationScript() {
+    me.createScriptAndInstall = function createInstallationScript() {
+        var resp;
+
+        resp = me.exec(me.configureNodeMemory, null, true);
+        if (resp.result != 0) return resp;
+
         return me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
@@ -502,6 +510,65 @@ function SSLManager(config) {
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
         return { result: 0 };
+    };
+
+    me.configureNodeMemory = function configureNodeMemory() {
+        var resp;
+
+        resp = me.defineNodeMemory();
+        if (resp.result != 0) return resp;
+
+        if (config.nodeMemory >= REQUIRED_MEM) {
+            return me.exec(me.setClouletsValidation);
+        } else {
+            return error(Response.ERROR_UNKNOWN, "At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let's Encrypt add-on.");
+        }
+    };
+
+    me.defineNodeMemory = function() {
+        var resp;
+
+        resp = me.cmd("free -m | grep Mem | awk '{print $2}'", {
+            nodeGroup: config.nodeGroup
+        });
+        config.nodeMemory = Number(resp.responses[0].out);
+        return {result: 0};
+    };
+
+    me.removeNodeValidation = function removeNodeValidation() {
+        var nodeGroupValidations;
+
+        nodeGroupValidations = nodeManager.getNodeGroupValidations();
+
+        if (config.setValidations && nodeGroupValidations) {
+            nodeGroupValidations.minCloudlets = "";
+
+            return jelastic.env.control.ApplyNodeGroupData(config.envName, session, config.nodeGroup, {"validation": nodeGroupValidations});
+        }
+
+        return { result: 0 };
+    };
+
+    me.setClouletsValidation = function() {
+        var nodeGroupValidations,
+            cloudletsAmount,
+            resp;
+
+        nodeGroupValidations = nodeManager.getNodeGroupValidations() || {};
+
+        if (!nodeGroupValidations.minCloudlets) {
+            cloudletsAmount = parseInt(REQUIRED_MEM / me.getCloudletsMemAmount());
+            nodeGroupValidations.minCloudlets = cloudletsAmount;
+
+            resp = jelastic.env.control.ApplyNodeGroupData(config.envName, session, config.nodeGroup, {"validation": nodeGroupValidations});
+            if (resp.result != 0) return resp;
+            config.setValidations = true;
+        }
+        return { result: 0 };
+    };
+
+    me.getCloudletsMemAmount = function() {
+        return CLOUDLET_MEM_AMOUNT; // TODO: read from system settings
     };
 
     me.initBindedDomains = function() {
@@ -1179,6 +1246,7 @@ function SSLManager(config) {
             LB = "lb",
             CP = "cp",
             bCustomSSLSupported,
+            nodeGroupsCache = [],
             oBackupScript,
             sBackupPath,
             envInfo,
@@ -1310,6 +1378,46 @@ function SSLManager(config) {
             }
 
             return { result : 0, group : group || CP };
+        };
+
+        me.getNodeGroupsData = function() {
+            var resp;
+
+            resp = me.getEnvInfo();
+            if (resp.result != 0) return resp;
+
+            return {
+                result: 0,
+                nodeGroups: resp.nodeGroups || ""
+            }
+        };
+
+        me.getNodeGroupDataByGroup = function(group) {
+            var nodeGroups,
+                resp;
+
+            if (nodeGroupsCache[group]) return nodeGroupsCache[group];
+
+            resp = me.getNodeGroupsData();
+            if (resp.result != 0) return resp;
+            nodeGroups = resp.nodeGroups;
+
+            for (var i = 0, n = nodeGroups.length; i < n; i++) {
+                if (nodeGroups[i].name == group) {
+                    nodeGroupsCache[group] = nodeGroups[i];
+                    break;
+                }
+            }
+
+            return nodeGroupsCache[group];
+
+        };
+
+        me.getNodeGroupValidations = function() {
+            var nodeGroup;
+
+            nodeGroup = me.getNodeGroupDataByGroup(config.nodeGroup);
+            return nodeGroup.validation || "";
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
