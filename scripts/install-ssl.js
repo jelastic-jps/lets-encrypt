@@ -34,6 +34,7 @@ function run() {
         withExtIp        : "${withExtIp}",
         fallbackToX1     : "${fallbackToX1}",
         patchVersion     : "${patchVersion}",
+        setValidations   : "${setValidations}",
         test             : "${test}"
     });
 
