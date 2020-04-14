@@ -514,8 +514,11 @@ function SSLManager(config) {
             propName,
             resp;
 
-        resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
-        if (resp.result != Response.FILE_PATH_NOT_EXIST) {
+        resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false");
+        if (resp.result != 0) return resp;
+
+        if (resp.responses[0].out == "true") {
+            resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
             if (resp.result != 0) return resp;
 
             stringReader = new java.io.StringReader(resp.body.toString());
