@@ -123,6 +123,8 @@ onUninstall:
 
 onBeforeDelete: delete
 
+onBeforeSetCloudletCount [${targetNodes.nodeGroup}]: stopSetCloudlets
+
 onAfterClone:
   install: ${baseUrl}/manifest.jps?_r=${fn.random}
   envName: ${event.response.env.envName}
@@ -179,6 +181,9 @@ actions:
       undeployHook: ${settings.undeployHook}
       undeployHookType: ${settings.undeployHookType}
       withExtIp: ${settings.withExtIp}
+  stopSetCloudlets:
+    - script: return {'result': 'warning', 'message': 'At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let\'s Encrypt add-on.'}
+    - stopEvent
 
   delete:
     script: |
