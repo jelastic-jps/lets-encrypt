@@ -536,14 +536,17 @@ function SSLManager(config) {
     };
 
     me.removeNodeValidation = function removeNodeValidation() {
-        var nodeGroupValidations;
+        var nodeGroupValidations,
+            platformVersion = getPlatformVersion();
 
         nodeGroupValidations = nodeManager.getNodeGroupValidations();
 
         if (config.setValidations && nodeGroupValidations) {
             nodeGroupValidations.minCloudlets = "";
 
-            return jelastic.env.control.ApplyNodeGroupData(config.envName, session, config.nodeGroup, {"validation": nodeGroupValidations});
+            if (compareVersions(platformVersion, '5.8.1') >= 0) {
+                return jelastic.env.control.ApplyNodeGroupData(config.envName, session, config.nodeGroup, {"validation": nodeGroupValidations});
+            }
         }
 
         return { result: 0 };
@@ -560,9 +563,11 @@ function SSLManager(config) {
             cloudletsAmount = parseInt(REQUIRED_MEM / me.getCloudletsMemAmount());
             nodeGroupValidations.minCloudlets = cloudletsAmount;
 
-            resp = jelastic.env.control.ApplyNodeGroupData(config.envName, session, config.nodeGroup, {"validation": nodeGroupValidations});
-            if (resp.result != 0) return resp;
-            config.setValidations = true;
+            if (compareVersions(platformVersion, '5.8.1') >= 0) {
+                resp = jelastic.env.control.ApplyNodeGroupData(config.envName, session, config.nodeGroup, {"validation": nodeGroupValidations});
+                if (resp.result != 0) return resp;
+                config.setValidations = true;
+            }
         }
         return { result: 0 };
     };
