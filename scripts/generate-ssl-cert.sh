@@ -4,6 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 
 [ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh"  ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
+[ -f "${DIR}/var/lib/jelastic/keys/letsencrypt/settings-custom"  ] && source "${DIR}/var/lib/jelastic/keys/letsencrypt/settings-custom"
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
@@ -16,6 +17,9 @@ git pull origin master
 #Parameters for test certificates
 test_params='';
 [ "$test" == "true" -o "$1" == "fake" ] && { test_params='--test-cert --break-my-certs '; }
+
+webroot_params='';
+[[ "$webroot" == "true" && ! -z "$webroot_path" ]] && { webroot_params="-a webroot --webroot-path ${webroot_path}"; } || { webroot_params=' --standalone '; }
 
 #Validate settings
 [ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
@@ -35,7 +39,7 @@ ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 1
 result_code=0;
 
 #Request for certificates
-resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt)
+resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $webroot_params $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt)
 result_code=$?;
 
 iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345

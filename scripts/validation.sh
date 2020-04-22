@@ -104,7 +104,9 @@ function validateDNSSettings(){
         }
     }
 
-    source "${SETTING_PATH}"
+    [ -f "${SETTING_PATH}" ] && {
+        source "${SETTING_PATH}";
+    }
 
     return 0;
 }
