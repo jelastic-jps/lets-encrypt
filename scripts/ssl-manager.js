@@ -549,6 +549,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
+        webroot = webroot || false;
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
     };
