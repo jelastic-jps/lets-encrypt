@@ -2,8 +2,8 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 
-[ -f "${DIR}/opt/letsencrypt/settings"  ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
-[ -f "${DIR}/root/validation.sh"  ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
+[ -f "${DIR}/opt/letsencrypt/settings" ] && source "${DIR}/opt/letsencrypt/settings" || { echo "No settings available" ; exit 3 ; }
+[ -f "${DIR}/root/validation.sh" ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
 
 #To be sure that r/w access
 mkdir -p /etc/letsencrypt/
@@ -17,8 +17,12 @@ git pull origin master
 test_params='';
 [ "$test" == "true" -o "$1" == "fake" ] && { test_params='--test-cert --break-my-certs '; }
 
-#Validate settings
-[ "$withExtIp" == "true" ] && { validateExtIP; validateDNSSettings; }
+params='';
+[[ ${webroot} == "true" && -z "$webrootPath" ]] && {
+    [[ ! -z ${WEBROOT} ]] && { webrootPath="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
+}
+[[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=' --standalone --http-01-port 12345 '; }
+[[ -z "$domain" ]] && domain=$appdomain;
 
 validateCertBot
 
@@ -28,26 +32,32 @@ killall -9 letsencrypt > /dev/null 2>&1
 
 mkdir -p $DIR/var/log/letsencrypt
 
-iptables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
-ip6tables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
-iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
-ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
+[[ "$webroot" == "false" ]] && {
+    iptables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+    ip6tables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+    iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
+    ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
+}
 result_code=0;
 
 #Request for certificates
-resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --standalone $test_params --domain $domain --preferred-challenges http-01 --http-01-port 12345 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt)
+resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
 result_code=$?;
 
-iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
-ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
-iptables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
-ip6tables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+[[ "$webroot" == "false" ]] && {
+    iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
+    ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+    iptables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+    ip6tables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+}
 
 if [ "$result_code" != "0" ]; then
     [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
+    [[ $resp == *"does not exist or is not a directory"* ]] && invalid_webroot_dir=true
 fi
 
 [[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
+[[ $invalid_webroot_dir == true ]] && exit 5; #wrong webroot directory or server is not running
 [[ $result_code != "0" ]] && { echo "$resp"; exit 1; } #general result error
 
 #To be sure that r/w access

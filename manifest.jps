@@ -201,7 +201,6 @@ actions:
     stopEvent:
       type: warning
       message: "At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let's Encrypt add-on."
-
   delete:
     script: |
       jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');

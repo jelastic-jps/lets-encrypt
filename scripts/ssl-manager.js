@@ -38,6 +38,7 @@ function SSLManager(config) {
         ANCIENT_VERSION_OF_PYTHON = 4,
         CLOUDLET_MEM_AMOUNT = 128,
         REQUIRED_MEM = 512,
+        INVALID_WEBROOT_DIR = 5,
         Random = com.hivext.api.utils.Random,
         me = this,
         BL = "bl",
