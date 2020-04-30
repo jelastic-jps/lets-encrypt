@@ -114,6 +114,8 @@ onInstall:
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    webroot: ${settings.webroot}
+    webrootPath: ${settings.webrootPath}
     fallbackToX1: ${settings.fallbackToX1:false}
 
 onUninstall:
@@ -135,6 +137,8 @@ onAfterClone:
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    webroot: ${settings.webroot}
+    webrootPath: ${settings.webrootPath}
 
 onAfterConfirmTransfer:
   installScript:
@@ -146,6 +150,8 @@ onAfterConfirmTransfer:
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
     withExtIp: ${settings.withExtIp}
+    webroot: ${settings.webroot}
+    webrootPath: ${settings.webrootPath}
 
 actions:
   installScript:
@@ -162,6 +168,8 @@ actions:
       undeployHook: ${this.undeployHook}
       undeployHookType: ${this.undeployHookType}
       withExtIp: ${this.withExtIp}
+      webroot: ${settings.webroot:false}
+      webrootPath: ${settings.webrootPath}
       fallbackToX1: ${this.fallbackToX1:false}
   callScript:
     script: |
@@ -181,9 +189,18 @@ actions:
       undeployHook: ${settings.undeployHook}
       undeployHookType: ${settings.undeployHookType}
       withExtIp: ${settings.withExtIp}
+      webroot: ${settings.webroot}
+      webrootPath: ${settings.webrootPath}
   stopSetCloudlets:
-    - script: return {'result': 'warning', 'message': 'At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let\'s Encrypt add-on.'}
-    - stopEvent
+    - script: |
+        var version = jelastic.system.service.GetVersion().version.split('-').shift();
+        if (compareVersions(version, '5.8') <= 1 && "${event.params.flexibleCloudlets}" < 4) return {result: 0, onAfterReturn: "setCloudletsStopEvent"};
+        function compareVersions(a, b) {a = a.split('.'), b = b.split('.'); for (var i = 0, l = Math.max(a.length, b.length); i < l; i++) {x = parseInt(a[i], 10) || 0; y = parseInt(b[i], 10) || 0; if (x != y) return x > y ? 1 : -1 }; return 0;}
+        return {result: 0};
+  setCloudletsStopEvent:
+    stopEvent:
+      type: warning
+      message: "At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let's Encrypt add-on."
 
   delete:
     script: |
