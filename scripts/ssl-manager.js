@@ -1064,7 +1064,7 @@ function SSLManager(config) {
             session: session,
             certId: resp.responses[resp.responses.length - 1].id,
             entryPoint: SLB,
-            extDomains: config.customDomains.replace(/ (-d)? /g, ',')
+            extDomains: me.formatDomains(config.customDomains)
         });
     };
 
