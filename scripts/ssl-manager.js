@@ -1060,11 +1060,11 @@ function SSLManager(config) {
         if (resp.result != 0) return resp;
 
         return jelastic.env.binder.BindSSLCert({
-            envName:config.envName,
+            envName: config.envName,
             session: session,
             certId: resp.responses[resp.responses.length - 1].id,
             entryPoint: SLB,
-            extDomains: config.customDomains
+            extDomains: config.customDomains.replace(/ (-d)? /g, ',')
         });
     };
 
@@ -1091,7 +1091,6 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                log("after AddSSLCert");
                 me.exec(me.bindSSLCerts);
             }
         } else {
