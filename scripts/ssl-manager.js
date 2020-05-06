@@ -634,7 +634,7 @@ function SSLManager(config) {
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
-            atachExtIpGroup,
+            atachExtIpGroup = "",
             targetNode,
             nodes,
             resp;
@@ -661,14 +661,17 @@ function SSLManager(config) {
 
             me.initAddOnExtIp(config.withExtIp);
 
-            
             log("node ->" + node);
+            log("config.withExtIp ->" + config.withExtIp);
             if (config.withExtIp) {
                 targetNode = nodeManager.getBalancerMasterNode() || node;
-                //if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
+                log("targetNode ->" + targetNode);
+                atachExtIpGroup = atachExtIpGroup || targetNode.nodeGroup;
+                log("atachExtIpGroup ->" + atachExtIpGroup);
+
+                // if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
                 //     me.attachExtIpToGroupNodes(targetNode.nodeGroup);
                 // } else {
-                    log("atachExtIpGroup ->" + atachExtIpGroup);
                     me.attachExtIpIfNeed(targetNode);
                 // }
             } else {
