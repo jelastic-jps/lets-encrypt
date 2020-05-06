@@ -642,6 +642,7 @@ function SSLManager(config) {
         if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
             log("before getEntryPointGroup");
             resp = nodeManager.getEntryPointGroup();
+            log("resp ->" + resp);
             if (resp.result != 0) return resp;
 
             group = resp.group;
@@ -1445,9 +1446,11 @@ function SSLManager(config) {
 
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
+                log("in for ->");
                 if (nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
                     nodeManager.setBalancerMasterNode(node);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
+                    log("group ->" + group);
                     break;
                 }
             }
