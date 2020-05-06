@@ -660,6 +660,7 @@ function SSLManager(config) {
 
             me.initAddOnExtIp(config.withExtIp);
 
+            
             log("node ->" + node);
             if (config.withExtIp) {
                 targetNode = nodeManager.getBalancerMasterNode() || node;
