@@ -48,7 +48,7 @@ targetNodes:
 requiredFeatures: extip
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/JE-53105
 logo: images/letsencrypt.png
 
 description:
@@ -105,18 +105,20 @@ buttons:
     action: configure
 
 onInstall:
-  installScript:
-    customDomains: ${settings.customDomains}
-    nodeId: ${settings.nodeId}
-    nodeGroup: ${targetNodes.nodeGroup}
-    deployHook: ${settings.deployHook}
-    deployHookType: ${settings.deployHookType}
-    undeployHook: ${settings.undeployHook}
-    undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp}
-    webroot: ${settings.webroot}
-    webrootPath: ${settings.webrootPath}
-    fallbackToX1: ${settings.fallbackToX1:false}
+  - setGlobals:
+      withExtIp: ${settings.withExtIp}
+  - installScript:
+        customDomains: ${settings.customDomains}
+        nodeId: ${settings.nodeId}
+        nodeGroup: ${targetNodes.nodeGroup}
+        deployHook: ${settings.deployHook}
+        deployHookType: ${settings.deployHookType}
+        undeployHook: ${settings.undeployHook}
+        undeployHookType: ${settings.undeployHookType}
+        withExtIp: ${globals.withExtIp}
+        webroot: ${settings.webroot}
+        webrootPath: ${settings.webrootPath}
+        fallbackToX1: ${settings.fallbackToX1:false}
 
 onUninstall:
   - callScript:
@@ -134,7 +136,7 @@ onAfterClone:
     nodeGroup: ${targetNodes.nodeGroup}
     deployHookType: ${settings.deployHookType}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp}
+    withExtIp: ${globals.withExtIp}
     webroot: ${settings.webroot}
     webrootPath: ${settings.webrootPath}
 
@@ -147,7 +149,7 @@ onAfterConfirmTransfer:
     deployHookType: ${settings.deployHookType}
     undeployHook: ${settings.undeployHook}
     undeployHookType: ${settings.undeployHookType}
-    withExtIp: ${settings.withExtIp}
+    withExtIp: ${globals.withExtIp}
     webroot: ${settings.webroot}
     webrootPath: ${settings.webrootPath}
 
@@ -186,7 +188,7 @@ actions:
       deployHookType: ${settings.deployHookType}
       undeployHook: ${settings.undeployHook}
       undeployHookType: ${settings.undeployHookType}
-      withExtIp: ${settings.withExtIp}
+      withExtIp: ${globals.withExtIp}
       webroot: ${settings.webroot}
       webrootPath: ${settings.webrootPath}
 
