@@ -640,16 +640,12 @@ function SSLManager(config) {
             resp;
 
         if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
-            log("before getEntryPointGroup");
             resp = nodeManager.getEntryPointGroup();
-            log("resp ->" + resp);
             if (resp.result != 0) return resp;
 
             group = resp.group;
             config.nodeGroup = group;
-            log("group after getEntryPointGroup" + group);
         }
-        log("id ->" + id);
 
         resp = nodeManager.getEnvInfo();
 
@@ -661,19 +657,13 @@ function SSLManager(config) {
 
             me.initAddOnExtIp(config.withExtIp);
 
-            log("node ->" + node);
-            log("config.withExtIp ->" + config.withExtIp);
             if (config.withExtIp) {
                 targetNode = nodeManager.getBalancerMasterNode() || node;
-                log("targetNode ->" + targetNode);
                 atachExtIpGroup = atachExtIpGroup || targetNode.nodeGroup;
-                log("atachExtIpGroup ->" + atachExtIpGroup);
 
                 if (targetNode.nodeGroup != group) {
-                    log("attachExtIpToGroupNodes");
                     me.attachExtIpToGroupNodes(targetNode.nodeGroup);
                 } else {
-                    log("attachExtIpIfNeed");
                     me.attachExtIpIfNeed(targetNode);
                 }
             } else {
@@ -695,7 +685,6 @@ function SSLManager(config) {
                 }
             }
 
-            log("id ->" + id);
             if (id) break;
         }
 
@@ -1089,7 +1078,6 @@ function SSLManager(config) {
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
         if (resp.result != 0) return resp;
 
-        log("formatDomains logging");
         return jelastic.env.binder.BindSSLCert({
             envName: config.envName,
             session: session,
@@ -1388,12 +1376,6 @@ function SSLManager(config) {
             return !!(group == LB || group == BL);
         };
 
-        me.getGroupNodesCount = function (group) {
-            var nodes;
-
-            nodes = me.getNodes();
-        };
-
         me.setBalancerMasterNode = function (node) {
             oBLMaster = node;
         };
@@ -1470,7 +1452,6 @@ function SSLManager(config) {
 
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
-                node = nodes[i];
                 if (nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
                     nodeManager.setBalancerMasterNode(node);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
