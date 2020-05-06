@@ -663,7 +663,7 @@ function SSLManager(config) {
             log("node ->" + node);
             if (config.withExtIp) {
                 targetNode = nodeManager.getBalancerMasterNode() || node;
-                / if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
+                if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
                 //     me.attachExtIpToGroupNodes(targetNode.nodeGroup);
                 // } else {
                     log("atachExtIpGroup ->" + atachExtIpGroup);
