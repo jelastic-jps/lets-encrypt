@@ -669,11 +669,13 @@ function SSLManager(config) {
                 atachExtIpGroup = atachExtIpGroup || targetNode.nodeGroup;
                 log("atachExtIpGroup ->" + atachExtIpGroup);
 
-                // if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
-                //     me.attachExtIpToGroupNodes(targetNode.nodeGroup);
-                // } else {
+                if (targetNode.nodeGroup != group) {
+                    log("attachExtIpToGroupNodes");
+                    me.attachExtIpToGroupNodes(targetNode.nodeGroup);
+                } else {
+                    log("attachExtIpIfNeed");
                     me.attachExtIpIfNeed(targetNode);
-                // }
+                }
             } else {
                 me.exec([
                     [ me.initBindedDomains ],
@@ -698,6 +700,18 @@ function SSLManager(config) {
         }
 
         return { result : 0 };
+    };
+
+    me.attachExtIpToGroupNodes = function(group) {
+        var nodes = me.getNodes();
+
+        for (var i = 0, n = nodes.length; i < n; i++) {
+            if (nodes[i].nodeGroup == group) {
+                me.attachExtIpIfNeed(nodes[i]);
+            }
+        }
+
+        return { result: 0 };
     };
 
     me.attachExtIpIfNeed = function (node) {
@@ -1075,6 +1089,7 @@ function SSLManager(config) {
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
         if (resp.result != 0) return resp;
 
+        log("formatDomains logging");
         return jelastic.env.binder.BindSSLCert({
             envName: config.envName,
             session: session,
@@ -1373,6 +1388,12 @@ function SSLManager(config) {
             return !!(group == LB || group == BL);
         };
 
+        me.getGroupNodesCount = function (group) {
+            var nodes;
+
+            nodes = me.getNodes();
+        };
+
         me.setBalancerMasterNode = function (node) {
             oBLMaster = node;
         };
@@ -1449,11 +1470,10 @@ function SSLManager(config) {
 
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
-                log("in for ->");
+                node = nodes[i];
                 if (nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
                     nodeManager.setBalancerMasterNode(node);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
-                    log("group ->" + group);
                     break;
                 }
             }
