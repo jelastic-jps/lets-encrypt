@@ -703,7 +703,7 @@ function SSLManager(config) {
     };
 
     me.attachExtIpToGroupNodes = function(group) {
-        var nodes = me.getNodes();
+        var nodes = nodeManager.getNodes();
 
         for (var i = 0, n = nodes.length; i < n; i++) {
             if (nodes[i].nodeGroup == group) {
