@@ -663,14 +663,12 @@ function SSLManager(config) {
             log("node ->" + node);
             if (config.withExtIp) {
                 targetNode = nodeManager.getBalancerMasterNode() || node;
-                // atachExtIpGroup = atachExtIpGroup || targetNode.nodeGroup;
-
-                if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
-                    me.attachExtIpToGroupNodes(targetNode.nodeGroup);
-                } else {
-                    log("targetGroup ->" + atachExtIpGroup);
+                / if (nodeManager.isBalancerLayer(targetNode.nodeGroup)) {
+                //     me.attachExtIpToGroupNodes(targetNode.nodeGroup);
+                // } else {
+                    log("atachExtIpGroup ->" + atachExtIpGroup);
                     me.attachExtIpIfNeed(targetNode);
-                }
+                // }
             } else {
                 me.exec([
                     [ me.initBindedDomains ],
