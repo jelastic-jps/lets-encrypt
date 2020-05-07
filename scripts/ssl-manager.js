@@ -634,7 +634,6 @@ function SSLManager(config) {
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
-            atachExtIpGroup = "",
             targetNode,
             nodes,
             resp;
@@ -659,7 +658,6 @@ function SSLManager(config) {
 
             if (config.withExtIp) {
                 targetNode = nodeManager.getBalancerMasterNode() || node;
-                atachExtIpGroup = atachExtIpGroup || targetNode.nodeGroup;
 
                 if (targetNode.nodeGroup != group) {
                     me.attachExtIpToGroupNodes(targetNode.nodeGroup);
