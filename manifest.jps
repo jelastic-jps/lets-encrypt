@@ -90,7 +90,6 @@ onInstall:
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
-      customDomains: ${settings.customDomains:}
       withExtIp: ${settings.withExtIp:true}
       webroot: ${settings.webroot:false}
       webrootPath: ${settings.webrootPath:}
@@ -133,7 +132,7 @@ actions:
       scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
       baseUrl: ${baseUrl}
       cronTime: 0 ${fn.random(1,6)},${fn.random(10,14)},${fn.random(15,20)} * * *
-      customDomains: ${this.customDomains:[globals.customDomains]}
+      customDomains: ${settings.customDomains}
       nodeId: ${globals.nodeId}
       nodeGroup: ${globals.nodeGroup}
       deployHook: ${globals.deployHook}
@@ -155,7 +154,6 @@ actions:
         action: auto-update
   configure:
     installScript:
-      customDomains: ${settings.customDomains:}
       test: ${settings.test:false}
 
   delete:
