@@ -109,7 +109,7 @@ onInstall:
       nodeId: ${settings.nodeId}
       nodeGroup: ${targetNodes.nodeGroup}
       customDomains: ${settings.customDomains}
-      withExtIp: ${settings.withExtIp}
+      withExtIp: ${settings.withExtIp:true}
       webroot: ${settings.webroot:false}
       webrootPath: ${settings.webrootPath}
       fallbackToX1: ${settings.fallbackToX1:false}
