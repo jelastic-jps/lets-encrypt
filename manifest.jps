@@ -67,24 +67,6 @@ settings:
       caption: External Domain(s)
       placeholder: leave blank to get a test certificate for this environment domain
       required: false
-    - type: string
-      name: nodeId
-      inputType: hidden
-    - type: string
-      name: nodeGroup
-      inputType: hidden
-    - type: string
-      name: deployHook
-      inputType: hidden
-    - type: string
-      name: deployHookType
-      inputType: hidden
-    - type: string
-      name: undeployHook
-      inputType: hidden
-    - type: string
-      name: undeployHookType
-      inputType: hidden
 
 onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
@@ -106,17 +88,18 @@ buttons:
 
 onInstall:
   - setGlobals:
-      nodeId: ${settings.nodeId}
-      nodeGroup: ${targetNodes.nodeGroup}
-      customDomains: ${settings.customDomains}
+      nodeId: ${settings.nodeId:}
+      nodeGroup: ${targetNodes.nodeGroup:}
+      customDomains: ${settings.customDomains:}
       withExtIp: ${settings.withExtIp:true}
       webroot: ${settings.webroot:false}
-      webrootPath: ${settings.webrootPath}
+      webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:false}
-      deployHook: ${settings.deployHook}
-      deployHookType: ${settings.deployHookType}
-      undeployHook: ${settings.undeployHook}
-      undeployHookType: ${settings.undeployHookType}
+      deployHook: ${settings.deployHook:}
+      deployHookType: ${settings.deployHookType:}
+      undeployHook: ${settings.undeployHook:}
+      undeployHookType: ${settings.undeployHookType:}
+      test: ${settings.test:false}
   - installScript
 
 onUninstall:
@@ -139,6 +122,7 @@ onAfterClone:
     webroot: ${globals.webroot}
     webrootPath: ${globals.webrootPath}
     fallbackToX1: ${globals.fallbackToX1}
+    test: ${globals.test}
 
 onAfterConfirmTransfer: installScript
 
@@ -149,7 +133,7 @@ actions:
       scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
       baseUrl: ${baseUrl}
       cronTime: 0 ${fn.random(1,6)},${fn.random(10,14)},${fn.random(15,20)} * * *
-      customDomains: ${this.customDomains:globals.customDomains}
+      customDomains: ${this.customDomains:[globals.customDomains]}
       nodeId: ${globals.nodeId}
       nodeGroup: ${globals.nodeGroup}
       deployHook: ${globals.deployHook}
@@ -160,6 +144,7 @@ actions:
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
+      test: ${this.test:[globals.test]}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
@@ -168,7 +153,10 @@ actions:
   update:
     - callScript:
         action: auto-update
-  configure: installScript
+  configure:
+    installScript:
+      customDomains: ${settings.customDomains:}
+      test: ${settings.test:false}
 
   delete:
     script: |
