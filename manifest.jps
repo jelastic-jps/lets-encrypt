@@ -143,7 +143,7 @@ actions:
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
-      test: ${this.test:[globals.test]}
+      test: ${globals.test}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
@@ -152,10 +152,7 @@ actions:
   update:
     - callScript:
         action: auto-update
-  configure:
-    installScript:
-      test: ${settings.test:false}
-
+  configure: installScript
   delete:
     script: |
       jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
