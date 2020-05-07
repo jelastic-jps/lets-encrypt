@@ -110,7 +110,7 @@ onInstall:
       nodeGroup: ${targetNodes.nodeGroup}
       customDomains: ${settings.customDomains}
       withExtIp: ${settings.withExtIp}
-      webroot: ${settings.webroot}
+      webroot: ${settings.webroot:false}
       webrootPath: ${settings.webrootPath}
       fallbackToX1: ${settings.fallbackToX1:false}
       deployHook: ${settings.deployHook}
@@ -138,6 +138,7 @@ onAfterClone:
     withExtIp: ${globals.withExtIp}
     webroot: ${globals.webroot}
     webrootPath: ${globals.webrootPath}
+    fallbackToX1: ${globals.fallbackToX1}
 
 onAfterConfirmTransfer: installScript
 
@@ -156,9 +157,9 @@ actions:
       undeployHook: ${globals.undeployHook}
       undeployHookType: ${globals.undeployHookType}
       withExtIp: ${globals.withExtIp}
-      webroot: ${globals.webroot:false}
+      webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
-      fallbackToX1: ${globals.fallbackToX1:false}
+      fallbackToX1: ${globals.fallbackToX1}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
