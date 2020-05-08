@@ -646,19 +646,22 @@ function SSLManager(config) {
             config.nodeGroup = group;
         }
 
+        me.initAddOnExtIp(config.withExtIp);
+        
         resp = nodeManager.getEnvInfo();
-
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
 
-            me.initAddOnExtIp(config.withExtIp);
-
             if (config.withExtIp) {
-                targetNode = nodeManager.getBalancerMasterNode() || node;
-                me.attachExtIpIfNeed(targetNode);
+                if (config.webroot && !targetNode) {
+                    targetNode = nodeManager.getBalancerMasterNode() || node;
+                    me.attachExtIpToGroupNodes(targetNode.nodeGroup)
+                } else {
+                    me.attachExtIpIfNeed(node);
+                }
             } else {
                 me.exec([
                     [ me.initBindedDomains ],
@@ -682,6 +685,18 @@ function SSLManager(config) {
         }
 
         return { result : 0 };
+    };
+
+    me.attachExtIpToGroupNodes = function(group) {
+        var nodes = nodeManager.getNodes();
+
+        for (var i = 0, n = nodes.length; i < n; i++) {
+            if (nodes[i].nodeGroup == group) {
+                me.attachExtIpIfNeed(nodes[i]);
+            }
+        }
+
+        return { result: 0 };
     };
 
     me.attachExtIpIfNeed = function (node) {
@@ -1060,11 +1075,11 @@ function SSLManager(config) {
         if (resp.result != 0) return resp;
 
         return jelastic.env.binder.BindSSLCert({
-            envName:config.envName,
+            envName: config.envName,
             session: session,
             certId: resp.responses[resp.responses.length - 1].id,
             entryPoint: SLB,
-            extDomains: config.customDomains
+            extDomains: me.formatDomains(config.customDomains).replace(/ /g, "")
         });
     };
 
@@ -1091,7 +1106,6 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                log("after AddSSLCert");
                 me.exec(me.bindSSLCerts);
             }
         } else {
