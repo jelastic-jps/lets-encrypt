@@ -657,12 +657,11 @@ function SSLManager(config) {
             me.initAddOnExtIp(config.withExtIp);
 
             if (config.withExtIp) {
-                targetNode = nodeManager.getBalancerMasterNode() || node;
-
-                if (targetNode.nodeGroup != group) {
-                    me.attachExtIpToGroupNodes(targetNode.nodeGroup);
+                if (config.webroot && !targetNode) {
+                    targetNode = nodeManager.getBalancerMasterNode() || node;
+                    me.attachExtIpToGroupNodes(targetNode.nodeGroup)
                 } else {
-                    me.attachExtIpIfNeed(targetNode);
+                    me.attachExtIpIfNeed(node);
                 }
             } else {
                 me.exec([
