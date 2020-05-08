@@ -646,15 +646,14 @@ function SSLManager(config) {
             config.nodeGroup = group;
         }
 
+        me.initAddOnExtIp(config.withExtIp);
+        
         resp = nodeManager.getEnvInfo();
-
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
-
-            me.initAddOnExtIp(config.withExtIp);
 
             if (config.withExtIp) {
                 if (config.webroot && !targetNode) {
