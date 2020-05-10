@@ -98,7 +98,7 @@ onInstall:
       deployHookType: ${settings.deployHookType:}
       undeployHook: ${settings.undeployHook:}
       undeployHookType: ${settings.undeployHookType:}
-      test: ${settings.test:false}
+      test: ${settings.test:}
   - installScript
 
 onUninstall:
