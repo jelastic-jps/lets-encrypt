@@ -646,19 +646,24 @@ function SSLManager(config) {
             config.nodeGroup = group;
         }
 
+        me.initAddOnExtIp(config.withExtIp);
+        
         resp = nodeManager.getEnvInfo();
-
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
 
-            me.initAddOnExtIp(config.withExtIp);
-
             if (config.withExtIp) {
-                targetNode = nodeManager.getBalancerMasterNode() || node;
-                me.attachExtIpIfNeed(targetNode);
+                if (config.webroot && !targetNode) {
+                    targetNode = nodeManager.getBalancerMasterNode() || node;
+                    resp = me.attachExtIpToGroupNodes(targetNode.nodeGroup);
+                    if (resp.result != 0) return resp;
+                } else {
+                    resp = me.attachExtIpIfNeed(node);
+                    if (resp.result != 0) return resp;
+                }
             } else {
                 me.exec([
                     [ me.initBindedDomains ],
@@ -682,6 +687,18 @@ function SSLManager(config) {
         }
 
         return { result : 0 };
+    };
+
+    me.attachExtIpToGroupNodes = function(group) {
+        var nodes = nodeManager.getNodes();
+
+        for (var i = 0, n = nodes.length; i < n; i++) {
+            if (nodes[i].nodeGroup == group) {
+                return me.attachExtIpIfNeed(nodes[i]);
+            }
+        }
+
+        return { result: 0 };
     };
 
     me.attachExtIpIfNeed = function (node) {
