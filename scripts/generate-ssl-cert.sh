@@ -58,6 +58,7 @@ result_code=$?;
     ip6tables -D INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
 
     service tinyproxy stop || echo "Failed to stop proxy server"
+    chkconfig tinyproxy off
 }
 
 if [ "$result_code" != "0" ]; then
