@@ -547,11 +547,9 @@ function SSLManager(config) {
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
-        
+
         edition = edition || getPlatformEdition();
         config.withExtIp = (edition == LIGHT) ? false : config.withExtIp;
-        log("edition-> " + edition);
-        log("config.withExtIp ->" + config.withExtIp);
 
         return { result: 0 };
     };
