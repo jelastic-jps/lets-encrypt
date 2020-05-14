@@ -38,6 +38,7 @@ function SSLManager(config) {
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
         Random = com.hivext.api.utils.Random,
+        BUSINESS = "BUSINESS",
         me = this,
         BL = "bl",
         LB = "lb",
@@ -46,7 +47,8 @@ function SSLManager(config) {
         patchBuild = 1,
         debug = [],
         nodeManager,
-        baseUrl,
+        version,
+        edition,
         session;
 
     config = config || {};
@@ -545,6 +547,10 @@ function SSLManager(config) {
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
+
+        edition = edition || getPlatformEdition();
+        config.withExtIp = (edition == BUSINESS) ? config.withExtIp : false;
+
         return { result: 0 };
     };
 
@@ -1539,8 +1545,17 @@ function SSLManager(config) {
         return typeof value !== "undefined";
     }
 
+    function getVersion() {
+        version = version || jelastic.system.service.GetVersion();
+        return version;
+    }
+
     function getPlatformVersion() {
-        return jelastic.system.service.GetVersion().version.split("-").shift();
+        return getVersion().version.split("-").shift();
+    }
+
+    function getPlatformEdition() {
+        return getVersion().edition;
     }
 
     function getScript(name) {
