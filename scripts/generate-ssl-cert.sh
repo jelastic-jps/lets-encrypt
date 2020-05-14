@@ -13,7 +13,7 @@ cd "${DIR}/opt/letsencrypt"
 git reset --hard
 git pull origin master
 
-PROXY_PORT=12356
+PROXY_PORT=12346
 LE_PORT=12345
 
 #Parameters for test certificates
@@ -40,7 +40,7 @@ mkdir -p $DIR/var/log/letsencrypt
 
     iptables -I INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
     ip6tables -I INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
-    iptables -t nat -I PREROUTING -p tcp -m tcp ! -s 127.0.0.1 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
+    iptables -t nat -I PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
     ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
 }
 result_code=0;
@@ -50,7 +50,7 @@ resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --dom
 result_code=$?;
 
 [[ "$webroot" == "false" ]] && {
-    iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
+    iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
     ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
     iptables -D INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
     ip6tables -D INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
