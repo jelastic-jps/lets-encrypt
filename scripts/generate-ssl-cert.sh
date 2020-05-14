@@ -71,6 +71,10 @@ mkdir -p $DIR/var/lib/jelastic/keys/
 rm -f $DIR/var/lib/jelastic/keys/*.pem
 
 [ ! -z $certdir ] && cp -f $certdir/* $DIR/var/lib/jelastic/keys/ && chown jelastic -R $DIR/var/lib/jelastic/keys/
+[ "$withExtIp" == "false" ] && {
+    cp -f "/var/lib/jelastic/SSL/jelastic.crt" "/var/lib/jelastic/SSL/jelastic.crt-backup";
+    cp -f $certdir/cert.pem "/var/lib/jelastic/SSL/jelastic.crt";
+}
 
 function uploadCerts() {
     local certdir="$1"
