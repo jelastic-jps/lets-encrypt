@@ -506,6 +506,10 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.getConfigUrl = function (configName) {
+        return me.getFileUrl("configs/" + configName);
+    };
+
     me.initCustomConfigs = function initCustomConfigs() {
         var CUSTOM_CONFIG = nodeManager.getCustomSettingsPath(),
             properties = new java.util.Properties(),
@@ -869,6 +873,7 @@ function SSLManager(config) {
             url = me.getScriptUrl(fileName),
             validationFileName = "validation.sh",
             generateSSLScript = nodeManager.getScriptPath(fileName),
+            proxyConfigName = "tinyproxy.conf",
             bUpload,
             text,
             resp;
@@ -879,10 +884,12 @@ function SSLManager(config) {
                 "wget --no-check-certificate '%(url)' -O %(path)",
                 "chmod +x %(path)",
                 "wget --no-check-certificate '%(validationUrl)' -O %(validationPath)",
-                "chmod +x %(path)"
+                "chmod +x %(validationPath)",
+                "wget --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf",
             ], {
                 validationUrl : me.getScriptUrl(validationFileName),
                 validationPath : nodeManager.getScriptPath(validationFileName),
+                proxyConfigUrl : me.getConfigUrl(proxyConfigName),
                 url : url,
                 path : generateSSLScript
             }]
