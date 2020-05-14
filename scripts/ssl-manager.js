@@ -38,7 +38,7 @@ function SSLManager(config) {
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
         Random = com.hivext.api.utils.Random,
-        BUSINESS = "BUSINESS",
+        LIGHT = "LIGHT",
         me = this,
         BL = "bl",
         LB = "lb",
@@ -548,8 +548,9 @@ function SSLManager(config) {
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
+        log("edition-> " + edition);
         edition = edition || getPlatformEdition();
-        config.withExtIp = (edition == BUSINESS) ? config.withExtIp : false;
+        config.withExtIp = (edition == LIGHT) ? false : config.withExtIp;
 
         return { result: 0 };
     };
