@@ -13,8 +13,8 @@ cd "${DIR}/opt/letsencrypt"
 git reset --hard
 git pull origin master
 
-PROXY_PORT=12346
-LE_PORT=12345
+PROXY_PORT=12345
+LE_PORT=12346
 
 #Parameters for test certificates
 test_params='';
