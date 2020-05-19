@@ -895,6 +895,11 @@ function SSLManager(config) {
             }]
         ]);
 
+        if (!config.withExtIp) {
+            resp = nodeManager.checkEnvSsl();
+            if (resp.result != 0) return resp;
+        }
+
         if (!config.webroot) {
             //redirect incoming requests to master node
             me.exec(me.manageDnat, "add");
@@ -1535,6 +1540,19 @@ function SSLManager(config) {
             }
 
             return bCustomSSLSupported;
+        };
+
+        me.checkEnvSsl = function () {
+            var resp = me.getEnvInfo();
+            if (resp.result != 0) return resp;
+
+            var env = resp.env || {};
+
+            if (!env.sslstate) {
+                return jelastic.env.control.EditEnvSettings(envName, session, { sslstate: true });
+            }
+
+            return { result : 0 };
         };
     }
 
