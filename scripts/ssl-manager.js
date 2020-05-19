@@ -896,7 +896,7 @@ function SSLManager(config) {
         ]);
 
         if (!config.withExtIp) {
-            resp = nodeManager.checkEnvSsl();
+            resp = me.exec(me.checkEnvSsl);
             if (resp.result != 0) return resp;
         }
 
@@ -998,6 +998,10 @@ function SSLManager(config) {
                 action    : action == 'add' ? '-I' : '-D'
             }
         );
+    };
+
+    me.checkEnvSsl = function checkEnvSsl() {
+        return nodeManager.checkEnvSsl();
     };
 
     me.scheduleAutoUpdate = function scheduleAutoUpdate() {
