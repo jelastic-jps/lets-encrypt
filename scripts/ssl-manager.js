@@ -38,7 +38,6 @@ function SSLManager(config) {
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
         Random = com.hivext.api.utils.Random,
-        TARGET_NODES = ["tomcat6", "tomcat7", "tomcat8", "tomcat85", "tomcat9", "tomcat", "tomee", "tomee-dockerized", "glassfish3", "glassfish4", "glassfish", "jetty", "jetty6", "apache", "apache2", "nginxphp", "apache2-ruby", "nginx-ruby", "nginx", "nginx-dockerized", "nginxphp-dockerized", "haproxy", "apache-lb", "varnish", "varnish-dockerized", "payara", "wildfly", "nodejs", "apache-ruby", "apache-python", "nginxruby", "litespeedphp", "litespeedadc", "lemp", "llsmp"],
         LIGHT = "LIGHT",
         me = this,
         BL = "bl",
@@ -1391,10 +1390,6 @@ function SSLManager(config) {
             return oBLMaster;
         };
 
-        me.isTargetNodeType = function(node) {
-            return TARGET_NODES.indexOf(node.nodeType) != -1; 
-        };
-
         me.getEntryNodeIps = function getEntryNodeIps() {
             var resp = nodeManager.cmd([
                 "IP=$(which ip)",
@@ -1464,7 +1459,7 @@ function SSLManager(config) {
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
                 if (nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
-                    if (!nodeManager.isTargetNodeType(node)) break;
+                    if (!nodeManager.checkCustomSSL(node)) break;
 
                     nodeManager.setBalancerMasterNode(node);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
@@ -1512,18 +1507,22 @@ function SSLManager(config) {
             return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId);
         };
 
-        me.checkCustomSSL = function () {
-            var node;
+        me.checkCustomSSL = function (targetNode) {
+            var node = targetNode || {};
+            log("checkCustomSSL -> ");
+            if (!isDefined(bCustomSSLSupported) || targetNode) {
+                if (!node) {
+                    var resp = me.getNode();
 
-            if (!isDefined(bCustomSSLSupported)) {
-                var resp = me.getNode();
-
-                if (resp.result != 0) {
-                    log("ERROR: getNode() = " + resp);
+                    if (resp.result != 0) {
+                        log("ERROR: getNode() = " + resp);
+                    }
+                    node = resp.node ? resp.node : {};
                 }
+                log("checkCustomSSL - node -> " + node);
 
-                if (resp.node) {
-                    node = resp.node;
+                if (node) {
+                    // node = resp.node;
 
                     bCustomSSLSupported = node.isCustomSslSupport;
 
