@@ -37,6 +37,7 @@ function SSLManager(config) {
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
+        VALIDATION_SCRIPT = "validation.sh",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
         me = this,
@@ -248,7 +249,7 @@ function SSLManager(config) {
                     nodeManager.getScriptPath("generate-ssl-cert.sh"),
                     nodeManager.getScriptPath("letsencrypt_settings"),
                     nodeManager.getScriptPath("install-le.sh"),
-                    nodeManager.getScriptPath("validation.sh"),
+                    nodeManager.getScriptPath(VALIDATION_SCRIPT),
                     autoUpdateScript
                 ].join(" ")
             }]
@@ -292,7 +293,7 @@ function SSLManager(config) {
                 scriptToBackup: [
                     nodeManager.getScriptPath("auto-update-ssl-cert.sh"),
                     nodeManager.getScriptPath("install-le.sh"),
-                    nodeManager.getScriptPath("validation.sh")
+                    nodeManager.getScriptPath(VALIDATION_SCRIPT)
                 ].join(",")
             }]
         ])
@@ -319,7 +320,7 @@ function SSLManager(config) {
                 files: [
                     "auto-update-ssl-cert.sh",
                     "install-le.sh",
-                    "validation.sh"
+                    VALIDATION_SCRIPT
                 ].join(",")
             }]
         ])
@@ -718,7 +719,7 @@ function SSLManager(config) {
     };
 
     me.validateEntryPoint = function validateEntryPoint() {
-        var fileName = "validation.sh",
+        var fileName = VALIDATION_SCRIPT,
             url = me.getScriptUrl(fileName),
             VALIDATE_IP = "validateExtIP",
             VALIDATE_DNS = "validateDNSSettings '%(domain)'",
@@ -873,7 +874,7 @@ function SSLManager(config) {
     me.generateSslCerts = function generateSslCerts() {
         var fileName = "generate-ssl-cert.sh",
             url = me.getScriptUrl(fileName),
-            validationFileName = "validation.sh",
+            validationFileName = VALIDATION_SCRIPT,
             generateSSLScript = nodeManager.getScriptPath(fileName),
             bUpload,
             text,
