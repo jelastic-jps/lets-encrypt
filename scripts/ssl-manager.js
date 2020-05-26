@@ -1509,7 +1509,7 @@ function SSLManager(config) {
 
         me.checkCustomSSL = function (targetNode) {
             var node = targetNode || {};
-            log("checkCustomSSL -> ");
+            log("checkCustomSSL targetNode -> " + targetNode);
             if (!isDefined(bCustomSSLSupported) || targetNode) {
                 if (!node) {
                     var resp = me.getNode();
