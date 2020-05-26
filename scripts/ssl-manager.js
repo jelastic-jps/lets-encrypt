@@ -1509,6 +1509,7 @@ function SSLManager(config) {
 
         me.checkCustomSSL = function (targetNode) {
             var node = targetNode || "";
+
             if (!isDefined(bCustomSSLSupported) || targetNode) {
                 if (!node) {
                     var resp = me.getNode();
@@ -1520,14 +1521,17 @@ function SSLManager(config) {
                 }
 
                 if (node) {
-
                     bCustomSSLSupported = node.isCustomSslSupport;
 
                     if ((!isDefined(bCustomSSLSupported) || node.type != "DOCKERIZED") && node.nodemission != "docker") {
                         resp = me.cmd([
+                            "wget --no-check-certificate '%(url)' -O '%(path)'",
                             "source %(path)",
                             "validateCustomSSL"
-                        ], { path : nodeManager.getScriptPath("validation.sh") });
+                        ], {
+                            url : me.getScriptUrl(VALIDATION_SCRIPT),
+                            path : nodeManager.getScriptPath(VALIDATION_SCRIPT)
+                        });
 
                         bCustomSSLSupported = (resp.result == 0);
                     }
