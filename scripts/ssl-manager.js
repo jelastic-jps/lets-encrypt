@@ -1512,8 +1512,12 @@ function SSLManager(config) {
             log("checkCustomSSL targetNode -> " + targetNode);
             if (!isDefined(bCustomSSLSupported) || targetNode) {
                 if (!node) {
+                    log("checkCustomSSL - node -> " + node);
+                }
+                if (!node) {
                     var resp = me.getNode();
 
+                    log("checkCustomSSL - resp -> " + resp);
                     if (resp.result != 0) {
                         log("ERROR: getNode() = " + resp);
                     }
