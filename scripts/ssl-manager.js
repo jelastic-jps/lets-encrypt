@@ -644,7 +644,7 @@ function SSLManager(config) {
             nodes,
             resp;
 
-        if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
+        if ((!id && !group) || (!nodeManager.isBalancerLayer(group) && !nodeManager.isExtraLayer(group))) {
             resp = nodeManager.getEntryPointGroup();
             if (resp.result != 0) return resp;
 
