@@ -73,6 +73,10 @@ onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
 onAfterRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
     action: restore-scripts
+    
+onAfterStart:
+  callScript:
+    action: check-for-update
 
 buttons:
   - confirmText: Do you want to update attached SSL certificate(s)?
