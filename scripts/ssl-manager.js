@@ -677,7 +677,7 @@ function SSLManager(config) {
                 ]);
             }
 
-            if (id || node.ismaster) {
+            if ((id && id == node.id) || node.ismaster) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
 
