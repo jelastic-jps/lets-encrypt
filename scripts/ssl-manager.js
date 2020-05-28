@@ -1138,7 +1138,7 @@ function SSLManager(config) {
         return me.cmd([
             'SSL_CONFIG_DIR="/var/lib/jelastic/SSL"',
             '[ ! -d "${SSL_CONFIG_DIR}" ] && mkdir -p ${SSL_CONFIG_DIR} || echo "SSL dir exists"',
-            'echo "key=%(key)\n\ncert=%(cert)\n\nintermediate=%(intermediate)\n\n"" > "${SSL_CONFIG_DIR}/customssl.conf"',
+            'echo "key=%(key)\n\ncert=%(cert)\n\nintermediate=%(intermediate)\n\n" > "${SSL_CONFIG_DIR}/customssl.conf"',
             'jem ssl install'
         ],
         {
