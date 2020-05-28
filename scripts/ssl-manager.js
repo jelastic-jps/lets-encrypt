@@ -1101,13 +1101,18 @@ function SSLManager(config) {
 
         if (cert_key.body && chain.body && cert.body) {
             if (config.withExtIp) {
-                resp = jelastic.env.binder.BindSSL({
-                    "envName": config.envName,
-                    "session": session,
-                    "cert_key": cert_key.body,
-                    "cert": cert.body,
-                    "intermediate": chain.body
-                });
+
+                if (nodeManager.isExtraLayer(config.nodeGroup)) {
+                    resp = me.exec(me.bindSSLOnExtra, cert_key.body, cert.body, chain.body);
+                } else {
+                    resp = jelastic.env.binder.BindSSL({
+                        "envName": config.envName,
+                        "session": session,
+                        "cert_key": cert_key.body,
+                        "cert": cert.body,
+                        "intermediate": chain.body
+                    });
+                }
             } else {
                 resp = jelastic.env.binder.AddSSLCert({
                     envName: config.envName,
@@ -1129,6 +1134,19 @@ function SSLManager(config) {
         return resp;
     };
 
+    me.bindSSLOnExtra = function bindSSLOnExtra(key, cert, intermediate) {
+        return me.cmd([
+            "SSL_CONFIG_DIR=\"/var/lib/jelastic/SSL\"",
+            "[ ! -d \"${SSL_CONFIG_DIR}\" ] && mkdir ${SSL_CONFIG_DIR} || echo \"SSL dir exists\"",
+            "echo 'key=%(key)\n\ncert=%(cert)\n\nintermediate=%(intermediate)\n\n' > \"${SSL_CONFIG_DIR}/customssl.conf\"",
+            "jem ssl install"
+        ],
+        {
+            key: key,
+            cert: cert,
+            intermediate: intermediate
+        });
+    };
     me.removeSSL = function removeSSL() {
         return jelastic.env.binder.RemoveSSL(config.envName, session);
     };
