@@ -81,7 +81,8 @@ function SSLManager(config) {
             "uninstall"   : me.uninstall,
             "auto-update" : me.autoUpdate,
             "backup-scripts": me.backupScripts,
-            "restore-scripts": me.restoreScripts
+            "restore-scripts": me.restoreScripts,
+            "check-for-update": me.checkForUpdate
         };
 
         if (getParam("uninstall")) {
@@ -331,6 +332,12 @@ function SSLManager(config) {
         return me.exec(me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
             backupPath: nodeManager.getBackupPath()
         });
+    };
+    
+    me.checkForUpdate = function checkForUpdate() {
+        me.logAction("CheckForUpdateLE");
+
+        return me.exec(me.cmd, "cronCmd=$(crontab -l | grep -Eo '/root/auto-update-ssl-cert.sh.*'); cronCmd=\"${cronCmd%?}\"; ./\"${cronCmd}\"");
     };
 
     me.autoUpdate = function () {
