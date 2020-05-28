@@ -336,7 +336,7 @@ function SSLManager(config) {
     
     me.checkForUpdate = function checkForUpdate() {
         me.logAction("CheckForUpdateLE");
-        return me.exec(me.cmd, 'cronCmd=$(crontab -l | grep -Eo "/root/auto-update-ssl-cert.sh.*"); cronCmd="${cronCmd%?}"; ${cronCmd}');
+        return me.exec(me.cmd, 'cronCmd=$(crontab -l | grep -Eo "/root/auto-update-ssl-cert.sh.*"); cronCmd="${cronCmd%?}"; ${cronCmd} 2>&1; echo "OK"');
     };
 
     me.autoUpdate = function () {
