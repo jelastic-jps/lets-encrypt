@@ -81,7 +81,8 @@ function SSLManager(config) {
             "uninstall"   : me.uninstall,
             "auto-update" : me.autoUpdate,
             "backup-scripts": me.backupScripts,
-            "restore-scripts": me.restoreScripts
+            "restore-scripts": me.restoreScripts,
+            "check-for-update": me.checkForUpdate
         };
 
         if (getParam("uninstall")) {
@@ -330,6 +331,17 @@ function SSLManager(config) {
 
         return me.exec(me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
             backupPath: nodeManager.getBackupPath()
+        });
+    };
+
+    me.checkForUpdate = function checkForUpdate() {
+        var fileName = "auto-update-ssl-cert.sh";
+
+        me.logAction("CheckForUpdateLE");
+
+        return me.exec(me.cmd, "%(path) '%(url)'", {
+            path : nodeManager.getScriptPath(fileName),
+            url : me.getAutoUpdateUrl()
         });
     };
 
@@ -1010,12 +1022,8 @@ function SSLManager(config) {
         return nodeManager.checkEnvSsl();
     };
 
-    me.scheduleAutoUpdate = function scheduleAutoUpdate() {
-        var fileName = "auto-update-ssl-cert.sh",
-            scriptUrl = me.getScriptUrl(fileName),
-            autoUpdateUrl;
-
-        autoUpdateUrl = _(
+    me.getAutoUpdateUrl = function () {
+        return _(
             "https://%(host)/%(scriptName)?appid=%(appid)&token=%(token)&action=auto-update",
             {
                 host : window.location.host,
@@ -1023,7 +1031,12 @@ function SSLManager(config) {
                 appid : appid,
                 token : config.token
             }
-        );
+        ) || "";
+    };
+
+    me.scheduleAutoUpdate = function scheduleAutoUpdate() {
+        var fileName = "auto-update-ssl-cert.sh",
+            scriptUrl = me.getScriptUrl(fileName);
 
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
@@ -1034,7 +1047,7 @@ function SSLManager(config) {
             url : scriptUrl,
             cronTime : config.cronTime,
             scriptPath : nodeManager.getScriptPath(fileName),
-            autoUpdateUrl : autoUpdateUrl
+            autoUpdateUrl : me.getAutoUpdateUrl()
         });
     };
 
