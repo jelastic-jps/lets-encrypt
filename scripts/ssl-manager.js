@@ -335,10 +335,14 @@ function SSLManager(config) {
     };
 
     me.checkForUpdate = function checkForUpdate() {
-        var autoUpdateUrl = me.getAutoUpdateUrl();
+        var fileName = "auto-update-ssl-cert.sh";
 
         me.logAction("CheckForUpdateLE");
-        return me.exec(me.cmd, '/root/auto-update-ssl-cert.sh "' + autoUpdateUrl + '"');
+
+        return me.exec(me.cmd, "%(path) '%(url)'", {
+            path : nodeManager.getScriptPath(fileName),
+            url : me.getAutoUpdateUrl()
+        });
     };
 
     me.autoUpdate = function () {
