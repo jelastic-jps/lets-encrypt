@@ -516,6 +516,10 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.getConfigUrl = function (configName) {
+        return me.getFileUrl("configs/" + configName);
+    };
+
     me.initCustomConfigs = function initCustomConfigs() {
         var CUSTOM_CONFIG = nodeManager.getCustomSettingsPath(),
             properties = new java.util.Properties(),
@@ -661,7 +665,7 @@ function SSLManager(config) {
         }
 
         me.initAddOnExtIp(config.withExtIp);
-
+        
         resp = nodeManager.getEnvInfo();
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
@@ -685,7 +689,7 @@ function SSLManager(config) {
                 ]);
             }
 
-            if (id || node.ismaster) {
+            if ((id && id == node.id) || node.ismaster) {
                 config.nodeId = node.id;
                 config.nodeIp = node.address;
 
@@ -883,6 +887,7 @@ function SSLManager(config) {
             url = me.getScriptUrl(fileName),
             validationFileName = "validation.sh",
             generateSSLScript = nodeManager.getScriptPath(fileName),
+            proxyConfigName = "tinyproxy.conf",
             bUpload,
             text,
             resp;
@@ -893,14 +898,21 @@ function SSLManager(config) {
                 "wget --no-check-certificate '%(url)' -O %(path)",
                 "chmod +x %(path)",
                 "wget --no-check-certificate '%(validationUrl)' -O %(validationPath)",
-                "chmod +x %(path)"
+                "chmod +x %(validationPath)",
+                "wget --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf",
             ], {
                 validationUrl : me.getScriptUrl(validationFileName),
                 validationPath : nodeManager.getScriptPath(validationFileName),
+                proxyConfigUrl : me.getConfigUrl(proxyConfigName),
                 url : url,
                 path : generateSSLScript
             }]
         ]);
+
+        if (!config.withExtIp) {
+            resp = me.exec(me.checkEnvSsl);
+            if (resp.result != 0) return resp;
+        }
 
         if (!config.webroot) {
             //redirect incoming requests to master node
@@ -1000,6 +1012,10 @@ function SSLManager(config) {
                 action    : action == 'add' ? '-I' : '-D'
             }
         );
+    };
+
+    me.checkEnvSsl = function checkEnvSsl() {
+        return nodeManager.checkEnvSsl();
     };
 
     me.getAutoUpdateUrl = function () {
@@ -1543,6 +1559,19 @@ function SSLManager(config) {
             }
 
             return bCustomSSLSupported;
+        };
+
+        me.checkEnvSsl = function () {
+            var resp = me.getEnvInfo();
+            if (resp.result != 0) return resp;
+
+            var env = resp.env || {};
+
+            if (!env.sslstate) {
+                return jelastic.env.control.EditEnvSettings(envName, session, { sslstate: true });
+            }
+
+            return { result : 0 };
         };
     }
 
