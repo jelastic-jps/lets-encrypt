@@ -333,10 +333,12 @@ function SSLManager(config) {
             backupPath: nodeManager.getBackupPath()
         });
     };
-    
+
     me.checkForUpdate = function checkForUpdate() {
+        var autoUpdateUrl = me.getAutoUpdateUrl();
+
         me.logAction("CheckForUpdateLE");
-        return me.exec(me.cmd, 'cronCmd=$(crontab -l | grep -Eo "/root/auto-update-ssl-cert.sh.*"); cronCmd="${cronCmd%?}"; ${cronCmd} 2>&1; echo "OK"');
+        return me.exec(me.cmd, '/root/auto-update-ssl-cert.sh "' + autoUpdateUrl + '"');
     };
 
     me.autoUpdate = function () {
@@ -659,7 +661,7 @@ function SSLManager(config) {
         }
 
         me.initAddOnExtIp(config.withExtIp);
-        
+
         resp = nodeManager.getEnvInfo();
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
@@ -1000,12 +1002,8 @@ function SSLManager(config) {
         );
     };
 
-    me.scheduleAutoUpdate = function scheduleAutoUpdate() {
-        var fileName = "auto-update-ssl-cert.sh",
-            scriptUrl = me.getScriptUrl(fileName),
-            autoUpdateUrl;
-
-        autoUpdateUrl = _(
+    me.getAutoUpdateUrl = function () {
+        return _(
             "https://%(host)/%(scriptName)?appid=%(appid)&token=%(token)&action=auto-update",
             {
                 host : window.location.host,
@@ -1013,7 +1011,12 @@ function SSLManager(config) {
                 appid : appid,
                 token : config.token
             }
-        );
+        ) || "";
+    };
+
+    me.scheduleAutoUpdate = function scheduleAutoUpdate() {
+        var fileName = "auto-update-ssl-cert.sh",
+            scriptUrl = me.getScriptUrl(fileName);
 
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
@@ -1024,7 +1027,7 @@ function SSLManager(config) {
             url : scriptUrl,
             cronTime : config.cronTime,
             scriptPath : nodeManager.getScriptPath(fileName),
-            autoUpdateUrl : autoUpdateUrl
+            autoUpdateUrl : me.getAutoUpdateUrl()
         });
     };
 
