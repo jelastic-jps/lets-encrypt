@@ -46,7 +46,7 @@ targetNodes:
     - llsmp
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/dzotic9/lets-encrypt/JE-53243
 logo: images/letsencrypt.png
 
 description:
