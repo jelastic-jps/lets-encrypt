@@ -13,6 +13,9 @@ cd "${DIR}/opt/letsencrypt"
 git reset --hard
 git pull origin master
 
+PROXY_PORT=12345
+LE_PORT=12346
+
 #Parameters for test certificates
 test_params='';
 [ "$test" == "true" -o "$1" == "fake" ] && { test_params='--test-cert --break-my-certs '; }
@@ -21,7 +24,7 @@ params='';
 [[ ${webroot} == "true" && -z "$webrootPath" ]] && {
     [[ ! -z ${WEBROOT} ]] && { webrootPath="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
 }
-[[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=' --standalone --http-01-port 12345 '; }
+[[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=" --standalone --http-01-port ${LE_PORT} "; }
 [[ -z "$domain" ]] && domain=$appdomain;
 
 validateCertBot
@@ -33,10 +36,13 @@ killall -9 letsencrypt > /dev/null 2>&1
 mkdir -p $DIR/var/log/letsencrypt
 
 [[ "$webroot" == "false" ]] && {
-    iptables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
-    ip6tables -I INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
-    iptables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
-    ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
+    service tinyproxy start || { echo "Failed to start proxy server" ; exit 3 ; }
+
+    iptables -I INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
+    iptables -I INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
+    ip6tables -I INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
+    iptables -t nat -I PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
+    ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
 }
 result_code=0;
 
@@ -45,10 +51,14 @@ resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --dom
 result_code=$?;
 
 [[ "$webroot" == "false" ]] && {
-    iptables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345
-    ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 12345 || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
-    iptables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
-    ip6tables -D INPUT -p tcp -m tcp --dport 12345 -j ACCEPT
+    iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
+    ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+    iptables -D INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
+    iptables -D INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
+    ip6tables -D INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
+
+    service tinyproxy stop || echo "Failed to stop proxy server"
+    chkconfig tinyproxy off
 }
 
 if [ "$result_code" != "0" ]; then
