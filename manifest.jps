@@ -44,6 +44,7 @@ targetNodes:
     - litespeedadc
     - lemp
     - llsmp
+    - jenkins
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
