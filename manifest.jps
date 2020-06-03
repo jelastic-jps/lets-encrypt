@@ -125,8 +125,6 @@ onUninstall:
 
 onBeforeDelete: delete
 
-onBeforeSetCloudletCount [${targetNodes.nodeGroup}]: stopSetCloudlets
-
 onAfterClone:
   install: ${baseUrl}/manifest.jps?_r=${fn.random}
   envName: ${event.response.env.envName}
@@ -191,16 +189,6 @@ actions:
       withExtIp: ${settings.withExtIp}
       webroot: ${settings.webroot}
       webrootPath: ${settings.webrootPath}
-  stopSetCloudlets:
-    - script: |
-        var version = jelastic.system.service.GetVersion().version.split('-').shift();
-        if (compareVersions(version, '5.8') <= 1 && "${event.params.flexibleCloudlets}" < 4) return {result: 0, onAfterReturn: "setCloudletsStopEvent"};
-        function compareVersions(a, b) {a = a.split('.'), b = b.split('.'); for (var i = 0, l = Math.max(a.length, b.length); i < l; i++) {x = parseInt(a[i], 10) || 0; y = parseInt(b[i], 10) || 0; if (x != y) return x > y ? 1 : -1 }; return 0;}
-        return {result: 0};
-  setCloudletsStopEvent:
-    stopEvent:
-      type: warning
-      message: "At least 512 MB RAM (4 cloudlets) are recommended for the correct installation of the Let's Encrypt add-on."
   delete:
     script: |
       jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
