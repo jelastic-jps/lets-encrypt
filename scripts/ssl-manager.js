@@ -36,7 +36,6 @@ function SSLManager(config) {
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         ANCIENT_VERSION_OF_PYTHON = 4,
-        CLOUDLET_MEM_AMOUNT = 128,
         REQUIRED_MEM = 512,
         INVALID_WEBROOT_DIR = 5,
         VALIDATION_SCRIPT = "validation.sh",
