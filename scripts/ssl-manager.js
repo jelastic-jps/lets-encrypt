@@ -359,14 +359,6 @@ function SSLManager(config) {
         }
 
         if (config.patchVersion == patchBuild) {
-
-            me.exec([
-                [ me.initAddOnExtIp, config.withExtIp ],
-                [ me.initWebrootMethod, config.webroot ],
-                [ me.initEntryPoint ],
-                [ me.validateEntryPoint ]
-            ]);
-
             resp = me.install(true);
         } else {
             resp = me.reinstall();
@@ -648,7 +640,7 @@ function SSLManager(config) {
             nodes,
             resp;
 
-        if ((!id && !group) || !nodeManager.isBalancerLayer(group)) {
+        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists())) {
             resp = nodeManager.getEntryPointGroup();
             if (resp.result != 0) return resp;
 
@@ -674,6 +666,7 @@ function SSLManager(config) {
                     resp = me.attachExtIpIfNeed(node);
                     if (resp.result != 0) return resp;
                 }
+                nodeManager.updateEnvInfo();
             } else {
                 me.exec([
                     [ me.initBindedDomains ],
@@ -1397,6 +1390,10 @@ function SSLManager(config) {
         me.isBalancerLayer = function (group) {
             return !!(group == LB || group == BL);
         };
+        
+        me.isComputeLayer = function (group) {
+            return !!(group == CP);
+        };
 
         me.setBalancerMasterNode = function (node) {
             oBLMaster = node;
@@ -1454,6 +1451,21 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
+        
+        me.isNodeExists = function isNodeExists() {
+            var resp,
+                nodes,
+                node;
+
+            nodes = me.getNodes();
+
+            for (var i = 0, n = nodes.length; i < n; i++) {
+                node = nodes[i];
+                if (node.id == config.nodeId && node.nodeGroup == config.nodeGroup) return true;
+            }
+
+            return false;
+        };
 
         me.getEnvInfo = function () {
             var resp;
@@ -1466,6 +1478,11 @@ function SSLManager(config) {
             }
 
             return envInfo;
+        };
+        
+        me.updateEnvInfo = function updateEnvInfo() {
+            envInfo = jelastic.env.control.GetEnvInfo(envName, session);
+            if (envInfo.result != 0) return envInfo;
         };
 
         me.getEntryPointGroup = function () {
