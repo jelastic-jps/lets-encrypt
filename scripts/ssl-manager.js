@@ -679,8 +679,7 @@ function SSLManager(config) {
                     resp = me.attachExtIpIfNeed(node);
                     if (resp.result != 0) return resp;
                 }
-                resp = nodeManager.updateEnvInfo();
-                if (resp.result != 0) return resp;
+                nodeManager.updateEnvInfo();
             } else {
                 me.exec([
                     [ me.initBindedDomains ],
@@ -1505,9 +1504,7 @@ function SSLManager(config) {
         me.getEnvInfo = function (reload) {
             var resp;
 
-            if (reload) envInfo = null;
-
-            if (!envInfo) {
+            if (!envInfo || reload) {
                 resp = jelastic.env.control.GetEnvInfo(envName, session);
                 if (resp.result != 0) return resp;
 
