@@ -37,6 +37,7 @@ function SSLManager(config) {
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
+        VALIDATION_SCRIPT = "validation.sh",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
         me = this,
@@ -81,7 +82,8 @@ function SSLManager(config) {
             "uninstall"   : me.uninstall,
             "auto-update" : me.autoUpdate,
             "backup-scripts": me.backupScripts,
-            "restore-scripts": me.restoreScripts
+            "restore-scripts": me.restoreScripts,
+            "check-for-update": me.checkForUpdate
         };
 
         if (getParam("uninstall")) {
@@ -248,7 +250,7 @@ function SSLManager(config) {
                     nodeManager.getScriptPath("generate-ssl-cert.sh"),
                     nodeManager.getScriptPath("letsencrypt_settings"),
                     nodeManager.getScriptPath("install-le.sh"),
-                    nodeManager.getScriptPath("validation.sh"),
+                    nodeManager.getScriptPath(VALIDATION_SCRIPT),
                     autoUpdateScript
                 ].join(" ")
             }]
@@ -292,7 +294,7 @@ function SSLManager(config) {
                 scriptToBackup: [
                     nodeManager.getScriptPath("auto-update-ssl-cert.sh"),
                     nodeManager.getScriptPath("install-le.sh"),
-                    nodeManager.getScriptPath("validation.sh")
+                    nodeManager.getScriptPath(VALIDATION_SCRIPT)
                 ].join(",")
             }]
         ])
@@ -319,7 +321,7 @@ function SSLManager(config) {
                 files: [
                     "auto-update-ssl-cert.sh",
                     "install-le.sh",
-                    "validation.sh"
+                    VALIDATION_SCRIPT
                 ].join(",")
             }]
         ])
@@ -330,6 +332,17 @@ function SSLManager(config) {
 
         return me.exec(me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
             backupPath: nodeManager.getBackupPath()
+        });
+    };
+
+    me.checkForUpdate = function checkForUpdate() {
+        var fileName = "auto-update-ssl-cert.sh";
+
+        me.logAction("CheckForUpdateLE");
+
+        return me.exec(me.cmd, "%(path) '%(url)'", {
+            path : nodeManager.getScriptPath(fileName),
+            url : me.getAutoUpdateUrl()
         });
     };
 
@@ -500,6 +513,10 @@ function SSLManager(config) {
         return me.getFileUrl("scripts/" + scriptName);
     };
 
+    me.getConfigUrl = function (configName) {
+        return me.getFileUrl("configs/" + configName);
+    };
+
     me.initCustomConfigs = function initCustomConfigs() {
         var CUSTOM_CONFIG = nodeManager.getCustomSettingsPath(),
             properties = new java.util.Properties(),
@@ -645,7 +662,7 @@ function SSLManager(config) {
         }
 
         me.initAddOnExtIp(config.withExtIp);
-        
+
         resp = nodeManager.getEnvInfo();
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
@@ -712,7 +729,7 @@ function SSLManager(config) {
     };
 
     me.validateEntryPoint = function validateEntryPoint() {
-        var fileName = "validation.sh",
+        var fileName = VALIDATION_SCRIPT,
             url = me.getScriptUrl(fileName),
             VALIDATE_IP = "validateExtIP",
             VALIDATE_DNS = "validateDNSSettings '%(domain)'",
@@ -867,8 +884,9 @@ function SSLManager(config) {
     me.generateSslCerts = function generateSslCerts() {
         var fileName = "generate-ssl-cert.sh",
             url = me.getScriptUrl(fileName),
-            validationFileName = "validation.sh",
+            validationFileName = VALIDATION_SCRIPT,
             generateSSLScript = nodeManager.getScriptPath(fileName),
+            proxyConfigName = "tinyproxy.conf",
             bUpload,
             text,
             resp;
@@ -879,14 +897,21 @@ function SSLManager(config) {
                 "wget --no-check-certificate '%(url)' -O %(path)",
                 "chmod +x %(path)",
                 "wget --no-check-certificate '%(validationUrl)' -O %(validationPath)",
-                "chmod +x %(path)"
+                "chmod +x %(validationPath)",
+                "wget --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf",
             ], {
                 validationUrl : me.getScriptUrl(validationFileName),
                 validationPath : nodeManager.getScriptPath(validationFileName),
+                proxyConfigUrl : me.getConfigUrl(proxyConfigName),
                 url : url,
                 path : generateSSLScript
             }]
         ]);
+
+        if (!config.withExtIp) {
+            resp = me.exec(me.checkEnvSsl);
+            if (resp.result != 0) return resp;
+        }
 
         if (!config.webroot) {
             //redirect incoming requests to master node
@@ -988,12 +1013,12 @@ function SSLManager(config) {
         );
     };
 
-    me.scheduleAutoUpdate = function scheduleAutoUpdate() {
-        var fileName = "auto-update-ssl-cert.sh",
-            scriptUrl = me.getScriptUrl(fileName),
-            autoUpdateUrl;
+    me.checkEnvSsl = function checkEnvSsl() {
+        return nodeManager.checkEnvSsl();
+    };
 
-        autoUpdateUrl = _(
+    me.getAutoUpdateUrl = function () {
+        return _(
             "https://%(host)/%(scriptName)?appid=%(appid)&token=%(token)&action=auto-update",
             {
                 host : window.location.host,
@@ -1001,7 +1026,12 @@ function SSLManager(config) {
                 appid : appid,
                 token : config.token
             }
-        );
+        ) || "";
+    };
+
+    me.scheduleAutoUpdate = function scheduleAutoUpdate() {
+        var fileName = "auto-update-ssl-cert.sh",
+            scriptUrl = me.getScriptUrl(fileName);
 
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
@@ -1012,7 +1042,7 @@ function SSLManager(config) {
             url : scriptUrl,
             cronTime : config.cronTime,
             scriptPath : nodeManager.getScriptPath(fileName),
-            autoUpdateUrl : autoUpdateUrl
+            autoUpdateUrl : me.getAutoUpdateUrl()
         });
     };
 
@@ -1095,13 +1125,18 @@ function SSLManager(config) {
 
         if (cert_key.body && chain.body && cert.body) {
             if (config.withExtIp) {
-                resp = jelastic.env.binder.BindSSL({
-                    "envName": config.envName,
-                    "session": session,
-                    "cert_key": cert_key.body,
-                    "cert": cert.body,
-                    "intermediate": chain.body
-                });
+
+                if (nodeManager.isExtraLayer(config.nodeGroup)) {
+                    resp = me.exec(me.bindSSLOnExtraNode, cert_key.body, cert.body, chain.body);
+                } else {
+                    resp = jelastic.env.binder.BindSSL({
+                        "envName": config.envName,
+                        "session": session,
+                        "cert_key": cert_key.body,
+                        "cert": cert.body,
+                        "intermediate": chain.body
+                    });
+                }
             } else {
                 resp = jelastic.env.binder.AddSSLCert({
                     envName: config.envName,
@@ -1121,6 +1156,21 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+
+    me.bindSSLOnExtraNode = function bindSSLOnExtra(key, cert, intermediate) {
+        return me.cmd([
+                'SSL_CONFIG_DIR="/var/lib/jelastic/SSL"',
+                '[ ! -d "${SSL_CONFIG_DIR}" ] && mkdir -p ${SSL_CONFIG_DIR} || echo "SSL dir exists"',
+                'echo "key=%(key)\n\ncert=%(cert)\n\nintermediate=%(intermediate)\n\n" > "${SSL_CONFIG_DIR}/customssl.conf"',
+                'jem ssl install'
+            ],
+            {
+                key: key,
+                cert: cert,
+                intermediate: intermediate,
+                nodeGroup: config.nodeGroup
+            });
     };
 
     me.removeSSL = function removeSSL() {
@@ -1375,7 +1425,7 @@ function SSLManager(config) {
         me.isBalancerLayer = function (group) {
             return !!(group == LB || group == BL);
         };
-
+        
         me.isComputeLayer = function (group) {
             return !!(group == CP);
         };
@@ -1436,7 +1486,7 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
-
+        
         me.isNodeExists = function isNodeExists() {
             var resp,
                 nodes,
@@ -1454,7 +1504,7 @@ function SSLManager(config) {
 
         me.getEnvInfo = function (reload) {
             var resp;
-            
+
             if (reload) envInfo = null;
 
             if (!envInfo) {
@@ -1466,7 +1516,7 @@ function SSLManager(config) {
 
             return envInfo;
         };
-
+        
         me.updateEnvInfo = function updateEnvInfo() {
             return me.getEnvInfo(true);
         };
@@ -1478,6 +1528,8 @@ function SSLManager(config) {
             nodes = me.getNodes();
             for (var i = 0, node; node = nodes[i]; i++) {
                 if (nodeManager.isBalancerLayer(node.nodeGroup) && node.ismaster) {
+                    if (!nodeManager.checkCustomSSL(node)) break;
+
                     nodeManager.setBalancerMasterNode(node);
                     group = config.webroot ? config.nodeGroup : node.nodeGroup;
                     break;
@@ -1524,26 +1576,31 @@ function SSLManager(config) {
             return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId);
         };
 
-        me.checkCustomSSL = function () {
-            var node;
+        me.checkCustomSSL = function (targetNode) {
+            var node = targetNode || "";
 
-            if (!isDefined(bCustomSSLSupported)) {
-                var resp = me.getNode();
+            if (!isDefined(bCustomSSLSupported) || targetNode) {
+                if (!node) {
+                    var resp = me.getNode();
 
-                if (resp.result != 0) {
-                    log("ERROR: getNode() = " + resp);
+                    if (resp.result != 0) {
+                        log("ERROR: getNode() = " + resp);
+                    }
+                    node = resp.node ? resp.node : "";
                 }
 
-                if (resp.node) {
-                    node = resp.node;
-
+                if (node) {
                     bCustomSSLSupported = node.isCustomSslSupport;
 
                     if ((!isDefined(bCustomSSLSupported) || node.type != "DOCKERIZED") && node.nodemission != "docker") {
                         resp = me.cmd([
+                            "wget --no-check-certificate '%(url)' -O '%(path)'",
                             "source %(path)",
                             "validateCustomSSL"
-                        ], { path : nodeManager.getScriptPath("validation.sh") });
+                        ], {
+                            url : me.getScriptUrl(VALIDATION_SCRIPT),
+                            path : nodeManager.getScriptPath(VALIDATION_SCRIPT)
+                        });
 
                         bCustomSSLSupported = (resp.result == 0);
                     }
@@ -1553,6 +1610,19 @@ function SSLManager(config) {
             }
 
             return bCustomSSLSupported;
+        };
+
+        me.checkEnvSsl = function () {
+            var resp = me.getEnvInfo();
+            if (resp.result != 0) return resp;
+
+            var env = resp.env || {};
+
+            if (!env.sslstate) {
+                return jelastic.env.control.EditEnvSettings(envName, session, { sslstate: true });
+            }
+
+            return { result : 0 };
         };
     }
 
