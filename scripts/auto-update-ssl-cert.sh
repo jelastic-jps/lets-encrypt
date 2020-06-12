@@ -57,8 +57,7 @@ seconds_before_expire=$(( $DAYS_BEFORE_EXPIRE * 24 * 60 * 60 ));
     exp_date=$(date --utc --date="$exp_date_raw" "+%Y-%m-%d %H:%M:%S");
 }
 
-[ -f "/var/lib/jelastic/SSL/jelastic.crt" ] && exp_date=$(jem ssl checkdomain | python -c "import sys, json; print (json.load(sys.stdin)['expiredate'])");
-
+[[ -f "/var/lib/jelastic/SSL/jelastic.crt" && "$withExtIp" != "false" ]] && exp_date=$(jem ssl checkdomain | python -c "import sys, json; print (json.load(sys.stdin)['expiredate'])");
 
 [ -z "$exp_date" ] && { echo "$(date) - no certificates for update" >> /var/log/letsencrypt.log; exit 0; };
 
@@ -72,3 +71,5 @@ _delta_time=$(( $_exp_date_unixtime - $_cur_date_unixtime  ));
     resp=$($WGET --no-check-certificate -qO- "${auto_update_url}");
     { echo "${resp#*response*}" | sed 's/"//g' | grep -q 'result:0' ;} || $WGET -qO- "${jerror_url}/jerror?appid=$appid&actionname=updatefromcontainer&callparameters=$auto_update_url&email=$email&errorcode=4121&errormessage=$resp&priority=high"
 }
+
+exit 0;
