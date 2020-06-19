@@ -96,8 +96,15 @@ function SSLManager(config) {
                 error : "unknown action [" + action + "]"
             }
         }
-
+        
+        me.init();
+        
         return actions[action].call(me);
+    };
+
+    me.init = function () {
+        nodeManager.setValidationScriptUrl(me.getScriptUrl(VALIDATION_SCRIPT));
+        nodeManager.setValidationPath(VALIDATION_SCRIPT);
     };
 
     me.install = function (isUpdate) {
@@ -1334,6 +1341,8 @@ function SSLManager(config) {
         var me = this,
             bCustomSSLSupported,
             sCustomSettingsPath,
+            sValidationPath,
+            sValidationUrl,
             oBackupScript,
             oBLMaster,
             sBackupPath,
@@ -1385,6 +1394,22 @@ function SSLManager(config) {
 
         me.getCustomSettingsPath = function() {
             return sCustomSettingsPath;
+        };
+
+        me.setValidationScriptUrl = function(url) {
+            sValidationUrl = url;
+        };
+        
+        me.getValidationScriptUrl = function() {
+            return sValidationUrl;
+        };
+        
+        me.setValidationPath = function(scriptName) {
+            sValidationPath = me.getScriptPath(scriptName);
+        };
+        
+        me.getValidationPath = function() {
+            return sValidationPath;
         };
 
         me.setNodeId = function (id) {
@@ -1595,8 +1620,8 @@ function SSLManager(config) {
                             "source %(path)",
                             "validateCustomSSL"
                         ], {
-                            url : me.getScriptUrl(VALIDATION_SCRIPT),
-                            path : nodeManager.getScriptPath(VALIDATION_SCRIPT)
+                            url : nodeManager.getValidationScriptUrl(),
+                            path : nodeManager.getValidationPath()
                         });
 
                         bCustomSSLSupported = (resp.result == 0);
