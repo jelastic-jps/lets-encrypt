@@ -98,12 +98,13 @@ function SSLManager(config) {
         }
         
         me.init();
-
+        
         return actions[action].call(me);
     };
-    
+
     me.init = function () {
-        nodeManager.setValidationScriptUrl(VALIDATION_SCRIPT);
+        nodeManager.setValidationScriptUrl(me.getScriptUrl(VALIDATION_SCRIPT));
+        nodeManager.setValidationPath(VALIDATION_SCRIPT);
     };
 
     me.install = function (isUpdate) {
@@ -222,7 +223,7 @@ function SSLManager(config) {
         resp = jelastic.marketplace.jps.install({
             appid: appid,
             session: session,
-            jps: nodeManager.getFileUrl("manifest.jps"),
+            jps: me.getFileUrl("manifest.jps"),
             envName: me.getEnvName(),
             settings: settings,
             nodeGroup: config.nodeGroup || "",
@@ -511,12 +512,16 @@ function SSLManager(config) {
         return config.envName || "";
     };
 
+    me.getFileUrl = function (filePath) {
+        return config.baseUrl + "/" + filePath + "?_r=" + Math.random();
+    };
+
     me.getScriptUrl = function (scriptName) {
-        return nodeManager.getFileUrl("scripts/" + scriptName);
+        return me.getFileUrl("scripts/" + scriptName);
     };
 
     me.getConfigUrl = function (configName) {
-        return nodeManager.getFileUrl("configs/" + configName);
+        return me.getFileUrl("configs/" + configName);
     };
 
     me.initCustomConfigs = function initCustomConfigs() {
@@ -1271,7 +1276,7 @@ function SSLManager(config) {
             html;
 
         try {
-            html = new Transport().get(nodeManager.getFileUrl(filePath));
+            html = new Transport().get(me.getFileUrl(filePath));
 
             if (values) {
                 html = me.replaceText(html, values);
@@ -1336,6 +1341,7 @@ function SSLManager(config) {
         var me = this,
             bCustomSSLSupported,
             sCustomSettingsPath,
+            sValidationPath,
             sValidationUrl,
             oBackupScript,
             oBLMaster,
@@ -1382,24 +1388,28 @@ function SSLManager(config) {
             return sBackupPath;
         };
 
-        me.getFileUrl = function (filePath) {
-            return config.baseUrl + "/" + filePath + "?_r=" + Math.random();
-        };
-
-        me.getValidationScriptUrl = function () {
-            return me.getFileUrl("scripts/" + sValidationUrl);
-        };
-
-        me.setValidationScriptUrl = function(url) {
-            sValidationUrl = url;
-        };
-
         me.setCustomSettingsPath = function (path) {
             sCustomSettingsPath = baseDir + path;
         };
 
         me.getCustomSettingsPath = function() {
             return sCustomSettingsPath;
+        };
+
+        me.setValidationScriptUrl = function(url) {
+            sValidationUrl = url;
+        };
+        
+        me.getValidationScriptUrl = function() {
+            return sValidationUrl;
+        };
+        
+        me.setValidationPath = function(scriptName) {
+            sValidationPath = me.getScriptPath(scriptName);
+        };
+        
+        me.getValidationPath = function() {
+            return sValidationPath;
         };
 
         me.setNodeId = function (id) {
@@ -1611,7 +1621,7 @@ function SSLManager(config) {
                             "validateCustomSSL"
                         ], {
                             url : nodeManager.getValidationScriptUrl(),
-                            path : nodeManager.getScriptPath(VALIDATION_SCRIPT)
+                            path : nodeManager.getValidationPath()
                         });
 
                         bCustomSSLSupported = (resp.result == 0);
