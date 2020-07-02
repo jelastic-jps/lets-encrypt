@@ -32,6 +32,7 @@ validateCertBot
 #Kill hanged certificate requests
 killall -9 letsencrypt-auto > /dev/null 2>&1
 killall -9 letsencrypt > /dev/null 2>&1
+killall -9 tinyproxy > /dev/null 2>&1
 
 mkdir -p $DIR/var/log/letsencrypt
 
