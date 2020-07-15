@@ -16,8 +16,7 @@ echo "Installing required packages"
   mkdir -p ${DIR}/opt;
   [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/certbot/certbot ${DIR}/opt/letsencrypt;
   ${DIR}/opt/letsencrypt/letsencrypt-auto --os-packages-only
-
-} &> /dev/null
+}
 
 [ ! -f "${DIR}/root/validation.sh" ] && {
     $WGET --no-check-certificate $RAW_REPO_SCRIPS_URL/validation.sh -O ${DIR}/root/validation.sh
