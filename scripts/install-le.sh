@@ -13,7 +13,7 @@ echo Checking RPM database
 echo "Installing required packages"
 {
   yum -y install epel-release git bc nss;
-  yum -y install tinyproxy --enablerepo='epel'
+  yum -y install tinyproxy --enablerepo='epel';
   
   mkdir -p ${DIR}/opt;
   [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/certbot/certbot ${DIR}/opt/letsencrypt;
