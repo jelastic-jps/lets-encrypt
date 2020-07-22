@@ -1042,7 +1042,7 @@ function SSLManager(config) {
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
             "chmod +x %(scriptPath)",
-            "crontab -l  >/dev/null | grep -v '%(scriptPath)' | crontab -",
+            "crontab -l | grep -v '%(scriptPath)' | crontab -",
             "echo \"%(cronTime) su - root -c \\\"%(scriptPath) '%(autoUpdateUrl)' >> %(log)\\\"\" >> /var/spool/cron/root"
         ], {
             url : scriptUrl,
