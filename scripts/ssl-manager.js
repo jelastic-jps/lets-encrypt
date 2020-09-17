@@ -931,6 +931,7 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
+        resp.result = 1;
         log("getOnlyCustomDomains->" + me.getOnlyCustomDomains());
         if (config.action == "install" && config.fallbackToX1 && !me.getOnlyCustomDomains() && resp.result != 0) {
             resp = me.analyzeSslResponse(
