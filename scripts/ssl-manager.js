@@ -931,7 +931,7 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
-        if (config.action == "install" && config.fallbackToX1 && resp.result != 0) {
+        if (config.action == "install" && config.fallbackToX1 && !me.getOnlyCustomDomains() && resp.result != 0) {
             resp = me.analyzeSslResponse(
                 me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
             );
@@ -959,6 +959,11 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+    
+    me.getOnlyCustomDomains = function () {
+        var regex = new RegExp(" ?" + config.envDomain + " ?");
+        return trim(config.customDomains.replace(regex, " "));
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl() {
@@ -1694,5 +1699,9 @@ function SSLManager(config) {
 
     function getUserInfo() {
         return jelastic.users.account.GetUserInfo(appid, session);
+    }
+    
+    function trim(string) {
+        return string.replace(/^\s+|\s+$/gm,'');
     }
 }
