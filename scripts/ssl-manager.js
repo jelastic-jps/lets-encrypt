@@ -962,7 +962,7 @@ function SSLManager(config) {
     };
     
     me.getOnlyCustomDomains = function () {
-        var regex = new RegExp(" ?" + config.envDomain + " ?");
+        var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
         return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
     };
 
