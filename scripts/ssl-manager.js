@@ -963,7 +963,7 @@ function SSLManager(config) {
     
     me.getOnlyCustomDomains = function () {
         var regex = new RegExp(" ?" + config.envDomain + " ?");
-        return trim(config.customDomains.replace(regex, " "));
+        return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl() {
