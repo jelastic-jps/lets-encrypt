@@ -1701,7 +1701,5 @@ function SSLManager(config) {
         return jelastic.users.account.GetUserInfo(appid, session);
     }
     
-    function trim(string) {
-        return string.replace(/^\s+|\s+$/gm,'');
-    }
+
 }
