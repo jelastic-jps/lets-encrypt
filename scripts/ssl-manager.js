@@ -1700,6 +1700,4 @@ function SSLManager(config) {
     function getUserInfo() {
         return jelastic.users.account.GetUserInfo(appid, session);
     }
-    
-
 }
