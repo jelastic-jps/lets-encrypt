@@ -931,7 +931,7 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
-        if (config.action == "install" && config.fallbackToX1 && resp.result != 0) {
+        if (config.action == "install" && config.fallbackToX1 && !me.getOnlyCustomDomains() && resp.result != 0) {
             resp = me.analyzeSslResponse(
                 me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
             );
@@ -959,6 +959,11 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+    
+    me.getOnlyCustomDomains = function () {
+        var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
+        return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl() {
