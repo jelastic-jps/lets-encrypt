@@ -676,16 +676,12 @@ function SSLManager(config) {
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
+            
+            node = (config.webroot && !targetNode) ? nodeManager.getBalancerMasterNode() : node;
 
-            if (config.withExtIp) {
-                if (config.webroot && !targetNode) {
-                    targetNode = nodeManager.getBalancerMasterNode() || node;
-                    resp = me.attachExtIpToGroupNodes(targetNode.nodeGroup);
-                    if (resp.result != 0) return resp;
-                } else {
-                    resp = me.attachExtIpIfNeed(node);
-                    if (resp.result != 0) return resp;
-                }
+            if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
+                resp = config.webroot ? me.attachExtIpToGroupNodes(node.nodeGroup) : me.attachExtIpIfNeed(node);
+                if (resp.result != 0) return resp;
                 nodeManager.updateEnvInfo();
             } else {
                 me.exec([
@@ -1519,6 +1515,10 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
+        
+        me.isIPv6Exists = function isIPv6Exists(node) {
+            return !!node.extipsv6.length;
+        }; 
         
         me.isNodeExists = function isNodeExists() {
             var resp,
