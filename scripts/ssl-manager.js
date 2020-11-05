@@ -1262,7 +1262,11 @@ function SSLManager(config) {
                 "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
                 "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
-            resp.debug = debug;
+            resp = { 
+                result: resp.result || Response.ERROR_UNKNOWN, 
+                error: resp.error || "unknown error",
+                debug: debug
+            };            
         }
 
         return me.sendEmail("Error", "html/update-error.html", {
