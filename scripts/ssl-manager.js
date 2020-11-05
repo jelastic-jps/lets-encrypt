@@ -931,7 +931,7 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
-        if (config.action == "install" && config.fallbackToX1 && resp.result != 0) {
+        if (config.action == "install" && config.fallbackToX1 && !me.getOnlyCustomDomains() && resp.result != 0) {
             resp = me.analyzeSslResponse(
                 me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
             );
@@ -959,6 +959,11 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+    
+    me.getOnlyCustomDomains = function () {
+        var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
+        return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl() {
@@ -1257,7 +1262,11 @@ function SSLManager(config) {
                 "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
                 "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
-            resp.debug = debug;
+            resp = { 
+                result: resp.result || Response.ERROR_UNKNOWN, 
+                error: resp.error || "unknown error",
+                debug: debug
+            };            
         }
 
         return me.sendEmail("Error", "html/update-error.html", {
