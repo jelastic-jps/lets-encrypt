@@ -1517,7 +1517,7 @@ function SSLManager(config) {
         };
         
         me.isIPv6Exists = function isIPv6Exists(node) {
-            return !!node.extipsv6.length;
+            return !!(node.extipsv6 && node.extipsv6.length);
         }; 
         
         me.isNodeExists = function isNodeExists() {
