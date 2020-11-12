@@ -25,7 +25,9 @@ params='';
     [[ ! -z ${WEBROOT} ]] && { webrootPath="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
 }
 [[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=" --standalone --http-01-port ${LE_PORT} "; }
+[ ! -z "$skipped_domains" ] && domain+=" -d "$skipped_domains
 [[ -z "$domain" ]] && domain=$appdomain;
+params+=' --allow-subset-of-names'
 
 validateCertBot
 
@@ -46,6 +48,10 @@ mkdir -p $DIR/var/log/letsencrypt
     ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
 }
 result_code=0;
+
+#check for unavailable domains
+resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --dry-run $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1) 
+parseDomains "${resp}"
 
 #Request for certificates
 resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
