@@ -1,5 +1,6 @@
 #!/bin/bash
 PATH="$PATH:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin::/root/bin"
+SETTING_PATH="${DIR}/opt/letsencrypt/settings"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 log="${DIR}/var/log/letsencrypt.log"
 function getLog(){
@@ -60,7 +61,6 @@ function validateExtIP(){
 }
 
 function validateDNSSettings(){
-    SETTING_PATH="${DIR}/opt/letsencrypt/settings"
     domain=$1;
     [ -z "$domain" ] && {
         [ -f "${SETTING_PATH}"  ] && source "${SETTING_PATH}" || { echo "Error: no settings available" ; exit 3 ; }
@@ -68,8 +68,8 @@ function validateDNSSettings(){
 
     [ ! -z "$skipped_domains" ] && domain+=" "$skipped_domains
 
-    domain_list=$(echo $domain | sed "s/-d / /g")
-    for single_domain in $domain_list
+    domain=$(echo $domain | sed "s/-d / /g")
+    for single_domain in $domain
     do
         [ "$single_domain" == "-d" ] && continue;
     detected=false
@@ -109,6 +109,32 @@ function validateDNSSettings(){
     return 0;
 }
 
+function parseDomains() {
+  failed_domains=$(echo $1 | grep -shoP "Domain: (.+?) Type: " | sed 's/Domain: //g;s/ Type: //')
+  domain=${domain// -d / }
+  skipped_domains=""
+
+  while IFS= read -r line; do
+    skipped_domains+=" "$line
+    domain=${domain/$line}
+  done <<< "$failed_domains"
+
+  domain=$(echo $domain | xargs)
+  
+  [ ! -z "$skipped_domains" ] && {
+  grep -q "skipped_domains" "${SETTING_PATH}" && sed -i "s/skipped_domains=.*/skipped_domains='$(echo $skipped_domains | sed "s/ / -d /g")'/g" "${SETTING_PATH}" || printf "\nskipped_domains='$(echo $skipped_domains | sed "s/ / -d /g")'" >> "${SETTING_PATH}";
+  }
+  
+  [[ ! -z "$domain" ]] && {
+      sed -i "s/^domain=.*/domain='$(echo $domain | sed "s/ / -d /g")'/g" "${SETTING_PATH}";
+  } || {
+      sed -i "s/^domain=.*/domain='$(echo $appdomain)'/g" "${SETTING_PATH}";
+      test_params='--test-cert --break-my-certs ';
+  }
+
+  [[ -f "${SETTING_PATH}" ]] && source "${SETTING_PATH}"
+}
+
 function validateCertBot(){
     [ -f "${DIR}/opt/letsencrypt/certbot-auto" ] && return 0  || { echo "Error: Certbot is not installed!"; exit 1 ; };
 }
@@ -126,7 +152,7 @@ function validateCustomSSL() {
 
 function runAllChecks(){
    validateExtIP
-   validateDNSSettings
+#   validateDNSSettings
    validateCertBot
    echo "All validations are passed succesfully";
 }
