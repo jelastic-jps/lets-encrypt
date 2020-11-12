@@ -762,8 +762,8 @@ function SSLManager(config) {
 
         resp = nodeManager.cmd([
             "source %(path)",
-            VALIDATE_IP,
-            VALIDATE_DNS
+            VALIDATE_IP
+            // VALIDATE_DNS
         ], {
             domain : config.customDomains || config.envDomain,
             path : nodeManager.getScriptPath(fileName),
