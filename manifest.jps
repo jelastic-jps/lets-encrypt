@@ -67,6 +67,9 @@ settings:
       caption: External Domain(s)
       placeholder: leave blank to get a test certificate for this environment domain
       required: false
+      tooltip: |
+        Each of the specified external domains should be preliminarily bound to the external IP of the node where add-on is installed (either via <a href="https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record" target="_blank">DNS record</a> or CDN service).<br><br>
+        <b>Note:</b> Leave this field blank for issuing a test SSL certificate bound to the internal environment domain.
 
 onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
