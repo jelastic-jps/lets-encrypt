@@ -49,13 +49,10 @@ mkdir -p $DIR/var/log/letsencrypt
 }
 result_code=0;
 
-#check for unavailable domains
-resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly --dry-run $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1) 
-parseDomains "${resp}"
-
 #Request for certificates
 resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
 result_code=$?;
+parseDomains "${resp}"
 
 [[ "$webroot" == "false" ]] && {
     iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
