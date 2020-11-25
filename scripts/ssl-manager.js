@@ -37,6 +37,7 @@ function SSLManager(config) {
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
+        UPLOADER_ERROR = 6,
         VALIDATION_SCRIPT = "validation.sh",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
@@ -958,6 +959,17 @@ function SSLManager(config) {
             };
         }
 
+        if (resp.result && resp.result == UPLOADER_ERROR) {
+            text = "There was an error while uploading certificates. Please contact our support team.";
+            return {
+                result: UPLOADER_ERROR,
+                error: text,
+                response: text,
+                type: "warning",
+                message: text
+            };
+        }
+
         return resp;
     };
     
@@ -985,6 +997,7 @@ function SSLManager(config) {
             if (resp) {
                 if (resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) return {result: ANCIENT_VERSION_OF_PYTHON };
                 if (resp.exitStatus == INVALID_WEBROOT_DIR) return { result: INVALID_WEBROOT_DIR}
+                if (resp.exitStatus == UPLOADER_ERROR) return { result: UPLOADER_ERROR}
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
