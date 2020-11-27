@@ -1003,6 +1003,7 @@ function SSLManager(config) {
                 if (ind1 != -1) {
                     var ind2 = end ? out.indexOf(end, ind1) : -1;
                     var message = ind2 == -1 ? out.substring(ind1).replace(start, "") : out.substring(ind1, ind2); //removed duplicated words in popup
+                    message += "\n \n[More info](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/)";
                     resp = error(Response.ERROR_UNKNOWN, message);
                     break;
                 }
