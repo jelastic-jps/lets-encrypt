@@ -2,6 +2,5 @@
 Just select a required *Environment* from the list below and specify the attached *External Domain(s)*.  
 
 **Note:** 
-* Leave the *External Domain(s)* field blank for issuing a test SSL certificate bound to the internal environment domain.
 * Public IP address will be automatically attached to all nodes within the entry point layer (application server or load balancer).
 * Let’s Encrypt has a set of [limitations while issuing certificates](https://letsencrypt.org/docs/rate-limits/). If they don’t meet the requirements of your project, please consider using alternative SSL certificate authority.

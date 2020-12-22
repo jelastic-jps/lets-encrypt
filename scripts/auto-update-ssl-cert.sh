@@ -42,7 +42,7 @@ updateScripts
 [ -f "${DIR}/root/validation.sh"  ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
 
 validateExtIP
-validateDNSSettings
+#validateDNSSettings
 
 TIME_TO_WAIT=$(($RANDOM%3600));
 #sleep $TIME_TO_WAIT;   

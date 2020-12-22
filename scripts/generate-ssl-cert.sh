@@ -25,7 +25,9 @@ params='';
     [[ ! -z ${WEBROOT} ]] && { webrootPath="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
 }
 [[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=" --standalone --http-01-port ${LE_PORT} "; }
+[ ! -z "$skipped_domains" ] && domain+=" -d "$skipped_domains
 [[ -z "$domain" ]] && domain=$appdomain;
+params+=' --allow-subset-of-names'
 
 validateCertBot
 
@@ -50,6 +52,7 @@ result_code=0;
 #Request for certificates
 resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
 result_code=$?;
+parseDomains "${resp}"
 
 [[ "$webroot" == "false" ]] && {
     iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
