@@ -49,6 +49,10 @@ mkdir -p $DIR/var/log/letsencrypt
 }
 result_code=0;
 
+
+cd $DIR/opt/letsencrypt/
+git reset --merge
+git checkout 02a5d000cb1684619650677a2d3fa4972dfd576f
 #Request for certificates
 resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
 result_code=$?;
