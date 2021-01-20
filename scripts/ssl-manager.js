@@ -39,6 +39,8 @@ function SSLManager(config) {
         INVALID_WEBROOT_DIR = 5,
         VALIDATION_SCRIPT = "validation.sh",
         Random = com.hivext.api.utils.Random,
+        isAddedEnvDomain = false,
+        INSTALL = "install",
         LIGHT = "LIGHT",
         me = this,
         BL = "bl",
@@ -96,9 +98,9 @@ function SSLManager(config) {
                 error : "unknown action [" + action + "]"
             }
         }
-        
+
         me.init();
-        
+
         return actions[action].call(me);
     };
 
@@ -438,6 +440,10 @@ function SSLManager(config) {
         });
     };
 
+    me.hasAddedEnvDomain = function () {
+        return isAddedEnvDomain;
+    };
+
     me.hasValidToken = function () {
         return isValidToken;
     };
@@ -451,7 +457,7 @@ function SSLManager(config) {
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
             [ me.createScript ],
-            [ me.evalScript, "install" ]
+            [ me.evalScript, INSTALL ]
         ]);
     };
 
@@ -893,6 +899,7 @@ function SSLManager(config) {
             validationFileName = VALIDATION_SCRIPT,
             generateSSLScript = nodeManager.getScriptPath(fileName),
             proxyConfigName = "tinyproxy.conf",
+            tmpResp,
             bUpload,
             text,
             resp;
@@ -931,10 +938,23 @@ function SSLManager(config) {
             me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs"))
         );
 
-        if (config.action == "install" && config.fallbackToX1 && !me.getOnlyCustomDomains() && resp.result != 0) {
-            resp = me.analyzeSslResponse(
-                me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
-            );
+        tmpResp = me.updateGeneratedCustomDomains();
+        if (tmpResp.result != 0) return tmpResp;
+
+        if (resp.result != 0 && config.action == INSTALL) {
+            if (!me.getOnlyCustomDomains() && (config.fallbackToX1 || !me.isEnvNameInDomains())) {
+                if (!me.isEnvNameInDomains()) {
+                    me.addEnvDomainToCustom();
+                }
+
+                resp = me.analyzeSslResponse(
+                    me.exec(me.cmd, generateSSLScript + (bUpload ? "" : " --no-upload-certs") + (config.fallbackToX1 ? " fake" : ""))
+                );
+
+                if (me.hasAddedEnvDomain()) {
+                    me.removeEnvDomainFromCustom();
+                }
+            }
         }
 
         if (!config.webroot) {
@@ -960,7 +980,22 @@ function SSLManager(config) {
 
         return resp;
     };
-    
+
+    me.isEnvNameInDomains = function () {
+        var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
+        return regex.test(config.customDomains);
+    };
+
+    me.addEnvDomainToCustom = function addEnvDomainToCustom() {
+        isAddedEnvDomain = true;
+        return me.exec(me.cmd, "sed -i \"s/^domain=''/domain='" + config.envDomain + "'/g\" /opt/letsencrypt/settings");
+    };
+
+    me.removeEnvDomainFromCustom = function removeEnvDomainFromCustom() {
+        isAddedEnvDomain = true;
+        return me.exec(me.cmd, "sed -i \"s/^domain='" + config.envDomain + "'/domain=''/g\" /opt/letsencrypt/settings");
+    };
+
     me.getOnlyCustomDomains = function () {
         var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
         return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
@@ -992,7 +1027,7 @@ function SSLManager(config) {
 
             errors = {
                 "An unexpected error": "Please see",
-                "The following errors": "appid =",
+                "- The following errors": "",
                 "Error: ": null
             };
 
@@ -1002,7 +1037,7 @@ function SSLManager(config) {
 
                 if (ind1 != -1) {
                     var ind2 = end ? out.indexOf(end, ind1) : -1;
-                    var message = ind2 == -1 ? out.substring(ind1).replace(start, "") : out.substring(ind1, ind2); //removed duplicated words in popup
+                    var message = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2); //removed duplicated words in popup
                     resp = error(Response.ERROR_UNKNOWN, message);
                     break;
                 }
@@ -1213,8 +1248,8 @@ function SSLManager(config) {
             "html/update-success.html", {
                 ENVIRONMENT : config.envDomain,
                 ACTION : action,
-                UPDATED_DOMAINS: "Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>",
-                SKIPPED_DOMAINS: skippedDomains ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "Login to your domain registrar admin panel and check <a href='https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record' target='_blank'>DNS records</a> for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
+                UPDATED_DOMAINS: me.getCustomDomains() ? "<br>Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>" : "",
+                SKIPPED_DOMAINS: skippedDomains ? "<br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "Login to your domain registrar admin panel and check <a href='https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record' target='_blank'>DNS records</a> for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
             }
         );
     };
@@ -1258,19 +1293,19 @@ function SSLManager(config) {
         resp = resp || {};
 
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
-            resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n" +
-                "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
-                "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
+            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(me.getSkippedDomains()) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt</a> settings.<br><br>" +
+                "If you no longer require SSL certificates within the <b>" + config.envDomain + "</b> environment, remove the Let's Encrypt add-on to stop receiving this error message.";
         } else {
-            resp = { 
-                result: resp.result || Response.ERROR_UNKNOWN, 
+            resp = {
+                result: resp.result || Response.ERROR_UNKNOWN,
                 error: resp.error || "unknown error",
                 debug: debug
-            };            
+            };
         }
 
         return me.sendEmail("Error", "html/update-error.html", {
             SUPPORT_EMAIL : "support@jelastic.com",
+            ENV_DOMAIN: config.envDomain,
             RESP : resp || ""
         });
     };
@@ -1278,6 +1313,14 @@ function SSLManager(config) {
     me.getEmailTitle = function (title) {
         return title + ": Let's Encrypt SSL at " + config.envDomain;
     };
+
+    me.escapeHtmlEntities =  function (str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
 
     me.sendEmail = function (title, filePath, values) {
         var email = config.email,
@@ -1408,15 +1451,15 @@ function SSLManager(config) {
         me.setValidationScriptUrl = function(url) {
             sValidationUrl = url;
         };
-        
+
         me.getValidationScriptUrl = function() {
             return sValidationUrl;
         };
-        
+
         me.setValidationPath = function(scriptName) {
             sValidationPath = me.getScriptPath(scriptName);
         };
-        
+
         me.getValidationPath = function() {
             return sValidationPath;
         };
@@ -1458,7 +1501,7 @@ function SSLManager(config) {
         me.isBalancerLayer = function (group) {
             return !!(group == LB || group == BL);
         };
-        
+
         me.isComputeLayer = function (group) {
             return !!(group == CP);
         };
@@ -1519,7 +1562,7 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
-        
+
         me.isNodeExists = function isNodeExists() {
             var resp,
                 nodes,
@@ -1547,7 +1590,7 @@ function SSLManager(config) {
 
             return envInfo;
         };
-        
+
         me.updateEnvInfo = function updateEnvInfo() {
             return me.getEnvInfo(true);
         };
