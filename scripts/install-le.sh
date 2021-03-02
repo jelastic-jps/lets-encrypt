@@ -12,11 +12,15 @@ echo Checking RPM database
 
 echo "Installing required packages"
 {
+  yum-config-manager --save --setopt=pgdg*.skip_if_unavailable=true
   yum -y install epel-release git bc nss;
   yum -y install tinyproxy --enablerepo='epel';
   
   mkdir -p ${DIR}/opt;
   [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/certbot/certbot ${DIR}/opt/letsencrypt;
+  cd $DIR/opt/letsencrypt/
+  git reset --merge
+  git checkout 02a5d000cb1684619650677a2d3fa4972dfd576f
   ${DIR}/opt/letsencrypt/letsencrypt-auto --os-packages-only
 }
 

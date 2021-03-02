@@ -25,7 +25,9 @@ params='';
     [[ ! -z ${WEBROOT} ]] && { webrootPath="${WEBROOT}/ROOT/"; } || { echo "Webroot path is not set"; exit 3; }
 }
 [[ "$webroot" == "true" && ! -z "$webrootPath" ]] && { params="-a webroot --webroot-path ${webrootPath}"; } || { params=" --standalone --http-01-port ${LE_PORT} "; }
+[ ! -z "$skipped_domains" ] && domain+=" -d "$skipped_domains
 [[ -z "$domain" ]] && domain=$appdomain;
+params+=' --allow-subset-of-names'
 
 validateCertBot
 
@@ -47,9 +49,14 @@ mkdir -p $DIR/var/log/letsencrypt
 }
 result_code=0;
 
+
+cd $DIR/opt/letsencrypt/
+git reset --merge
+git checkout 02a5d000cb1684619650677a2d3fa4972dfd576f
 #Request for certificates
 resp=$($DIR/opt/letsencrypt/letsencrypt-auto certonly $params $test_params --domain $domain --preferred-challenges http-01 --renew-by-default --email $email --agree-tos --no-bootstrap --no-self-upgrade --no-eff-email --logs-dir $DIR/var/log/letsencrypt 2>&1)
 result_code=$?;
+parseDomains "${resp}"
 
 [[ "$webroot" == "false" ]] && {
     iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
@@ -90,6 +97,9 @@ function uploadCerts() {
     #Upload 3 certificate files
     uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/privkey.pem" -F "fid=fullchain.pem" -F "file=@${certdir}/chain.pem" -F "fid=cert.pem" -F "file=@${certdir}/cert.pem" http://$primarydomain/xssu/rest/upload)
 
+    result_code=$?;
+    [[ $result_code != 0 ]] && { echo "$uploadresult" && exit 6; }
+    
     #Save urls to certificate files
     echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/privkey.url
     echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/fullchain.url

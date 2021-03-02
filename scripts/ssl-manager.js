@@ -37,6 +37,7 @@ function SSLManager(config) {
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
+        UPLOADER_ERROR = 6,
         VALIDATION_SCRIPT = "validation.sh",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
@@ -136,7 +137,7 @@ function SSLManager(config) {
         var skippedDomains = me.getSkippedDomains();
 
         if (skippedDomains) {
-            skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Fix their DNS records via your domain registrar admin panel, and reinstall/update the add-on or remove them from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
+            skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
         }
 
         resp.skippedDomains = skippedDomains || "";
@@ -762,8 +763,8 @@ function SSLManager(config) {
 
         resp = nodeManager.cmd([
             "source %(path)",
-            VALIDATE_IP,
-            VALIDATE_DNS
+            VALIDATE_IP
+            // VALIDATE_DNS
         ], {
             domain : config.customDomains || config.envDomain,
             path : nodeManager.getScriptPath(fileName),
@@ -958,6 +959,17 @@ function SSLManager(config) {
             };
         }
 
+        if (resp.result && resp.result == UPLOADER_ERROR) {
+            text = "There was an error while uploading certificates. Please contact our support team.";
+            return {
+                result: UPLOADER_ERROR,
+                error: text,
+                response: text,
+                type: "warning",
+                message: text
+            };
+        }
+
         return resp;
     };
     
@@ -985,6 +997,7 @@ function SSLManager(config) {
             if (resp) {
                 if (resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) return {result: ANCIENT_VERSION_OF_PYTHON };
                 if (resp.exitStatus == INVALID_WEBROOT_DIR) return { result: INVALID_WEBROOT_DIR}
+                if (resp.exitStatus == UPLOADER_ERROR) return { result: UPLOADER_ERROR}
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
@@ -1215,7 +1228,7 @@ function SSLManager(config) {
                 ENVIRONMENT : config.envDomain,
                 ACTION : action,
                 UPDATED_DOMAINS: "Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>",
-                SKIPPED_DOMAINS: skippedDomains ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
+                SKIPPED_DOMAINS: skippedDomains ? "<br><br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "Login to your domain registrar admin panel and check <a href='https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record' target='_blank'>DNS records</a> for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
             }
         );
     };
