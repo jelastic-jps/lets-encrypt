@@ -77,7 +77,7 @@ fi
 
 [[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
 [[ $invalid_webroot_dir == true ]] && exit 5; #wrong webroot directory or server is not running
-[[ $timed_out == true ]] && exit 6; #timed out exception
+[[ $timed_out == true ]] && exit 7; #timed out exception
 [[ $result_code != "0" ]] && { echo "$resp"; exit 1; } #general result error
 
 #To be sure that r/w access
