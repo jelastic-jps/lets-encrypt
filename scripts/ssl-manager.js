@@ -658,7 +658,7 @@ function SSLManager(config) {
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
-            targetNode,
+            blMasterNode,
             nodes,
             resp;
 
@@ -679,7 +679,8 @@ function SSLManager(config) {
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
             
-            node = config.webroot ? node : (nodeManager.getBalancerMasterNode() ? nodeManager.getBalancerMasterNode() : node);
+            blMasterNode = nodeManager.getBalancerMasterNode();
+            node = config.webroot ? node : (blMasterNode ? blMasterNode : node);
 
             if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
                 resp = config.webroot ? me.attachExtIpToGroupNodes(node.nodeGroup) : me.attachExtIpIfNeed(node);
