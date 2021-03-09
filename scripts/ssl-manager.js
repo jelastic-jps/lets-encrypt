@@ -679,7 +679,7 @@ function SSLManager(config) {
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
             
-            node = (config.webroot && !targetNode && nodeManager.getBalancerMasterNode()) ? nodeManager.getBalancerMasterNode() : node;
+            node = config.webroot ? node : (nodeManager.getBalancerMasterNode() ? nodeManager.getBalancerMasterNode() : node);
 
             if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
                 resp = config.webroot ? me.attachExtIpToGroupNodes(node.nodeGroup) : me.attachExtIpIfNeed(node);
