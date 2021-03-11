@@ -662,7 +662,7 @@ function SSLManager(config) {
             nodes,
             resp;
 
-        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists())) {
+        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists()) || config.webroot) {
             resp = nodeManager.getEntryPointGroup();
             if (resp.result != 0) return resp;
 
@@ -672,18 +672,20 @@ function SSLManager(config) {
 
         me.initAddOnExtIp(config.withExtIp);
 
+        if (config.webroot && group == BL) {
+            group = CP;
+        }
+
         resp = nodeManager.getEnvInfo();
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
-            
             blMasterNode = nodeManager.getBalancerMasterNode();
-            node = config.webroot ? node : (blMasterNode ? blMasterNode : node);
 
             if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
-                resp = config.webroot ? me.attachExtIpToGroupNodes(node.nodeGroup) : me.attachExtIpIfNeed(node);
+                resp = config.webroot && !nodeManager.isExtraLayer(node.nodeGroup) ? me.attachExtIpToGroupNodes(blMasterNode ? BL : node.nodeGroup) : me.attachExtIpIfNeed(node);
                 if (resp.result != 0) return resp;
                 nodeManager.updateEnvInfo();
             } else {
