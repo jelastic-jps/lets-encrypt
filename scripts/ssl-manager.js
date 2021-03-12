@@ -673,7 +673,7 @@ function SSLManager(config) {
         me.initAddOnExtIp(config.withExtIp);
 
         if (config.webroot && group == BL) {
-            group = CP;
+            if (nodeManager.isNodeExists(CP)) group = CP;
         }
 
         resp = nodeManager.getEnvInfo();
@@ -1550,7 +1550,7 @@ function SSLManager(config) {
             return !!(node.extipsv6 && node.extipsv6.length);
         }; 
         
-        me.isNodeExists = function isNodeExists() {
+        me.isNodeExists = function isNodeExists(group) {
             var resp,
                 nodes,
                 node;
@@ -1559,6 +1559,7 @@ function SSLManager(config) {
 
             for (var i = 0, n = nodes.length; i < n; i++) {
                 node = nodes[i];
+                if (group && node.nodeGroup == group) return true;
                 if (node.id == config.nodeId && node.nodeGroup == config.nodeGroup) return true;
             }
 
