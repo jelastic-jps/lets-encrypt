@@ -38,6 +38,7 @@ function SSLManager(config) {
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
         UPLOADER_ERROR = 6,
+        READ_TIMED_OUT = 7,
         VALIDATION_SCRIPT = "validation.sh",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
@@ -657,11 +658,11 @@ function SSLManager(config) {
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
-            targetNode,
+            blMasterNode,
             nodes,
             resp;
 
-        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists())) {
+        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists()) || config.webroot) {
             resp = nodeManager.getEntryPointGroup();
             if (resp.result != 0) return resp;
 
@@ -671,22 +672,21 @@ function SSLManager(config) {
 
         me.initAddOnExtIp(config.withExtIp);
 
+        if (config.webroot && group == BL) {
+            if (nodeManager.isNodeExists(CP)) group = CP;
+        }
+
         resp = nodeManager.getEnvInfo();
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
+            blMasterNode = nodeManager.getBalancerMasterNode();
 
-            if (config.withExtIp) {
-                if (config.webroot && !targetNode) {
-                    targetNode = nodeManager.getBalancerMasterNode() || node;
-                    resp = me.attachExtIpToGroupNodes(targetNode.nodeGroup);
-                    if (resp.result != 0) return resp;
-                } else {
-                    resp = me.attachExtIpIfNeed(node);
-                    if (resp.result != 0) return resp;
-                }
+            if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
+                resp = config.webroot && !nodeManager.isExtraLayer(node.nodeGroup) ? me.attachExtIpToGroupNodes(blMasterNode ? BL : node.nodeGroup) : me.attachExtIpIfNeed(node);
+                if (resp.result != 0) return resp;
                 nodeManager.updateEnvInfo();
             } else {
                 me.exec([
@@ -969,6 +969,17 @@ function SSLManager(config) {
                 message: text
             };
         }
+        
+        if (resp.result && resp.result == READ_TIMED_OUT) {
+            text = "The Let's Encrypt service is currently unavailable. Check the /var/log/letsencrypt log for more details or try again in a few minutes.";
+            return {
+                result: READ_TIMED_OUT,
+                error: text,
+                response: text,
+                type: "warning",
+                message: text
+            };
+        }
 
         return resp;
     };
@@ -998,6 +1009,7 @@ function SSLManager(config) {
                 if (resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) return {result: ANCIENT_VERSION_OF_PYTHON };
                 if (resp.exitStatus == INVALID_WEBROOT_DIR) return { result: INVALID_WEBROOT_DIR}
                 if (resp.exitStatus == UPLOADER_ERROR) return { result: UPLOADER_ERROR}
+                if (resp.exitStatus == READ_TIMED_OUT) return { result: READ_TIMED_OUT}
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
@@ -1016,6 +1028,7 @@ function SSLManager(config) {
                 if (ind1 != -1) {
                     var ind2 = end ? out.indexOf(end, ind1) : -1;
                     var message = ind2 == -1 ? out.substring(ind1).replace(start, "") : out.substring(ind1, ind2); //removed duplicated words in popup
+                    message += "\n \n[More info](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/)";
                     resp = error(Response.ERROR_UNKNOWN, message);
                     break;
                 }
@@ -1533,7 +1546,11 @@ function SSLManager(config) {
             return { result : 0, node : node };
         };
         
-        me.isNodeExists = function isNodeExists() {
+        me.isIPv6Exists = function isIPv6Exists(node) {
+            return !!(node.extipsv6 && node.extipsv6.length);
+        }; 
+        
+        me.isNodeExists = function isNodeExists(group) {
             var resp,
                 nodes,
                 node;
@@ -1542,6 +1559,7 @@ function SSLManager(config) {
 
             for (var i = 0, n = nodes.length; i < n; i++) {
                 node = nodes[i];
+                if (group && node.nodeGroup == group) return true;
                 if (node.id == config.nodeId && node.nodeGroup == config.nodeGroup) return true;
             }
 
