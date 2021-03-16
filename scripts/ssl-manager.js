@@ -658,11 +658,11 @@ function SSLManager(config) {
     me.initEntryPoint = function initEntryPoint() {
         var group = config.nodeGroup,
             id = config.nodeId,
-            targetNode,
+            blMasterNode,
             nodes,
             resp;
 
-        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists())) {
+        if ((!id && !group) || nodeManager.isComputeLayer(group) || (id && group && !nodeManager.isNodeExists()) || config.webroot) {
             resp = nodeManager.getEntryPointGroup();
             if (resp.result != 0) return resp;
 
@@ -672,17 +672,20 @@ function SSLManager(config) {
 
         me.initAddOnExtIp(config.withExtIp);
 
+        if (config.webroot && group == BL) {
+            if (nodeManager.isNodeExists(CP)) group = CP;
+        }
+
         resp = nodeManager.getEnvInfo();
         if (resp.result != 0) return resp;
         nodes = resp.nodes;
 
         for (var j = 0, node; node = nodes[j]; j++) {
             if (node.nodeGroup != group) continue;
-            
-            node = (config.webroot && !targetNode) ? nodeManager.getBalancerMasterNode() : node;
+            blMasterNode = nodeManager.getBalancerMasterNode();
 
             if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
-                resp = config.webroot ? me.attachExtIpToGroupNodes(node.nodeGroup) : me.attachExtIpIfNeed(node);
+                resp = config.webroot && !nodeManager.isExtraLayer(node.nodeGroup) ? me.attachExtIpToGroupNodes(blMasterNode ? BL : node.nodeGroup) : me.attachExtIpIfNeed(node);
                 if (resp.result != 0) return resp;
                 nodeManager.updateEnvInfo();
             } else {
@@ -1547,7 +1550,7 @@ function SSLManager(config) {
             return !!(node.extipsv6 && node.extipsv6.length);
         }; 
         
-        me.isNodeExists = function isNodeExists() {
+        me.isNodeExists = function isNodeExists(group) {
             var resp,
                 nodes,
                 node;
@@ -1556,6 +1559,7 @@ function SSLManager(config) {
 
             for (var i = 0, n = nodes.length; i < n; i++) {
                 node = nodes[i];
+                if (group && node.nodeGroup == group) return true;
                 if (node.id == config.nodeId && node.nodeGroup == config.nodeGroup) return true;
             }
 
