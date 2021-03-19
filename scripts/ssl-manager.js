@@ -444,8 +444,9 @@ function SSLManager(config) {
         return isValidToken;
     };
 
-    me.creteScriptAndInstall = function createInstallationScript() {
+    me.createScriptAndInstall = function createInstallationScript() {
         return me.exec([
+            [ me.initCustomConfigs ],
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
@@ -534,7 +535,7 @@ function SSLManager(config) {
             propName,
             resp;
 
-        resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false");
+        resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false", { nodeGroup: config.nodeGroup });
         if (resp.result != 0) return resp;
 
         if (resp.responses[0].out == "true") {
@@ -547,7 +548,7 @@ function SSLManager(config) {
 
             while (propNames.hasMoreElements()) {
                 propName = propNames.nextElement().toString();
-                config[propName] = String(properties.getProperty(propName));
+                config[propName] = config[propName] || String(properties.getProperty(propName));
             }
         }
 
@@ -559,11 +560,13 @@ function SSLManager(config) {
     };
 
     me.initFalbackToFake = function initFalbackToFake(fake) {
+        fake = fake || false;
         config.fallbackToX1 = me.initBoolValue(fake);
         return { result: 0 };
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
+        withExtIp = withExtIp || true;
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
         edition = edition || getPlatformEdition();
@@ -573,7 +576,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        webroot = webroot || false;
+        webroot = webroot || config.webroot || false;
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
     };
@@ -1635,7 +1638,10 @@ function SSLManager(config) {
         };
 
         me.readFile = function (path, group) {
-            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId);
+            if (nodeId)
+                return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId);
+            else
+                return jelastic.env.file.Read(envName, session, path, null, group || null);
         };
 
         me.checkCustomSSL = function (targetNode) {
