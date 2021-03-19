@@ -10,11 +10,11 @@ var baseDir          = getParam("baseDir", "/"),
     deployHookType   = getParam("deployHookType", ""),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
-    withExtIp        = getParam("withExtIp", "true"),
-    webroot          = getParam("webroot", "false"),
+    withExtIp        = getParam("withExtIp", ""),
+    webroot          = getParam("webroot", ""),
     webrootPath     = getParam("webrootPath", ""),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
-    fallbackToX1     = getParam("fallbackToX1", "false"),
+    fallbackToX1     = getParam("fallbackToX1", ""),
     test             = getParam("test", "");
 
 function run() {
@@ -32,9 +32,9 @@ function run() {
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
         undeployHookType : replace(undeployHookType),
-        withExtIp        : replace(withExtIp) || "true",
-        fallbackToX1     : replace(fallbackToX1) || "false",
-        webroot          : replace(webroot) || "false",
+        withExtIp        : replace(withExtIp) || "",
+        fallbackToX1     : replace(fallbackToX1) || "",
+        webroot          : replace(webroot) || "",
         webrootPath      : replace(webrootPath) || "",
         test             : test,
         envName          : "${env.envName}",
@@ -44,7 +44,7 @@ function run() {
     });
 
     jelastic.local.ReturnResult(
-        SSLManager.creteScriptAndInstall()
+        SSLManager.createScriptAndInstall()
     );
 }
 
