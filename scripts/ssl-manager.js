@@ -560,13 +560,13 @@ function SSLManager(config) {
     };
 
     me.initFalbackToFake = function initFalbackToFake(fake) {
-        fake = fake || false;
+        fake = String(fake) || false;
         config.fallbackToX1 = me.initBoolValue(fake);
         return { result: 0 };
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
-        withExtIp = withExtIp || true;
+        withExtIp = String(withExtIp) || true;
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
         edition = edition || getPlatformEdition();
@@ -576,7 +576,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        webroot = webroot || config.webroot || false;
+        webroot = String(webroot) || config.webroot || false;
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
     };
