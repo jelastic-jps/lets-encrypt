@@ -684,7 +684,7 @@ function SSLManager(config) {
             if (node.nodeGroup != group) continue;
             blMasterNode = nodeManager.getBalancerMasterNode();
 
-            if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
+            if (config.withExtIp) {
                 resp = config.webroot && !nodeManager.isExtraLayer(node.nodeGroup) ? me.attachExtIpToGroupNodes(blMasterNode ? BL : node.nodeGroup) : me.attachExtIpIfNeed(node);
                 if (resp.result != 0) return resp;
                 nodeManager.updateEnvInfo();
