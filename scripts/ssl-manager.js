@@ -728,7 +728,7 @@ function SSLManager(config) {
     };
 
     me.attachExtIpIfNeed = function (node) {
-        if (!node.extIPs || node.extIPs.length == 0) {
+        if (!nodeManager.isIPv4Exists(node) && !nodeManager.isIPv6Exists(node)) {
             return me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
         }
 
@@ -1544,6 +1544,10 @@ function SSLManager(config) {
             }
 
             return { result : 0, node : node };
+        };
+        
+        me.isIPv4Exists = function isIPv4Exists(node) {
+            return !!(node.extIPs && node.extIPs.length);
         };
         
         me.isIPv6Exists = function isIPv6Exists(node) {
