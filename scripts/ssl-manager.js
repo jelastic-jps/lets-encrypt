@@ -501,14 +501,18 @@ function SSLManager(config) {
     me.getSkippedDomains = function () {
         return config.skippedDomains || "";
     };
+    
+    me.formatDomainSeparator = function (domains) {
+        return (domains || "").replace(/ /g, " -d ")
+    };
 
     me.formatDomains = function (domains, bList) {
 
         if (bList) {
-            return domains.replace(/ -d /g, '\n > * ');
+            return (domains || "").replace(/ -d /g, '\n > * ');
         }
 
-        return domains ? domains.replace(/ -d/g, ', ') : "";
+        return (domains || "").replace(/ -d/g, ', ');
     };
 
     me.getEnvName = function () {
@@ -854,8 +858,8 @@ function SSLManager(config) {
         var path = "opt/letsencrypt/settings",
             primaryDomain = window.location.host,
             envDomain = config.envDomain,
-            skippedDomains = me.getSkippedDomains(),
-            customDomains = me.getCustomDomains();
+            skippedDomains = me.parseDomains(me.getSkippedDomains()),
+            customDomains = me.parseDomains(me.getCustomDomains());
 
         if (isUpdate) {
             customDomains = customDomains.concat(skippedDomains);
@@ -876,7 +880,7 @@ function SSLManager(config) {
                 "webrootPath='%(webrootPath)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
-                domain: customDomains.replace(/ /g, " -d "),
+                domain: me.formatDomainSeparator(customDomains),
                 email : config.email || "",
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
@@ -887,7 +891,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : (skippedDomains || "").replace(/ /g, " -d ")
+                skipped : me.formatDomainSeparator(skippedDomains)
             }),
             path : nodeManager.getPath(path)
         });
