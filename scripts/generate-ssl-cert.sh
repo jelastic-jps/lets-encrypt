@@ -45,11 +45,11 @@ mkdir -p $DIR/var/log/letsencrypt
     ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
 }
 result_code=1;
-
+count=1
 while [ "$result_code" != "0" ]
 do
-  [[ -z $domain ]] && break;
-
+  [[ -z $domain || $count == 100 ]] && break;
+  ((count=count+1));
   resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=1
