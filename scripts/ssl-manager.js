@@ -35,6 +35,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
+        WRONG_DNS_CUSTOM_DOMAINS = 1,
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
         UPLOADER_ERROR = 6,
@@ -117,10 +118,9 @@ function SSLManager(config) {
             [ me.initEntryPoint ],
             [ me.initCustomConfigs ],
             [ me.installLetsEncrypt ],
-            [ me.generateSslConfig ],
+            [ me.generateSslConfig, isUpdate ],
             [ me.validateEntryPoint ],
-            [ me.generateSslCerts ],
-            [ me.updateGeneratedCustomDomains ]
+            [ me.generateSslCerts ]
         ]);
 
         if (resp.result == 0) {
@@ -444,9 +444,8 @@ function SSLManager(config) {
         return isValidToken;
     };
 
-    me.createScriptAndInstall = function createInstallationScript() {
+    me.creteScriptAndInstall = function createInstallationScript() {
         return me.exec([
-            [ me.initCustomConfigs ],
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
@@ -535,7 +534,7 @@ function SSLManager(config) {
             propName,
             resp;
 
-        resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false", { nodeGroup: config.nodeGroup });
+        resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false");
         if (resp.result != 0) return resp;
 
         if (resp.responses[0].out == "true") {
@@ -548,7 +547,7 @@ function SSLManager(config) {
 
             while (propNames.hasMoreElements()) {
                 propName = propNames.nextElement().toString();
-                config[propName] = config[propName] || String(properties.getProperty(propName));
+                config[propName] = String(properties.getProperty(propName));
             }
         }
 
@@ -560,13 +559,11 @@ function SSLManager(config) {
     };
 
     me.initFalbackToFake = function initFalbackToFake(fake) {
-        fake = String(fake) || false;
         config.fallbackToX1 = me.initBoolValue(fake);
         return { result: 0 };
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
-        withExtIp = String(withExtIp) || true;
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
         edition = edition || getPlatformEdition();
@@ -576,7 +573,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        webroot = String(webroot) || config.webroot || false;
+        webroot = webroot || false;
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
     };
@@ -850,15 +847,17 @@ function SSLManager(config) {
         });
     };
 
-    me.generateSslConfig = function generateSslConfig() {
+    me.generateSslConfig = function generateSslConfig(isUpdate) {
         var path = "opt/letsencrypt/settings",
             primaryDomain = window.location.host,
             envDomain = config.envDomain,
-            customDomains = config.customDomains;
+            skippedDomains = me.getSkippedDomains(),
+            customDomains = me.getCustomDomains();
 
-        if (customDomains) {
-            customDomains = me.parseDomains(customDomains).join(" -d ");
+        if (isUpdate) {
+            customDomains = customDomains.concat(skippedDomains);
         }
+        customDomains = customDomains || skippedDomains;
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
             params : _([
@@ -874,7 +873,7 @@ function SSLManager(config) {
                 "webrootPath='%(webrootPath)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
-                domain: customDomains || envDomain,
+                domain: customDomains.replace(/ /g, " -d "),
                 email : config.email || "",
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
@@ -885,7 +884,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : config.skippedDomains || ""
+                skipped : (skippedDomains || "").replace(/ /g, " -d ")
             }),
             path : nodeManager.getPath(path)
         });
@@ -897,6 +896,9 @@ function SSLManager(config) {
             validationFileName = VALIDATION_SCRIPT,
             generateSSLScript = nodeManager.getScriptPath(fileName),
             proxyConfigName = "tinyproxy.conf",
+            incorrectDNSText,
+            ancientPython,
+            message,
             bUpload,
             text,
             resp;
@@ -941,6 +943,8 @@ function SSLManager(config) {
             );
         }
 
+        me.exec(me.updateGeneratedCustomDomains);
+
         if (!config.webroot) {
             //removing redirect
             me.exec(me.manageDnat, "remove");
@@ -949,6 +953,21 @@ function SSLManager(config) {
         if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
             log("WARNING: Ancient version of Python");
             resp = me.exec(me.tryRegenerateSsl);
+        }
+
+        if (resp.result == WRONG_DNS_CUSTOM_DOMAINS) {
+            text = resp.response ? "<ul><li>" + resp.response.replace(/;/g, "</li><li>") + "</li></ul>" : "";
+            message = "The following errors are occurred while updating Let's Encrypt add-on:\n";
+            message += resp.response ? "* " + resp.response.replace(/;/g, "\n* "): "";
+            incorrectDNSText = "\n\nSSL certificates cannot be assigned to the specified custom domains due to incorrect DNS settings. Please, recheck provided data and ensure that listed domains point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar.";
+            text += "<br>" + incorrectDNSText;
+            return {
+                result: WRONG_DNS_CUSTOM_DOMAINS,
+                error: text,
+                response: text,
+                type: "warning",
+                message: message + incorrectDNSText
+            };
         }
 
         if (resp.result && resp.result == INVALID_WEBROOT_DIR) {
@@ -992,23 +1011,54 @@ function SSLManager(config) {
         return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
     };
 
-    me.tryRegenerateSsl = function tryRegenerateSsl() {
+    me.tryRegenerateSsl = function tryRegenerateSsl(ancientPython) {
+        var resp;
+
+        if (ancientPython) {
+            resp = me.exec([
+                [ me.backupEffPackages ],
+                [ me.installLetsEncrypt ]
+            ]);
+            if (resp.result != 0) return resp;
+        }
+
         return me.execAll([
-            [ me.backupEffPackages ],
-            [ me.installLetsEncrypt ],
+            [ me.generateSslConfig ],
             [ me.generateSslCerts ]
         ]);
     };
 
     me.analyzeSslResponse = function (resp) {
         var out,
-            errors;
+            index,
+            token,
+            errors,
+            domain,
+            outResp,
+            domainResp,
+            tempData = {},
+            validDomains = [],
+            customDomains = [],
+            pendingDomains = [],
+            skippedDomains = [],
+            skippedDomainsErrors = [];
+
+        customDomains = me.getCustomDomains().split(" ");
+
+        function filterDomains(domains, removeItem) {
+            return domains.filter(function(item, index) {
+                if (removeItem) return item != removeItem;
+
+                return domains.indexOf(item) == index;
+            });
+        }
 
         if (resp.responses) {
             resp = resp.responses[0];
             out = resp.error + resp.errOut + resp.out;
 
             if (resp) {
+                if (resp.exitStatus == WRONG_DNS_CUSTOM_DOMAINS) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out}
                 if (resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) return {result: ANCIENT_VERSION_OF_PYTHON };
                 if (resp.exitStatus == INVALID_WEBROOT_DIR) return { result: INVALID_WEBROOT_DIR}
                 if (resp.exitStatus == UPLOADER_ERROR) return { result: UPLOADER_ERROR}
@@ -1287,11 +1337,12 @@ function SSLManager(config) {
         resp = resp || {};
 
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
-            resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n" +
+            resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n<br>" +
+                "The following errors are occurred:<br>" + resp.error + "\n\n" +
                 "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
                 "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
-            resp = { 
+            resp = {
                 result: resp.result || Response.ERROR_UNKNOWN, 
                 error: resp.error || "unknown error",
                 debug: debug
@@ -1638,10 +1689,7 @@ function SSLManager(config) {
         };
 
         me.readFile = function (path, group) {
-            if (nodeId)
-                return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId);
-            else
-                return jelastic.env.file.Read(envName, session, path, null, group || null);
+            return jelastic.env.file.Read(envName, session, path, null, group || null, nodeId);
         };
 
         me.checkCustomSSL = function (targetNode) {
