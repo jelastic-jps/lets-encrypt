@@ -1032,28 +1032,7 @@ function SSLManager(config) {
 
     me.analyzeSslResponse = function (resp) {
         var out,
-            index,
-            token,
-            errors,
-            domain,
-            outResp,
-            domainResp,
-            tempData = {},
-            validDomains = [],
-            customDomains = [],
-            pendingDomains = [],
-            skippedDomains = [],
-            skippedDomainsErrors = [];
-
-        customDomains = me.getCustomDomains().split(" ");
-
-        function filterDomains(domains, removeItem) {
-            return domains.filter(function(item, index) {
-                if (removeItem) return item != removeItem;
-
-                return domains.indexOf(item) == index;
-            });
-        }
+            errors;
 
         if (resp.responses) {
             resp = resp.responses[0];
