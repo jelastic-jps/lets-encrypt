@@ -501,18 +501,13 @@ function SSLManager(config) {
     me.getSkippedDomains = function () {
         return config.skippedDomains || "";
     };
-    
-    me.formatDomainSeparator = function (domains) {
-        return (domains || "").replace(/ /g, " -d ")
-    };
 
     me.formatDomains = function (domains, bList) {
-
         if (bList) {
-            return (domains || "").replace(/ -d /g, '\n > * ');
+            return (domains || "").replace(/\s+/g, '\n > * ');
         }
 
-        return (domains || "").replace(/ -d/g, ', ');
+        return (domains || "").replace(/\s+/g, ', ');
     };
 
     me.getEnvName = function () {
@@ -880,7 +875,7 @@ function SSLManager(config) {
                 "webrootPath='%(webrootPath)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
-                domain: me.formatDomainSeparator(customDomains),
+                domain: customDomains.join(" "),
                 email : config.email || "",
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
@@ -891,7 +886,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : me.formatDomainSeparator(skippedDomains)
+                skipped : skippedDomains.join(" ")
             }),
             path : nodeManager.getPath(path)
         });
