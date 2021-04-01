@@ -35,6 +35,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
+        WRONG_DNS_CUSTOM_DOMAINS = 1,
         ANCIENT_VERSION_OF_PYTHON = 4,
         INVALID_WEBROOT_DIR = 5,
         UPLOADER_ERROR = 6,
@@ -117,10 +118,9 @@ function SSLManager(config) {
             [ me.initEntryPoint ],
             [ me.initCustomConfigs ],
             [ me.installLetsEncrypt ],
-            [ me.generateSslConfig ],
+            [ me.generateSslConfig, isUpdate ],
             [ me.validateEntryPoint ],
-            [ me.generateSslCerts ],
-            [ me.updateGeneratedCustomDomains ]
+            [ me.generateSslCerts ]
         ]);
 
         if (resp.result == 0) {
@@ -503,12 +503,11 @@ function SSLManager(config) {
     };
 
     me.formatDomains = function (domains, bList) {
-
         if (bList) {
-            return domains.replace(/ -d /g, '\n > * ');
+            return (domains || "").replace(/\s+/g, '\n > * ');
         }
 
-        return domains ? domains.replace(/ -d/g, ', ') : "";
+        return (domains || "").replace(/\s+/g, ', ');
     };
 
     me.getEnvName = function () {
@@ -850,15 +849,17 @@ function SSLManager(config) {
         });
     };
 
-    me.generateSslConfig = function generateSslConfig() {
+    me.generateSslConfig = function generateSslConfig(isUpdate) {
         var path = "opt/letsencrypt/settings",
             primaryDomain = window.location.host,
             envDomain = config.envDomain,
-            customDomains = config.customDomains;
+            skippedDomains = me.parseDomains(me.getSkippedDomains()),
+            customDomains = me.parseDomains(me.getCustomDomains());
 
-        if (customDomains) {
-            customDomains = me.parseDomains(customDomains).join(" -d ");
+        if (isUpdate) {
+            customDomains = customDomains.concat(skippedDomains);
         }
+        customDomains = customDomains || skippedDomains;
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
             params : _([
@@ -874,7 +875,7 @@ function SSLManager(config) {
                 "webrootPath='%(webrootPath)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
-                domain: customDomains || envDomain,
+                domain: customDomains.join(" "),
                 email : config.email || "",
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
@@ -885,7 +886,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : config.skippedDomains || ""
+                skipped : skippedDomains.join(" ")
             }),
             path : nodeManager.getPath(path)
         });
@@ -897,6 +898,9 @@ function SSLManager(config) {
             validationFileName = VALIDATION_SCRIPT,
             generateSSLScript = nodeManager.getScriptPath(fileName),
             proxyConfigName = "tinyproxy.conf",
+            incorrectDNSText,
+            ancientPython,
+            message,
             bUpload,
             text,
             resp;
@@ -941,6 +945,8 @@ function SSLManager(config) {
             );
         }
 
+        me.exec(me.updateGeneratedCustomDomains);
+
         if (!config.webroot) {
             //removing redirect
             me.exec(me.manageDnat, "remove");
@@ -949,6 +955,21 @@ function SSLManager(config) {
         if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
             log("WARNING: Ancient version of Python");
             resp = me.exec(me.tryRegenerateSsl);
+        }
+
+        if (resp.result == WRONG_DNS_CUSTOM_DOMAINS) {
+            text = resp.response ? "<ul><li>" + resp.response.replace(/;/g, "</li><li>") + "</li></ul>" : "";
+            message = "The following errors are occurred while updating Let's Encrypt add-on:\n";
+            message += resp.response ? "* " + resp.response.replace(/;/g, "\n* "): "";
+            incorrectDNSText = "\n\nSSL certificates cannot be assigned to the specified custom domains due to incorrect DNS settings. Please, recheck provided data and ensure that listed domains point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar.";
+            text += "<br>" + incorrectDNSText;
+            return {
+                result: WRONG_DNS_CUSTOM_DOMAINS,
+                error: text,
+                response: text,
+                type: "warning",
+                message: message + incorrectDNSText
+            };
         }
 
         if (resp.result && resp.result == INVALID_WEBROOT_DIR) {
@@ -992,10 +1013,19 @@ function SSLManager(config) {
         return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
     };
 
-    me.tryRegenerateSsl = function tryRegenerateSsl() {
+    me.tryRegenerateSsl = function tryRegenerateSsl(ancientPython) {
+        var resp;
+
+        if (ancientPython) {
+            resp = me.exec([
+                [ me.backupEffPackages ],
+                [ me.installLetsEncrypt ]
+            ]);
+            if (resp.result != 0) return resp;
+        }
+
         return me.execAll([
-            [ me.backupEffPackages ],
-            [ me.installLetsEncrypt ],
+            [ me.generateSslConfig ],
             [ me.generateSslCerts ]
         ]);
     };
@@ -1009,6 +1039,7 @@ function SSLManager(config) {
             out = resp.error + resp.errOut + resp.out;
 
             if (resp) {
+                if (resp.exitStatus == WRONG_DNS_CUSTOM_DOMAINS) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out}
                 if (resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) return {result: ANCIENT_VERSION_OF_PYTHON };
                 if (resp.exitStatus == INVALID_WEBROOT_DIR) return { result: INVALID_WEBROOT_DIR}
                 if (resp.exitStatus == UPLOADER_ERROR) return { result: UPLOADER_ERROR}
@@ -1287,11 +1318,12 @@ function SSLManager(config) {
         resp = resp || {};
 
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
-            resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n" +
+            resp = "Please note that the SSL certificates cannot be assigned to the available custom domains due to incorrect DNS settings.\n\n<br>" +
+                "The following errors are occurred:<br>" + resp.error + "\n\n" +
                 "You can fix the issues with DNS records (IP addresses) via your domain admin panel or by removing invalid custom domains from Let's Encrypt settings.\n\n" +
                 "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
-            resp = { 
+            resp = {
                 result: resp.result || Response.ERROR_UNKNOWN, 
                 error: resp.error || "unknown error",
                 debug: debug
