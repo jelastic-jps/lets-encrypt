@@ -576,7 +576,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        webroot = String(webroot) || config.webroot || false;
+        webroot = !isDefined(webroot) ? false : String(webroot) == "true";
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
     };
