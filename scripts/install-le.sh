@@ -13,7 +13,7 @@ echo Checking RPM database
 echo "Installing required packages"
 {
   yum-config-manager --save --setopt=pgdg*.skip_if_unavailable=true
-  yum -y install epel-release git bc nss;
+  yum -y --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5 install epel-release git bc nss
   yum -y install tinyproxy --enablerepo='epel';
   
   mkdir -p ${DIR}/opt;
