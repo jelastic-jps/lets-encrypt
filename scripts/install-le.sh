@@ -12,9 +12,9 @@ echo Checking RPM database
 
 echo "Installing required packages"
 {
-  yum-config-manager --save --setopt=pgdg*.skip_if_unavailable=true
-  yum -y --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5 install epel-release git bc nss
-  yum -y --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5 install tinyproxy --enablerepo='epel';
+  YUM='yum -y --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5'
+  $YUM install epel-release git bc nss
+  $YUM install tinyproxy --enablerepo='epel';
   
   mkdir -p ${DIR}/opt;
   [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/certbot/certbot ${DIR}/opt/letsencrypt;
