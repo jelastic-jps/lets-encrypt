@@ -17,7 +17,10 @@ echo "Installing required packages"
   yum -y install tinyproxy socat --enablerepo='epel';
   
   mkdir -p ${DIR}/opt;
-  [ ! -d "${DIR}/opt/letsencrypt" ] && git clone https://github.com/acmesh-official/acme.sh ${DIR}/opt/letsencrypt;
+  [ ! -f "${DIR}/opt/letsencrypt/acme.sh" ] && {
+    [ -d "${DIR}/opt/letsencrypt" ] && mv ${DIR}/opt/letsencrypt ${DIR}/opt/letsencrypt-certbot;
+    git clone https://github.com/acmesh-official/acme.sh ${DIR}/opt/letsencrypt;
+  }
   cd $DIR/opt/letsencrypt/
   ./acme.sh --install --accountemail $email
 }
