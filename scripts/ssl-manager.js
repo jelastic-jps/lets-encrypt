@@ -857,7 +857,7 @@ function SSLManager(config) {
             customDomains = me.getCustomDomains();
 
         if (customDomains) {
-            customDomains = me.parseDomains(customDomains);
+            customDomains = me.parseDomains(customDomains).join(" ");
         }
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
