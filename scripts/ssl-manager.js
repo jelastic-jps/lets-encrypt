@@ -575,7 +575,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
-        webroot = String(webroot) || config.webroot || false;
+        webroot = isDefined(webroot) ? String(webroot) == "true" : false;
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
     };
@@ -849,17 +849,16 @@ function SSLManager(config) {
         });
     };
 
-    me.generateSslConfig = function generateSslConfig(isUpdate) {
+    me.generateSslConfig = function generateSslConfig() {
         var path = "opt/letsencrypt/settings",
             primaryDomain = window.location.host,
             envDomain = config.envDomain,
-            skippedDomains = me.parseDomains(me.getSkippedDomains()),
-            customDomains = me.parseDomains(me.getCustomDomains());
+            skippedDomains = me.getSkippedDomains(),
+            customDomains = me.getCustomDomains();
 
-        if (isUpdate) {
-            customDomains = customDomains.concat(skippedDomains);
+        if (customDomains) {
+            customDomains = me.parseDomains(customDomains);
         }
-        customDomains = customDomains || skippedDomains;
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
             params : _([
@@ -875,7 +874,7 @@ function SSLManager(config) {
                 "webrootPath='%(webrootPath)'",
                 "skipped_domains='%(skipped)'"
             ].join("\n"), {
-                domain: customDomains.join(" "),
+                domain: customDomains || "",
                 email : config.email || "",
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
@@ -886,7 +885,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : skippedDomains.join(" ")
+                skipped : config.skippedDomains || ""
             }),
             path : nodeManager.getPath(path)
         });
