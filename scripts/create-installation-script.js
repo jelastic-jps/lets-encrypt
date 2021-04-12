@@ -27,7 +27,7 @@ function run() {
         scriptName       : scriptName,
         customDomains    : replace(customDomains),
         nodeId           : replace(String(nodeId)),
-        nodeGroup        : replace(nodeGroup),
+        nodeGroup        : replace(nodeGroup) || "${targetNodes.nodeGroup}",
         deployHook       : replace(deployHook),
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
