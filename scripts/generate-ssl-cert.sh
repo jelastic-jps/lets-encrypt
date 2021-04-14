@@ -35,6 +35,9 @@ skipped_domains=$(echo $skipped_domains | sed -r 's/\s+/ -d /g');
 }
 [[ -z "$domain" ]] && domain=$appdomain;
 
+#IPv6 flag
+ipv6=" --listen-v6 ";
+
 #Kill hanged certificate requests
 
 killall -9 tinyproxy > /dev/null 2>&1
@@ -56,7 +59,7 @@ while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
 
-  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
+  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params $ipv6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=1
 
