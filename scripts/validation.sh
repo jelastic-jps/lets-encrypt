@@ -70,6 +70,7 @@ function hasExtIPv6Only(){
   do  
     isLANIPv6 $EXT_IP || return 0;
   done
+  return 1;
 }
 
 function validateDNSSettings(){
