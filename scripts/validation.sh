@@ -62,13 +62,13 @@ function validateExtIP(){
 
 function hasExtIPv6Only(){
   for EXT_IP in $EXT_IPs
-  do
-    isLANIP $EXT_IP || return 0;
+  do  
+    isLANIP $EXT_IP || return 1;
   done
 
   for EXT_IP in $EXT_IPs_v6
-  do
-    isLANIPv6 $EXT_IP || echo 1;
+  do  
+    isLANIPv6 $EXT_IP || return 0;
   done
 }
 
