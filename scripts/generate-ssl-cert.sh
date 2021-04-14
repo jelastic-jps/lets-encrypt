@@ -128,13 +128,12 @@ certname=$(echo $certspath | sed 's/.*\///' | tail -n 1)
 certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer//')
 
 mkdir -p $KEYS_DIR
-rm -f $KEYS_DIR/*.pem
 
 [ ! -z $certdir ] && {
   cp -f $certdir/* $KEYS_DIR && chown jelastic -R $KEYS_DIR
-  cp ${certdir}/${certdomain}.key $KEYS_DIR/privkey.pem
-  cp ${certdir}/${certdomain}.cer $KEYS_DIR/cert.pem
-  cp ${certdir}/fullchain.cer $KEYS_DIR/fullchain.pem
+  cp -n ${certdir}/${certdomain}.key $KEYS_DIR/privkey.pem
+  cp -n ${certdir}/${certdomain}.cer $KEYS_DIR/cert.pem
+  cp -n ${certdir}/fullchain.cer $KEYS_DIR/fullchain.pem
 }
 
 function uploadCerts() {
