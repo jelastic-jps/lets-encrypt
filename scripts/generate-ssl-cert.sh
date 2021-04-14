@@ -1,6 +1,6 @@
 #!/bin/bash
-LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
+LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="${DIR}/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
