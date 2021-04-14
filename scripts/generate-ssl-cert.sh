@@ -1,6 +1,7 @@
 #!/bin/bash
 LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
+KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="${DIR}/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
 
@@ -126,10 +127,15 @@ certdir=$(echo $certspath | sed 's/[^\/]*\.cer//' | tail -n 1)
 certname=$(echo $certspath | sed 's/.*\///' | tail -n 1)
 certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer//')
 
-mkdir -p $DIR/var/lib/jelastic/keys/
-rm -f $DIR/var/lib/jelastic/keys/*.pem
+mkdir -p $KEYS_DIR
+rm -f $KEYS_DIR/*.pem
 
-[ ! -z $certdir ] && cp -f $certdir/* $DIR/var/lib/jelastic/keys/ && chown jelastic -R $DIR/var/lib/jelastic/keys/
+[ ! -z $certdir ] && {
+  cp -f $certdir/* $KEYS_DIR && chown jelastic -R $KEYS_DIR
+  cp ${certdir}/${certdomain}.key $KEYS_DIR/privkey.pem
+  cp ${certdir}/${certdomain}.cer $KEYS_DIR/cert.pem
+  cp ${certdir}/fullchain.cer $KEYS_DIR/fullchain.pem
+}
 
 function uploadCerts() {
     local certdir="$1"
