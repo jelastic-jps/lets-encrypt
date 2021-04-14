@@ -60,6 +60,18 @@ function validateExtIP(){
     { echo "Error: External IP is required!"; exit 1; }
 }
 
+function hasExtIPv6Only(){
+  for EXT_IP in $EXT_IPs
+  do
+    isLANIP $EXT_IP || { HAS_EXTERNAL_v4=1; return 0; }
+  done
+
+  for EXT_IP in $EXT_IPs_v6
+  do
+    isLANIPv6 $EXT_IP || { HAS_EXTERNAL_v6_ONLY=1; return 0; }
+  done
+}
+
 function validateDNSSettings(){
     domain=$1;
     [ -z "$domain" ] && {
