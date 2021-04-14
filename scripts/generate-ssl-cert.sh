@@ -36,8 +36,7 @@ skipped_domains=$(echo $skipped_domains | sed -r 's/\s+/ -d /g');
 [[ -z "$domain" ]] && domain=$appdomain;
 
 #Define IPv6 only
-HAS_EXTERNAL_v6_ONLY=$(hasExtIPv6Only)
-[[ $HAS_EXTERNAL_v6_ONLY == 1 ]] && ipv6=" --listen-v6 ";
+hasExtIPv6Only && ipv6=" --listen-v6";
 
 #Kill hanged certificate requests
 killall -9 tinyproxy > /dev/null 2>&1
