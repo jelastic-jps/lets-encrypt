@@ -1277,7 +1277,7 @@ function SSLManager(config) {
             skippedDomains = me.getSkippedDomains();
 
         if (resp.result != 0) {
-            return me.sendErrResp(resp);
+            return me.sendErrResp(resp, isUpdate);
         }
 
         return me.sendEmail(
@@ -1326,7 +1326,7 @@ function SSLManager(config) {
         return !!(resp && resp.apps && resp.apps.length);
     };
 
-    me.sendErrResp = function sendErrResp(resp) {
+    me.sendErrResp = function sendErrResp(resp, isUpdate) {
         resp = resp || {};
 
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
@@ -1344,7 +1344,8 @@ function SSLManager(config) {
 
         return me.sendEmail("Error", "html/update-error.html", {
             SUPPORT_EMAIL : "support@jelastic.com",
-            RESP : resp || ""
+            RESP : resp || "",
+            TYPE: isUpdate ? "updated" : "installed",
         });
     };
 
