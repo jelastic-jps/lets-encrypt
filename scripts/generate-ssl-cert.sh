@@ -1,6 +1,7 @@
 #!/bin/bash
-LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
+LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
+KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="${DIR}/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
 
@@ -36,7 +37,6 @@ skipped_domains=$(echo $skipped_domains | sed -r 's/\s+/ -d /g');
 [[ -z "$domain" ]] && domain=$appdomain;
 
 #Kill hanged certificate requests
-
 killall -9 tinyproxy > /dev/null 2>&1
 
 mkdir -p $DIR/var/log/letsencrypt
@@ -56,7 +56,7 @@ while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
 
-  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
+  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=1
 
@@ -127,10 +127,14 @@ certdir=$(echo $certspath | sed 's/[^\/]*\.cer//' | tail -n 1)
 certname=$(echo $certspath | sed 's/.*\///' | tail -n 1)
 certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer//')
 
-mkdir -p $DIR/var/lib/jelastic/keys/
-rm -f $DIR/var/lib/jelastic/keys/*.pem
+mkdir -p $KEYS_DIR
 
-[ ! -z $certdir ] && cp -f $certdir/* $DIR/var/lib/jelastic/keys/ && chown jelastic -R $DIR/var/lib/jelastic/keys/
+[ ! -z $certdir ] && {
+  cp -f $certdir/* $KEYS_DIR && chown jelastic -R $KEYS_DIR
+  cp -n ${certdir}/${certdomain}.key $KEYS_DIR/privkey.pem
+  cp -n ${certdir}/${certdomain}.cer $KEYS_DIR/cert.pem
+  cp -n ${certdir}/fullchain.cer $KEYS_DIR/fullchain.pem
+}
 
 function uploadCerts() {
     local certdir="$1"
