@@ -2,7 +2,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
-SETTINGS="${DIR}/opt/letsencrypt/settings"
+SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
@@ -131,9 +131,9 @@ mkdir -p $KEYS_DIR
 
 [ ! -z $certdir ] && {
   cp -f $certdir/* $KEYS_DIR && chown jelastic -R $KEYS_DIR
-  cp -n ${certdir}/${certdomain}.key $KEYS_DIR/privkey.pem
-  cp -n ${certdir}/${certdomain}.cer $KEYS_DIR/cert.pem
-  cp -n ${certdir}/fullchain.cer $KEYS_DIR/fullchain.pem
+  cp -f ${certdir}/${certdomain}.key $KEYS_DIR/privkey.pem
+  cp -f ${certdir}/${certdomain}.cer $KEYS_DIR/cert.pem
+  cp -f ${certdir}/fullchain.cer $KEYS_DIR/fullchain.pem
 }
 
 function uploadCerts() {
