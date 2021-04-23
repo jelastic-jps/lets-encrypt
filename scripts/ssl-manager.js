@@ -146,13 +146,9 @@ function SSLManager(config) {
             HTML = "html/update-expired.html",
             UPDATE_DECREASED = "updateDecreased",
             UPDATE_DISABLED = "updateDisabled",
-            jemCheckdomain,
-            decreaseUpdate,
-            disableUpdate,
             timeStamp;
 
-        jemCheckdomain = nodeManager.jemSslCheckdomain();
-        timeStamp = Date.parse(jemCheckdomain.replace(/-/g, "/"));
+        timeStamp = Date.parse(nodeManager.jemSslCheckdomain().replace(/-/g, "/"));
 
         if (!config[UPDATE_DISABLED] && me.isExparedToDays(timeStamp, REMOVE_UPDATE_DAYS)) {
             me.disableAutoUpdate();
