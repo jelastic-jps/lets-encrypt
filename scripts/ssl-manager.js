@@ -108,9 +108,9 @@ function SSLManager(config) {
                 error : "unknown action [" + action + "]"
             }
         }
-        
+
         me.init();
-        
+
         return actions[action].call(me);
     };
 
@@ -156,7 +156,7 @@ function SSLManager(config) {
 
         timeStamp = me.parseDate(nodeManager.jemSslCheckdomain());
 
-        if (!config[UPDATE_DISABLED] && me.isExparedToDays(timeStamp, REMOVE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DISABLED] && me.isDateExpared(timeStamp, REMOVE_UPDATE_DAYS)) {
             me.disableAutoUpdate();
             me.updateSettingsValue(UPDATE_DISABLED, true);
 
@@ -167,7 +167,7 @@ function SSLManager(config) {
             });
         }
 
-        if (!config[UPDATE_DECREASED] && me.isExparedToDays(timeStamp, DECREASE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DECREASED] && me.isDateExpared(timeStamp, DECREASE_UPDATE_DAYS)) {
             me.exec([
                 [ me.scheduleAutoUpdate, "0 0 " + Math.floor(Math.random() * (16 -8) + 8) + " * *" ],
                 [ me.updateSettingsValue, UPDATE_DECREASED, true ]
@@ -183,7 +183,7 @@ function SSLManager(config) {
         return { result: 0 }
     };
 
-    me.isExparedToDays = function(timestamp, days) {
+    me.isDateExpared = function(timestamp, days) {
         var currentDate = new Date().getTime(),
             dayStamp = parseInt(days) * 24 * 60 * 60;
 
@@ -1044,7 +1044,7 @@ function SSLManager(config) {
                 message: message + incorrectDNSText
             };
         }
-        
+
         if (resp.result == RATE_LIMIT_EXCEEDED) {
             text = "Error: " + resp.response;
             return {
@@ -1077,7 +1077,7 @@ function SSLManager(config) {
                 message: text
             };
         }
-        
+
         if (resp.result && resp.result == READ_TIMED_OUT) {
             text = "The Let's Encrypt service is currently unavailable. Check the /var/log/letsencrypt log for more details or try again in a few minutes.";
             return {
@@ -1091,7 +1091,7 @@ function SSLManager(config) {
 
         return resp;
     };
-    
+
     me.getOnlyCustomDomains = function () {
         var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
         return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
@@ -1566,15 +1566,15 @@ function SSLManager(config) {
         me.setValidationScriptUrl = function(url) {
             sValidationUrl = url;
         };
-        
+
         me.getValidationScriptUrl = function() {
             return sValidationUrl;
         };
-        
+
         me.setValidationPath = function(scriptName) {
             sValidationPath = me.getScriptPath(scriptName);
         };
-        
+
         me.getValidationPath = function() {
             return sValidationPath;
         };
@@ -1616,7 +1616,7 @@ function SSLManager(config) {
         me.isBalancerLayer = function (group) {
             return !!(group == LB || group == BL);
         };
-        
+
         me.isComputeLayer = function (group) {
             return !!(group == CP);
         };
@@ -1688,11 +1688,11 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
-        
+
         me.isIPv6Exists = function isIPv6Exists(node) {
             return !!(node.extipsv6 && node.extipsv6.length);
-        }; 
-        
+        };
+
         me.isNodeExists = function isNodeExists(group) {
             var resp,
                 nodes,
@@ -1721,7 +1721,7 @@ function SSLManager(config) {
 
             return envInfo;
         };
-        
+
         me.updateEnvInfo = function updateEnvInfo() {
             return me.getEnvInfo(true);
         };
