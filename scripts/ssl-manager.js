@@ -45,7 +45,7 @@ function SSLManager(config) {
         VALIDATION_SCRIPT = "validation.sh",
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
-        SETTING_PATH = "opt/letsencrypt/settings",
+        SETTINGS_PATH = "opt/letsencrypt/settings",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
@@ -152,11 +152,11 @@ function SSLManager(config) {
             EMAIL_BODY_PATH = "html/update-expired.html",
             UPDATE_DECREASED = "updateDecreased",
             UPDATE_DISABLED = "updateDisabled",
-            timeStamp;
+            timestamp;
 
-        timeStamp = me.parseDate(nodeManager.jemSslCheckdomain());
+        timestamp = me.parseDate(nodeManager.jemSslCheckdomain());
 
-        if (!config[UPDATE_DISABLED] && me.isDateExpared(timeStamp, REMOVE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DISABLED] && me.isDateExpared(timestamp, REMOVE_UPDATE_DAYS)) {
             me.disableAutoUpdate();
             me.updateSettingsValue(UPDATE_DISABLED, true);
 
@@ -167,7 +167,7 @@ function SSLManager(config) {
             });
         }
 
-        if (!config[UPDATE_DECREASED] && me.isDateExpared(timeStamp, DECREASE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DECREASED] && me.isDateExpared(timestamp, DECREASE_UPDATE_DAYS)) {
             me.exec([
                 [ me.scheduleAutoUpdate, "0 0 " + Math.floor(Math.random() * (16 -8) + 8) + " * *" ],
                 [ me.updateSettingsValue, UPDATE_DECREASED, true ]
@@ -232,10 +232,10 @@ function SSLManager(config) {
         var resp;
 
         resp = nodeManager.cmd([
-            "variable=$(grep -E '^%(KEY)=(.*)' %(SETTING_PATH)  | cut -d: -f2)",
-            "[[ -z $variable ]] && { echo \"\n%(KEY)='%(VALUE)'\" >> %(SETTING_PATH); } || { sed -i \"s/%(KEY)=.*/%(KEY)='%(VALUE)'/g\" %(SETTING_PATH); }"
+            "variable=$(grep -E '^%(KEY)=(.*)' %(SETTINGS_PATH)  | cut -d: -f2)",
+            "[[ -z $variable ]] && { echo \"\n%(KEY)='%(VALUE)'\" >> %(SETTINGS_PATH); } || { sed -i \"s/%(KEY)=.*/%(KEY)='%(VALUE)'/g\" %(SETTINGS_PATH); }"
         ], {
-            SETTING_PATH : nodeManager.getPath(SETTING_PATH),
+            SETTINGS_PATH : nodeManager.getPath(SETTINGS_PATH),
             VALUE: value,
             KEY: key
         }, "", true);
@@ -252,7 +252,7 @@ function SSLManager(config) {
             "grep -E '^domain=' %(setting) | cut -c 8-",
             "grep -E 'skipped_domains=' %(setting) | cut -c 17-"
         ], {
-            setting : nodeManager.getPath(SETTING_PATH)
+            setting : nodeManager.getPath(SETTINGS_PATH)
         });
 
         if (resp.result != 0) return resp;
@@ -961,7 +961,7 @@ function SSLManager(config) {
                 updateDecreased: !!config.updateDecreased,
                 updateDisabled: !!config.updateDisabled
             }),
-            path : nodeManager.getPath(SETTING_PATH)
+            path : nodeManager.getPath(SETTINGS_PATH)
         });
     };
 
