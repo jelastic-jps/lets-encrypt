@@ -34,6 +34,7 @@ function SSLManager(config) {
     var Response = com.hivext.api.Response,
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
+        SimpleDateFormat = java.text.SimpleDateFormat,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         WRONG_DNS_CUSTOM_DOMAINS = 1,
         RATE_LIMIT_EXCEEDED = 2,
@@ -44,10 +45,11 @@ function SSLManager(config) {
         VALIDATION_SCRIPT = "validation.sh",
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
-        SETTING = "opt/letsencrypt/settings",
+        SETTING_PATH = "opt/letsencrypt/settings",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
+        DATE_FORMAT = "yyyy-MM-dd HH:mm:ss",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
         me = this,
@@ -141,20 +143,24 @@ function SSLManager(config) {
         return resp;
     };
 
-    me.checkUpdateExpiration = function() {
-        var LE_TEXT = "Let's Encrypt auto update",
-            HTML = "html/update-expired.html",
+    me.parseDate = function(date) {
+        return new Date(new SimpleDateFormat(DATE_FORMAT).parse(date)).getTime();
+    };
+
+    me.checkUpdateExpiration = function checkUpdateExpiration() {
+        var LE_TEXT = "Let's Encrypt Auto Update",
+            EMAIL_BODY_PATH = "html/update-expired.html",
             UPDATE_DECREASED = "updateDecreased",
             UPDATE_DISABLED = "updateDisabled",
             timeStamp;
 
-        timeStamp = Date.parse(nodeManager.jemSslCheckdomain().replace(/-/g, "/"));
+        timeStamp = me.parseDate(nodeManager.jemSslCheckdomain());
 
         if (!config[UPDATE_DISABLED] && me.isExparedToDays(timeStamp, REMOVE_UPDATE_DAYS)) {
             me.disableAutoUpdate();
             me.updateSettingsValue(UPDATE_DISABLED, true);
 
-            return me.sendEmail("Disable " + LE_TEXT, HTML, {
+            return me.sendEmail("Disable " + LE_TEXT, EMAIL_BODY_PATH, {
                 SUPPORT_EMAIL : SUPPORT_EMAIL,
                 DAYS: String(REMOVE_UPDATE_DAYS),
                 ACTION: "Auto-update retries were disabled."
@@ -167,7 +173,7 @@ function SSLManager(config) {
                 [ me.updateSettingsValue, UPDATE_DECREASED, true ]
             ]);
 
-            return me.sendEmail("Decrease " + LE_TEXT, HTML, {
+            return me.sendEmail("Decrease " + LE_TEXT, EMAIL_BODY_PATH, {
                 SUPPORT_EMAIL : SUPPORT_EMAIL,
                 DAYS: String(DECREASE_UPDATE_DAYS),
                 ACTION: "The frequency of auto-update retries was decreased to once per month."
@@ -178,7 +184,7 @@ function SSLManager(config) {
     };
 
     me.isExparedToDays = function(timestamp, days) {
-        var currentDate = Date.now(),
+        var currentDate = new Date().getTime(),
             dayStamp = parseInt(days) * 24 * 60 * 60;
 
         return !!((currentDate - timestamp) > dayStamp);
@@ -226,10 +232,10 @@ function SSLManager(config) {
         var resp;
 
         resp = nodeManager.cmd([
-            "variable=$(grep -E '^%(KEY)=(.*)' %(SETTING)  | cut -d: -f2)",
-            "[[ -z $variable ]] && { echo \"\n%(KEY)='%(VALUE)'\" >> %(SETTING); } || { sed -i \"s/%(KEY)=.*/%(KEY)='%(VALUE)'/g\" %(SETTING); }"
+            "variable=$(grep -E '^%(KEY)=(.*)' %(SETTING_PATH)  | cut -d: -f2)",
+            "[[ -z $variable ]] && { echo \"\n%(KEY)='%(VALUE)'\" >> %(SETTING_PATH); } || { sed -i \"s/%(KEY)=.*/%(KEY)='%(VALUE)'/g\" %(SETTING_PATH); }"
         ], {
-            SETTING : nodeManager.getPath(SETTING),
+            SETTING_PATH : nodeManager.getPath(SETTING_PATH),
             VALUE: value,
             KEY: key
         }, "", true);
@@ -246,7 +252,7 @@ function SSLManager(config) {
             "grep -E '^domain=' %(setting) | cut -c 8-",
             "grep -E 'skipped_domains=' %(setting) | cut -c 17-"
         ], {
-            setting : nodeManager.getPath(SETTING)
+            setting : nodeManager.getPath(SETTING_PATH)
         });
 
         if (resp.result != 0) return resp;
@@ -955,7 +961,7 @@ function SSLManager(config) {
                 updateDecreased: !!config.updateDecreased,
                 updateDisabled: !!config.updateDisabled
             }),
-            path : nodeManager.getPath(SETTING)
+            path : nodeManager.getPath(SETTING_PATH)
         });
     };
 
@@ -1415,10 +1421,10 @@ function SSLManager(config) {
                 "In case you no longer require SSL certificates within <b>" + config.envDomain + "</b> environment, feel free to delete Let’s Encrypt add-on to stop receiving error messages.";
         } else {
             resp = {
-                result: resp.result || Response.ERROR_UNKNOWN, 
+                result: resp.result || Response.ERROR_UNKNOWN,
                 error: resp.error || "unknown error",
                 debug: debug
-            };            
+            };
         }
 
         return me.sendEmail("Error", "html/update-error.html", {
@@ -1468,7 +1474,7 @@ function SSLManager(config) {
             fn = methods[i][0];
             methods[i].shift();
 
-            if (fn.name) log(fn.name + (methods[i].length > 0 ?  ": " + methods[i] : ""));
+            log(fn.name + (methods[i].length > 0 ?  ": " + methods[i] : ""));
 
             resp = fn.apply(this, methods[i]);
             debug.push(resp);
