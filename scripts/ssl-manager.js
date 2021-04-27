@@ -148,7 +148,7 @@ function SSLManager(config) {
     };
 
     me.checkUpdateExpiration = function checkUpdateExpiration() {
-        var LE_TEXT = "Let's Encrypt Auto Update",
+        var LE_TEXT = "Let's Encrypt Auto-Update",
             EMAIL_BODY_PATH = "html/update-expired.html",
             UPDATE_DECREASED = "updateDecreased",
             UPDATE_DISABLED = "updateDisabled",
