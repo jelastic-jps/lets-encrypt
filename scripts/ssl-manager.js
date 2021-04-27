@@ -42,6 +42,7 @@ function SSLManager(config) {
         UPLOADER_ERROR = 6,
         READ_TIMED_OUT = 7,
         VALIDATION_SCRIPT = "validation.sh",
+        CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         LIGHT = "LIGHT",
         me = this,
@@ -390,6 +391,14 @@ function SSLManager(config) {
         me.logAction("EndUpdateLEFromContainer", resp);
 
         return resp;
+    };
+
+    me.setAddOnAction = function(action) {
+        config.action = action;
+    };
+
+    me.getAddOnAction = function() {
+        return config.action || "";
     };
 
     me.restoreCSScript = function restoreCSScript() {
@@ -804,8 +813,13 @@ function SSLManager(config) {
 
             scriptBody = me.replaceText(scriptBody, config);
 
-            //delete the script if it already exists
-            jelastic.dev.scripting.DeleteScript(scriptName);
+            resp = getScript(config.scriptName);
+            if (resp.result == Response.OK) {
+                me.setAddOnAction(CONFIGURE);
+                me.logAction("StartConfigureLEUpdate");
+                //delete the script if it already exists
+                jelastic.dev.scripting.DeleteScript(scriptName);
+            }
 
             //create a new script
             resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
@@ -828,6 +842,10 @@ function SSLManager(config) {
         params.fallbackToX1 = config.fallbackToX1;
 
         var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
+
+        if (me.getAddOnAction() == CONFIGURE) {
+            me.logAction("EndConfigureLEUpdate", resp);
+        }
 
         if (resp.result == 0 && typeof resp.response === "object" && resp.response.result != 0) {
             resp = resp.response;
