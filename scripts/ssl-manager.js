@@ -144,7 +144,7 @@ function SSLManager(config) {
     };
 
     me.parseDate = function(date) {
-        return new Date(new SimpleDateFormat(DATE_FORMAT).parse(date)).getTime();
+        return new Date(new SimpleDateFormat(DATE_FORMAT).parse(date));
     };
 
     me.checkUpdateExpiration = function checkUpdateExpiration() {
@@ -152,11 +152,11 @@ function SSLManager(config) {
             EMAIL_BODY_PATH = "html/update-expired.html",
             UPDATE_DECREASED = "updateDecreased",
             UPDATE_DISABLED = "updateDisabled",
-            timestamp;
+            sslExpiredTime;
 
-        timestamp = me.parseDate(nodeManager.jemSslCheckdomain());
+        sslExpiredTime = me.parseDate(nodeManager.jemSslCheckdomain());
 
-        if (!config[UPDATE_DISABLED] && me.isDateExpared(timestamp, REMOVE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DISABLED] && me.isDateExpired(sslExpiredTime, REMOVE_UPDATE_DAYS)) {
             me.disableAutoUpdate();
             me.updateSettingsValue(UPDATE_DISABLED, true);
 
@@ -167,7 +167,7 @@ function SSLManager(config) {
             });
         }
 
-        if (!config[UPDATE_DECREASED] && me.isDateExpared(timestamp, DECREASE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DECREASED] && me.isDateExpired(timestamp, DECREASE_UPDATE_DAYS)) {
             me.exec([
                 [ me.scheduleAutoUpdate, "0 0 " + Math.floor(Math.random() * (16 -8) + 8) + " * *" ],
                 [ me.updateSettingsValue, UPDATE_DECREASED, true ]
@@ -183,11 +183,11 @@ function SSLManager(config) {
         return { result: 0 }
     };
 
-    me.isDateExpared = function(timestamp, days) {
+    me.isDateExpired = function(date, days) {
         var currentDate = new Date().getTime(),
             dayStamp = parseInt(days) * 24 * 60 * 60;
 
-        return !!((currentDate - timestamp) > dayStamp);
+        return !!((currentDate - date.getTime()) > dayStamp);
     }
 
     me.checkSkippedDomainsInSuccess = function checkSkippedDomainsInSuccess(resp) {
