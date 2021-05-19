@@ -2,7 +2,12 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 WGET=$(which wget);
-RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/"
+BASE_URL=$1
+RAW_REPO_SCRIPS_URL="${BASE_URL}/scripts/"
+RAW_REPO_CONFIG_URL="${BASE_URL}/configs/"
+YUM_REPO_PATH="/etc/yum.repos.d/"
+CENTOS_REPO_FILE="CentOS-Base.repo"
+CENTOS_REPO_FILE_BACKUP=${CENTOS_REPO_FILE}"-backup"
 
 echo Checking RPM database
 {
@@ -12,6 +17,14 @@ echo Checking RPM database
 
 echo "Installing required packages"
 {
+  grep -q "CentOS release 6." /etc/system-release && {
+    command && code=$(echo $?) && [[ $code == "0" ]] && {
+      [[ ! -f "${YUM_REPO_PATH}/${CENTOS_REPO_FILE_BACKUP}" ]] && {
+      command cp -f ${YUM_REPO_PATH}/${CENTOS_REPO_FILE} ${YUM_REPO_PATH}/${CENTOS_REPO_FILE_BACKUP}
+      $WGET --no-check-certificate "${RAW_REPO_CONFIG_URL}/${CENTOS_REPO_FILE}" -O ${YUM_REPO_PATH}/${CENTOS_REPO_FILE}
+      }
+    }
+  }
   yum-config-manager --save --setopt=fuzzyrpm*.skip_if_unavailable=true
   yum-config-manager --save --setopt=pgdg*.skip_if_unavailable=true
   yum -y install epel-release git bc nss;
