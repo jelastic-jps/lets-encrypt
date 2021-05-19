@@ -4,6 +4,7 @@ LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
+counter=1
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh" ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
@@ -54,24 +55,36 @@ result_code=1;
 
 #returning to the old revision - https://github.com/acmesh-official/acme.sh/commit/44615c6fa2115a2010a87ed575699ec8f8a746e8
 cd $DIR/opt/letsencrypt/
-git reset --hard 44615c6fa2115a2010a87ed575699ec8f8a746e8
+git checkout 2.8.9
 
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
+  LOG_FILE=$LOG_FILE"-"$counter
 
   resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=1
 
   [[ "$result_code" == "1" ]] && {
-    error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
-    [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+    error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
+    [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Invalid response from http:\/\/.*)\\\"".*/\2/p' $LOG_FILE | sed '$!d')
+      [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/Invalid response from http:\/\/(.*)\/\.well-known.*/\1/p')
+    }
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
+      [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+    }
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
-    
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
@@ -86,6 +99,7 @@ do
     domain=$(echo $domain | sed 's/'${invalid_domain}'\(\s-d\s\)\?//')
     domain=$(echo $domain | sed "s/\s-d$//")
   }
+  counter=$((counter + 1))
 done
 
 all_invalid_domains_errors=${all_invalid_domains_errors%?}
