@@ -53,10 +53,6 @@ mkdir -p $DIR/var/log/letsencrypt
 }
 result_code=1;
 
-#returning to the old revision - https://github.com/acmesh-official/acme.sh/commit/44615c6fa2115a2010a87ed575699ec8f8a746e8
-cd $DIR/opt/letsencrypt/
-git checkout 2.8.9
-
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
