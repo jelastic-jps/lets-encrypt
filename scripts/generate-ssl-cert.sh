@@ -70,6 +70,7 @@ do
   [[ "$result_code" == "$GENERAL_RESULT_ERROR" ]] && {
     error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+
   [[ "$result_code" == "1" ]] && {
     error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
@@ -88,7 +89,7 @@ do
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
-    
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
