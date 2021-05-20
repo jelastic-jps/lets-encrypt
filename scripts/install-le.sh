@@ -20,7 +20,7 @@ echo "Installing required packages"
   mkdir -p ${DIR}/opt;
   [ ! -f "${DIR}/opt/letsencrypt/acme.sh" ] && {
     [ -d "${DIR}/opt/letsencrypt" ] && mv ${DIR}/opt/letsencrypt ${DIR}/opt/letsencrypt-certbot;
-    git clone https://github.com/acmesh-official/acme.sh ${DIR}/opt/letsencrypt;
+    git clone -b 2.8.9 https://github.com/acmesh-official/acme.sh ${DIR}/opt/letsencrypt;
   }
   cd $DIR/opt/letsencrypt/
   ./acme.sh --install --no-cron --accountemail $email
