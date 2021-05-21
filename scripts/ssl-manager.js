@@ -843,9 +843,10 @@ function SSLManager(config) {
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O '%(path)'",
             "chmod +x %(path)",
-            "%(path) >> %(log)"
+            "%(path) %(baseUrl) >> %(log)"
         ], {
             url : url,
+            baseUrl: config.baseUrl,
             path : nodeManager.getScriptPath(fileName)
         });
     };
