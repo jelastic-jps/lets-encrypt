@@ -36,7 +36,7 @@ echo "Installing required packages"
 
   [[ -z $CLIENT_VERSION ]] && {
     $WGET --no-check-certificate "${RAW_REPO_CONFIG_URL}/${VERS_FILE}" -O /tmp/${VERS_FILE}
-    CLIENT_VERSION=$(sed -n "s/version_acme-sh:.\(.*\)/\1/p" /tmp/${VERS_FILE})
+    CLIENT_VERSION=$(sed -n "s/.*version_acme-sh:.\(.*\)/\1/p" /tmp/${VERS_FILE})
   }
 
   [ ! -f "${DIR}/opt/letsencrypt/acme.sh" ] && {
