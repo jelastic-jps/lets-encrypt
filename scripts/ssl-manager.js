@@ -932,10 +932,11 @@ function SSLManager(config) {
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O '%(path)'",
             "chmod +x %(path)",
-            "%(path) %(baseUrl) >> %(log)"
+            "%(path) %(baseUrl) %(clientVersion) >> %(log)"
         ], {
             url : url,
             baseUrl: config.baseUrl,
+            clientVersion: config.clientVersion,
             path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
         });
     };
