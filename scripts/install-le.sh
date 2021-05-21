@@ -3,11 +3,13 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 WGET=$(which wget);
 BASE_URL=$1
+CLIENT_VERSION=$2
 RAW_REPO_SCRIPS_URL="${BASE_URL}/scripts/"
 RAW_REPO_CONFIG_URL="${BASE_URL}/configs/"
 YUM_REPO_PATH="/etc/yum.repos.d/"
 CENTOS_REPO_FILE="CentOS-Base.repo"
 CENTOS_REPO_FILE_BACKUP=${CENTOS_REPO_FILE}"-backup"
+VERS_FILE="vers.yaml"
 
 echo Checking RPM database
 {
@@ -31,9 +33,15 @@ echo "Installing required packages"
   yum -y install tinyproxy socat --enablerepo='epel';
   
   mkdir -p ${DIR}/opt;
+
+  [[ -z $CLIENT_VERSION ]] && {
+    $WGET --no-check-certificate "${RAW_REPO_CONFIG_URL}/${VERS_FILE}" -O /tmp/${VERS_FILE}
+    CLIENT_VERSION=$(sed -n "s/.*version_acme-sh:.\(.*\)/\1/p" /tmp/${VERS_FILE})
+  }
+
   [ ! -f "${DIR}/opt/letsencrypt/acme.sh" ] && {
     [ -d "${DIR}/opt/letsencrypt" ] && mv ${DIR}/opt/letsencrypt ${DIR}/opt/letsencrypt-certbot;
-    git clone https://github.com/acmesh-official/acme.sh ${DIR}/opt/letsencrypt;
+    git clone -b ${CLIENT_VERSION} https://github.com/acmesh-official/acme.sh ${DIR}/opt/letsencrypt;
   }
   cd $DIR/opt/letsencrypt/
   ./acme.sh --install --accountemail $email
