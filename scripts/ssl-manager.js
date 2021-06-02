@@ -122,11 +122,11 @@ function SSLManager(config) {
 
     me.install = function (isUpdate) {
         var resp = me.exec([
+            [ me.initCustomConfigs ],
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.initEntryPoint ],
-            [ me.initCustomConfigs ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig, isUpdate ],
             [ me.validateEntryPoint ],
