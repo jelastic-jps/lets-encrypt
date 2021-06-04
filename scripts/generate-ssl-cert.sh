@@ -9,6 +9,7 @@ TOO_MANY_CERTS=22
 WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
+counter=1
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh" ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
@@ -60,6 +61,7 @@ result_code=$GENERAL_RESULT_ERROR;
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
+  LOG_FILE=$LOG_FILE"-"$counter
 
   resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --no-cron --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
@@ -68,11 +70,26 @@ do
   [[ "$result_code" == "$GENERAL_RESULT_ERROR" ]] && {
     error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+
+  [[ "$result_code" == "1" ]] && {
+    error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
+    [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Invalid response from http:\/\/.*)\\\"".*/\2/p' $LOG_FILE | sed '$!d')
+      [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/Invalid response from http:\/\/(.*)\/\.well-known.*/\1/p')
+    }
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
+      [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+    }
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
-    
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
@@ -87,6 +104,7 @@ do
     domain=$(echo $domain | sed 's/'${invalid_domain}'\(\s-d\s\)\?//')
     domain=$(echo $domain | sed "s/\s-d$//")
   }
+  counter=$((counter + 1))
 done
 
 all_invalid_domains_errors=${all_invalid_domains_errors%?}
