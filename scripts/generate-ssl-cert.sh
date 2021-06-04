@@ -6,7 +6,6 @@ SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
 GENERAL_RESULT_ERROR=21
 TOO_MANY_CERTS=22
-ANCIENT_PYTHON_ERROR=24
 WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
@@ -93,7 +92,6 @@ done
 all_invalid_domains_errors=${all_invalid_domains_errors%?}
 
 [[ ! -z $all_invalid_domains ]] && {
-#  all_invalid_domains=$(echo $all_invalid_domains | sed "s/\s-d//gp")
   all_invalid_domains=$(echo $all_invalid_domains | sed -r "s/\s-d//g")
   sed -i "s|skipped_domains=.*|skipped_domains='${all_invalid_domains}'|g" ${SETTINGS}
 }
@@ -112,12 +110,10 @@ sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
 }
 
 if [ "$result_code" != "0" ]; then
-    [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
     [[ $resp == *"does not exist or is not a directory"* ]] && invalid_webroot_dir=true
     [[ $resp == *"Read timed out"* ]] && timed_out=true
 fi
 
-[[ $need_regenerate == true ]] && exit $ANCIENT_PYTHON_ERROR; #need regenerate
 [[ $invalid_webroot_dir == true ]] && exit $WRONG_WEBROOT_ERROR;
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
