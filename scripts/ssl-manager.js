@@ -36,13 +36,13 @@ function SSLManager(config) {
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         SimpleDateFormat = java.text.SimpleDateFormat,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
-        WRONG_DNS_CUSTOM_DOMAINS = 1,
-        RATE_LIMIT_EXCEEDED = 2,
-        ANCIENT_VERSION_OF_PYTHON = 4,
-        INVALID_WEBROOT_DIR = 5,
-        UPLOADER_ERROR = 6,
-        READ_TIMED_OUT = 7,
+        WRONG_DNS_CUSTOM_DOMAINS = 12001,
+        RATE_LIMIT_EXCEEDED = 12002,
+        INVALID_WEBROOT_DIR = 12005,
+        UPLOADER_ERROR = 12006,
+        READ_TIMED_OUT = 12007,
         VALIDATION_SCRIPT = "validation.sh",
+        SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
         SETTINGS_PATH = "opt/letsencrypt/settings",
@@ -965,6 +965,14 @@ function SSLManager(config) {
         });
     };
 
+    me.defineShellCodes = function() {
+        SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS] = 21;
+        SHELL_CODES[RATE_LIMIT_EXCEEDED] = 22;
+        SHELL_CODES[INVALID_WEBROOT_DIR] = 25;
+        SHELL_CODES[UPLOADER_ERROR] = 26;
+        SHELL_CODES[READ_TIMED_OUT] = 27;
+    };
+
     me.generateSslCerts = function generateSslCerts() {
         var fileName = "generate-ssl-cert.sh",
             url = me.getScriptUrl(fileName),
@@ -1006,6 +1014,7 @@ function SSLManager(config) {
         }
 
         bUpload = nodeManager.checkCustomSSL();
+        me.defineShellCodes();
 
         //execute ssl generation script
         resp = me.analyzeSslResponse(
@@ -1023,11 +1032,6 @@ function SSLManager(config) {
         if (!config.webroot) {
             //removing redirect
             me.exec(me.manageDnat, "remove");
-        }
-
-        if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
-            log("WARNING: Ancient version of Python");
-            resp = me.exec(me.tryRegenerateSsl);
         }
 
         if (resp.result == WRONG_DNS_CUSTOM_DOMAINS) {
@@ -1123,12 +1127,11 @@ function SSLManager(config) {
             out = resp.error + resp.errOut + resp.out;
 
             if (resp) {
-                if (resp.exitStatus == WRONG_DNS_CUSTOM_DOMAINS) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out}
-                if (resp.exitStatus == ANCIENT_VERSION_OF_PYTHON) return {result: ANCIENT_VERSION_OF_PYTHON };
-                if (resp.exitStatus == INVALID_WEBROOT_DIR) return { result: INVALID_WEBROOT_DIR}
-                if (resp.exitStatus == UPLOADER_ERROR) return { result: UPLOADER_ERROR}
-                if (resp.exitStatus == READ_TIMED_OUT) return { result: READ_TIMED_OUT}
-                if (resp.exitStatus == RATE_LIMIT_EXCEEDED) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
+                if (resp.exitStatus == SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS]) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out}
+                if (resp.exitStatus == SHELL_CODES[INVALID_WEBROOT_DIR]) return { result: INVALID_WEBROOT_DIR}
+                if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR}
+                if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
+                if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_EXCEEDED]) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
