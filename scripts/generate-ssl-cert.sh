@@ -68,10 +68,6 @@ do
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
   [[ "$result_code" == "$GENERAL_RESULT_ERROR" ]] && {
-    error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
-    [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
-
-  [[ "$result_code" == "1" ]] && {
     error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
 
