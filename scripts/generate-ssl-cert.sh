@@ -6,7 +6,7 @@ SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
 GENERAL_RESULT_ERROR=21
 TOO_MANY_CERTS=22
-INCIENT_PYTHON_ERROR=24
+ANCIENT_PYTHON_ERROR=24
 WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
@@ -117,7 +117,7 @@ if [ "$result_code" != "0" ]; then
     [[ $resp == *"Read timed out"* ]] && timed_out=true
 fi
 
-[[ $need_regenerate == true ]] && exit $INCIENT_PYTHON_ERROR; #need regenerate
+[[ $need_regenerate == true ]] && exit $ANCIENT_PYTHON_ERROR; #need regenerate
 [[ $invalid_webroot_dir == true ]] && exit $WRONG_WEBROOT_ERROR;
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
