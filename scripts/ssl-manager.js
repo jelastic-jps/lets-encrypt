@@ -122,11 +122,11 @@ function SSLManager(config) {
 
     me.install = function (isUpdate) {
         var resp = me.exec([
+            [ me.initCustomConfigs ],
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.initEntryPoint ],
-            [ me.initCustomConfigs ],
             [ me.installLetsEncrypt ],
             [ me.generateSslConfig, isUpdate ],
             [ me.validateEntryPoint ],
@@ -656,6 +656,7 @@ function SSLManager(config) {
     };
 
     me.initWebrootMethod = function initWebrootMethod(webroot) {
+        webroot = webroot || config.webroot;
         webroot = isDefined(webroot) ? String(webroot) == "true" : false;
         config.webroot = me.initBoolValue(webroot);
         return { result: 0 };
