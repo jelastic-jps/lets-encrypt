@@ -37,7 +37,6 @@ function SSLManager(config) {
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         WRONG_DNS_CUSTOM_DOMAINS = 12001,
         RATE_LIMIT_EXCEEDED = 12002,
-        ANCIENT_VERSION_OF_PYTHON = 12004,
         INVALID_WEBROOT_DIR = 12005,
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
@@ -896,7 +895,6 @@ function SSLManager(config) {
     me.defineShellCodes = function() {
         SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS] = 21;
         SHELL_CODES[RATE_LIMIT_EXCEEDED] = 22;
-        SHELL_CODES[ANCIENT_VERSION_OF_PYTHON] = 24;
         SHELL_CODES[INVALID_WEBROOT_DIR] = 25;
         SHELL_CODES[UPLOADER_ERROR] = 26;
         SHELL_CODES[READ_TIMED_OUT] = 27;
@@ -961,11 +959,6 @@ function SSLManager(config) {
         if (!config.webroot) {
             //removing redirect
             me.exec(me.manageDnat, "remove");
-        }
-
-        if (resp.result && resp.result == ANCIENT_VERSION_OF_PYTHON) {
-            log("WARNING: Ancient version of Python");
-            resp = me.exec(me.tryRegenerateSsl);
         }
 
         if (resp.result == WRONG_DNS_CUSTOM_DOMAINS) {
@@ -1062,7 +1055,6 @@ function SSLManager(config) {
 
             if (resp) {
                 if (resp.exitStatus == SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS]) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out}
-                if (resp.exitStatus == SHELL_CODES[ANCIENT_VERSION_OF_PYTHON]) return {result: ANCIENT_VERSION_OF_PYTHON };
                 if (resp.exitStatus == SHELL_CODES[INVALID_WEBROOT_DIR]) return { result: INVALID_WEBROOT_DIR}
                 if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR}
                 if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
