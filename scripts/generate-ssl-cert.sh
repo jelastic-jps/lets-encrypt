@@ -127,9 +127,9 @@ chmod -R 777 /tmp/
 appdomain=$(cut -d"." -f2- <<< $appdomain)
 
 certspath=$(sed -n 's/.*][[:space:][:digit:]{4}[:space:]]Your[[:space:]]cert[[:space:]]is[[:space:]]in[[:space:]]\{2\}\(.*\)./\1/p' $LOG_FILE)
-certdir=$(echo $certspath | sed 's/[^\/]*\.cer//' | tail -n 1)
+certdir=$(echo $certspath | sed 's/[^\/]*\.cer$//' | tail -n 1)
 certname=$(echo $certspath | sed 's/.*\///' | tail -n 1)
-certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer//')
+certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer$//')
 
 mkdir -p $KEYS_DIR
 
