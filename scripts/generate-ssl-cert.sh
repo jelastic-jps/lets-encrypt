@@ -4,6 +4,12 @@ LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
+GENERAL_RESULT_ERROR=21
+TOO_MANY_CERTS=22
+WRONG_WEBROOT_ERROR=25
+UPLOAD_CERTS_ERROR=26
+TIME_OUT_ERROR=27
+counter=1
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh" ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
@@ -50,7 +56,7 @@ mkdir -p $DIR/var/log/letsencrypt
     iptables -t nat -I PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
     ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
 }
-result_code=1;
+result_code=$GENERAL_RESULT_ERROR;
 
 #returning to the old revision - https://github.com/acmesh-official/acme.sh/commit/44615c6fa2115a2010a87ed575699ec8f8a746e8
 cd $DIR/opt/letsencrypt/
@@ -59,19 +65,31 @@ git reset --hard 44615c6fa2115a2010a87ed575699ec8f8a746e8
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
+  LOG_FILE=$LOG_FILE"-"$counter
 
   resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
-  grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=1
+  grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
-  [[ "$result_code" == "1" ]] && {
-    error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
-    [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+  [[ "$result_code" == "$GENERAL_RESULT_ERROR" ]] && {
+    error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
+    [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Invalid response from http:\/\/.*)\\\"".*/\2/p' $LOG_FILE | sed '$!d')
+      [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/Invalid response from http:\/\/(.*)\/\.well-known.*/\1/p')
+    }
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
+      [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
+    }
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
-    
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
@@ -86,12 +104,12 @@ do
     domain=$(echo $domain | sed 's/'${invalid_domain}'\(\s-d\s\)\?//')
     domain=$(echo $domain | sed "s/\s-d$//")
   }
+  counter=$((counter + 1))
 done
 
 all_invalid_domains_errors=${all_invalid_domains_errors%?}
 
 [[ ! -z $all_invalid_domains ]] && {
-#  all_invalid_domains=$(echo $all_invalid_domains | sed "s/\s-d//gp")
   all_invalid_domains=$(echo $all_invalid_domains | sed -r "s/\s-d//g")
   sed -i "s|skipped_domains=.*|skipped_domains='${all_invalid_domains}'|g" ${SETTINGS}
 }
@@ -110,16 +128,14 @@ sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
 }
 
 if [ "$result_code" != "0" ]; then
-    [[ $resp == *"You have an ancient version of Python"* ]] && need_regenerate=true;
     [[ $resp == *"does not exist or is not a directory"* ]] && invalid_webroot_dir=true
     [[ $resp == *"Read timed out"* ]] && timed_out=true
 fi
 
-[[ $need_regenerate == true ]] && exit 4; #reinstall packages, regenerate certs
-[[ $invalid_webroot_dir == true ]] && exit 5; #wrong webroot directory or server is not running
-[[ $timed_out == true ]] && exit 7; #timed out exception
-[[ $rate_limit_exceeded == true ]] && { echo "$error"; exit 2; } #too many certificates already issued
-[[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit 1; } #general result error
+[[ $invalid_webroot_dir == true ]] && exit $WRONG_WEBROOT_ERROR;
+[[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
+[[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
+[[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
 #To be sure that r/w access
 mkdir -p /tmp/
@@ -148,7 +164,7 @@ function uploadCerts() {
     uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/${certdomain}.key" -F "fid=fullchain.pem" -F "file=@${certdir}/fullchain.cer" -F "fid=cert.pem" -F "file=@${certdir}/${certdomain}.cer" http://$primarydomain/xssu/rest/upload)
 
     result_code=$?;
-    [[ $result_code != 0 ]] && { echo "$uploadresult" && exit 6; }
+    [[ $result_code != 0 ]] && { echo "$uploadresult" && exit $UPLOAD_CERTS_ERROR; }
     
     #Save urls to certificate files
     echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/privkey.url
