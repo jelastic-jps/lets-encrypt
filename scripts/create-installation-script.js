@@ -10,12 +10,13 @@ var baseDir          = getParam("baseDir", "/"),
     deployHookType   = getParam("deployHookType", ""),
     undeployHook     = getParam("undeployHook", ""),
     undeployHookType = getParam("undeployHookType", ""),
-    withExtIp        = getParam("withExtIp", "true"),
-    webroot          = getParam("webroot", "false"),
+    withExtIp        = getParam("withExtIp", ""),
+    webroot          = getParam("webroot", ""),
     webrootPath     = getParam("webrootPath", ""),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
-    fallbackToX1     = getParam("fallbackToX1", "false"),
-    test             = getParam("test", "");
+    fallbackToX1     = getParam("fallbackToX1", ""),
+    test             = getParam("test", ""),
+    clientVersion    = getParam("clientVersion", "");
 
 function run() {
     var SSLManager = use("scripts/ssl-manager.js", {
@@ -27,31 +28,32 @@ function run() {
         scriptName       : scriptName,
         customDomains    : replace(customDomains),
         nodeId           : replace(String(nodeId)),
-        nodeGroup        : replace(nodeGroup),
+        nodeGroup        : replace(nodeGroup) || "${targetNodes.nodeGroup}",
         deployHook       : replace(deployHook),
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
         undeployHookType : replace(undeployHookType),
-        withExtIp        : replace(withExtIp) || "true",
-        fallbackToX1     : replace(fallbackToX1) || "false",
-        webroot          : replace(webroot) || "false",
+        withExtIp        : replace(withExtIp) || "",
+        fallbackToX1     : replace(fallbackToX1) || "",
+        webroot          : replace(webroot) || "",
         webrootPath      : replace(webrootPath) || "",
         test             : test,
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
         envAppid         : "${env.appid}",
-        email            : "${user.email}"
+        email            : "${user.email}",
+        clientVersion    : clientVersion
     });
 
     jelastic.local.ReturnResult(
-        SSLManager.creteScriptAndInstall()
+        SSLManager.createScriptAndInstall()
     );
 }
 
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
-    
+
     return new (new Function("return " + body)())(config);
 }
 

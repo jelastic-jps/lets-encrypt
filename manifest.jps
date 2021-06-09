@@ -78,7 +78,7 @@ onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
 onAfterRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
     action: restore-scripts
-    
+
 onAfterStart:
   callScript:
     action: check-for-update
@@ -98,9 +98,9 @@ onInstall:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
       withExtIp: ${settings.withExtIp:true}
-      webroot: ${settings.webroot:false}
+      webroot: ${settings.webroot:}
       webrootPath: ${settings.webrootPath:}
-      fallbackToX1: ${settings.fallbackToX1:false}
+      fallbackToX1: ${settings.fallbackToX1:}
       deployHook: ${settings.deployHook:}
       deployHookType: ${settings.deployHookType:}
       undeployHook: ${settings.undeployHook:}
@@ -151,6 +151,7 @@ actions:
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
+      clientVersion: ${globals.version_acme-sh:}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
