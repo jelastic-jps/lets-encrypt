@@ -36,7 +36,8 @@ function run() {
         webrootPath      : "${webrootPath}",
         fallbackToX1     : "${fallbackToX1}",
         patchVersion     : "${patchVersion}",
-        test             : "${test}"
+        test             : "${test}",
+        clientVersion    : "${clientVersion}"
     });
 
     var resp = SSLManager.auth(token);
