@@ -161,7 +161,7 @@ function uploadCerts() {
     echo appid = $appid
     echo appdomain = $appdomain
     #Upload 3 certificate files
-    uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/${certdomain}.key" -F "fid=fullchain.pem" -F "file=@${certdir}/fullchain.cer" -F "fid=cert.pem" -F "file=@${certdir}/${certdomain}.cer" http://$primarydomain/xssu/rest/upload)
+    uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/${certdomain}.key" -F "fid=fullchain.pem" -F "file=@${certdir}/ca.cer" -F "fid=cert.pem" -F "file=@${certdir}/${certdomain}.cer" http://$primarydomain/xssu/rest/upload)
 
     result_code=$?;
     [[ $result_code != 0 ]] && { echo "$uploadresult" && exit $UPLOAD_CERTS_ERROR; }
