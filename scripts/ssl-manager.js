@@ -168,7 +168,7 @@ function SSLManager(config) {
             });
         }
 
-        if (!config[UPDATE_DECREASED] && me.isDateExpired(timestamp, DECREASE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DECREASED] && me.isDateExpired(sslExpiredTime, DECREASE_UPDATE_DAYS)) {
             me.exec([
                 [ me.scheduleAutoUpdate, "0 0 " + Math.floor(Math.random() * (16 -8) + 8) + " * *" ],
                 [ me.updateSettingsValue, UPDATE_DECREASED, true ]
