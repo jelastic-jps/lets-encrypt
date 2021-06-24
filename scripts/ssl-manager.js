@@ -936,7 +936,7 @@ function SSLManager(config) {
         ], {
             url : url,
             baseUrl: config.baseUrl,
-            clientVersion: config.clientVersion,
+            clientVersion: config.clientVersion || "",
             path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
         });
     };
