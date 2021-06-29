@@ -58,6 +58,9 @@ description:
 
 globals:
   scriptSufix: letsencrypt-ssl
+  
+mixins:
+  - configs/vers.yaml
 
 settings:
   fields:
