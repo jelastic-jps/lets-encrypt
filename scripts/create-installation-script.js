@@ -15,7 +15,8 @@ var baseDir          = getParam("baseDir", "/"),
     webrootPath     = getParam("webrootPath", ""),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
     fallbackToX1     = getParam("fallbackToX1", ""),
-    test             = getParam("test", "");
+    test             = getParam("test", ""),
+    clientVersion    = getParam("clientVersion", "");
 
 function run() {
     var SSLManager = use("scripts/ssl-manager.js", {
@@ -27,7 +28,7 @@ function run() {
         scriptName       : scriptName,
         customDomains    : replace(customDomains),
         nodeId           : replace(String(nodeId)),
-        nodeGroup        : replace(nodeGroup),
+        nodeGroup        : replace(nodeGroup) || "${targetNodes.nodeGroup}",
         deployHook       : replace(deployHook),
         deployHookType   : replace(deployHookType),
         undeployHook     : replace(undeployHook),
@@ -40,7 +41,8 @@ function run() {
         envName          : "${env.envName}",
         envDomain        : "${env.domain}",
         envAppid         : "${env.appid}",
-        email            : "${user.email}"
+        email            : "${user.email}",
+        clientVersion    : clientVersion
     });
 
     jelastic.local.ReturnResult(
@@ -51,7 +53,7 @@ function run() {
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
-    
+
     return new (new Function("return " + body)())(config);
 }
 

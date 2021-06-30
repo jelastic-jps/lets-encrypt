@@ -48,7 +48,7 @@ targetNodes:
     - jenkins2
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/stage
 logo: images/letsencrypt.png
 
 description:
@@ -58,6 +58,9 @@ description:
 
 globals:
   scriptSufix: letsencrypt-ssl
+  
+mixins:
+  - configs/vers.yaml
 
 settings:
   fields:
@@ -151,6 +154,7 @@ actions:
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
+      clientVersion: ${globals.version_acme-sh:}
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
