@@ -168,7 +168,7 @@ function SSLManager(config) {
             });
         }
 
-        if (!config[UPDATE_DECREASED] && me.isDateExpired(timestamp, DECREASE_UPDATE_DAYS)) {
+        if (!config[UPDATE_DECREASED] && me.isDateExpired(sslExpiredTime, DECREASE_UPDATE_DAYS)) {
             me.exec([
                 [ me.scheduleAutoUpdate, "0 0 " + Math.floor(Math.random() * (16 -8) + 8) + " * *" ],
                 [ me.updateSettingsValue, UPDATE_DECREASED, true ]
@@ -768,7 +768,7 @@ function SSLManager(config) {
             if (node.nodeGroup != group) continue;
             blMasterNode = nodeManager.getBalancerMasterNode();
 
-            if (config.withExtIp && !nodeManager.isIPv6Exists(node)) {
+            if (config.withExtIp) {
                 resp = config.webroot && !nodeManager.isExtraLayer(node.nodeGroup) ? me.attachExtIpToGroupNodes(blMasterNode ? BL : node.nodeGroup) : me.attachExtIpIfNeed(node);
                 if (resp.result != 0) return resp;
                 nodeManager.updateEnvInfo();
@@ -812,7 +812,7 @@ function SSLManager(config) {
     };
 
     me.attachExtIpIfNeed = function (node) {
-        if (!node.extIPs || node.extIPs.length == 0) {
+        if (!nodeManager.isIPv4Exists(node) && !nodeManager.isIPv6Exists(node)) {
             return me.exec.call(nodeManager, nodeManager.attachExtIp, node.id);
         }
 
@@ -936,7 +936,7 @@ function SSLManager(config) {
         ], {
             url : url,
             baseUrl: config.baseUrl,
-            clientVersion: config.clientVersion,
+            clientVersion: config.clientVersion || "",
             path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
         });
     };
@@ -1711,6 +1711,10 @@ function SSLManager(config) {
             }
 
             return { result : 0, node : node };
+        };
+        
+        me.isIPv4Exists = function isIPv4Exists(node) {
+            return !!(node.extIPs && node.extIPs.length);
         };
 
         me.isIPv6Exists = function isIPv6Exists(node) {

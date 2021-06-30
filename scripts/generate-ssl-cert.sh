@@ -58,10 +58,6 @@ mkdir -p $DIR/var/log/letsencrypt
 }
 result_code=$GENERAL_RESULT_ERROR;
 
-#returning to the old revision - https://github.com/acmesh-official/acme.sh/commit/44615c6fa2115a2010a87ed575699ec8f8a746e8
-cd $DIR/opt/letsencrypt/
-git reset --hard 44615c6fa2115a2010a87ed575699ec8f8a746e8
-
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
@@ -143,9 +139,9 @@ chmod -R 777 /tmp/
 appdomain=$(cut -d"." -f2- <<< $appdomain)
 
 certspath=$(sed -n 's/.*][[:space:][:digit:]{4}[:space:]]Your[[:space:]]cert[[:space:]]is[[:space:]]in[[:space:]]\{2\}\(.*\)./\1/p' $LOG_FILE)
-certdir=$(echo $certspath | sed 's/[^\/]*\.cer//' | tail -n 1)
+certdir=$(echo $certspath | sed 's/[^\/]*\.cer$//' | tail -n 1)
 certname=$(echo $certspath | sed 's/.*\///' | tail -n 1)
-certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer//')
+certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer$//')
 
 mkdir -p $KEYS_DIR
 
@@ -161,7 +157,7 @@ function uploadCerts() {
     echo appid = $appid
     echo appdomain = $appdomain
     #Upload 3 certificate files
-    uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/${certdomain}.key" -F "fid=fullchain.pem" -F "file=@${certdir}/fullchain.cer" -F "fid=cert.pem" -F "file=@${certdir}/${certdomain}.cer" http://$primarydomain/xssu/rest/upload)
+    uploadresult=$(curl -F "appid=$appid" -F "fid=privkey.pem" -F "file=@${certdir}/${certdomain}.key" -F "fid=fullchain.pem" -F "file=@${certdir}/ca.cer" -F "fid=cert.pem" -F "file=@${certdir}/${certdomain}.cer" http://$primarydomain/xssu/rest/upload)
 
     result_code=$?;
     [[ $result_code != 0 ]] && { echo "$uploadresult" && exit $UPLOAD_CERTS_ERROR; }
