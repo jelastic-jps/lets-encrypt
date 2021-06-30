@@ -128,7 +128,7 @@ function parseDomains() {
   [[ ! -z "$domain" ]] && {
       sed -i "s/^domain=.*/domain='$(echo $domain | sed "s/ / -d /g")'/g" "${SETTING_PATH}";
   } || {
-      sed -i "s/^domain=.*/domain='$(echo $appdomain)'/g" "${SETTING_PATH}";
+      sed -i "s/^domain=.*/domain=''/g" "${SETTING_PATH}";
       test_params='--test-cert --break-my-certs ';
   }
 
