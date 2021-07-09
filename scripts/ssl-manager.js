@@ -7,7 +7,7 @@ function SSLManager(config) {
      *      envDomain : {String}
      *      envAppid : {String}
      *      baseUrl : {String}
-     *      baseDir : {String}     
+     *      baseDir : {String}
      *      scriptName : {String}
      *      cronTime : {String}
      *      email : {String}
@@ -42,6 +42,8 @@ function SSLManager(config) {
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
         VALIDATION_SCRIPT = "validation.sh",
+        AUTO_UPDATE = "auto-update",
+        LE_ADDON_IDENTIFIER = "letsencrypt-ssl-addon",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
@@ -456,7 +458,11 @@ function SSLManager(config) {
         }
 
         if (config.patchVersion == patchBuild) {
-            resp = me.install(true);
+            if (config.isTask) {
+                return jelastic.marketplace.jps.ExecuteAppAction(appid, session, nodeManager.getAppUniqueName(), AUTO_UPDATE);
+            } else {
+                resp = me.install(true);
+            }
         } else {
             resp = me.reinstall();
         }
@@ -519,7 +525,7 @@ function SSLManager(config) {
             script: config.scriptName,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
-            params: { token: config.token, task: 1, action : "auto-update" }
+            params: { token: config.token, task: 1, action : AUTO_UPDATE }
         });
     };
 
@@ -541,7 +547,7 @@ function SSLManager(config) {
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
             [ me.createScript ],
-            [ me.evalScript, INSTALL ]
+            [ me.evalScript, { action: INSTALL } ]
         ]);
     };
 
@@ -913,10 +919,12 @@ function SSLManager(config) {
         return resp;
     };
 
-    me.evalScript = function evalScript(action) {
-        var params = { token : config.token };
+    me.evalScript = function evalScript(params) {
+        var params = params || {},
+            script;
 
-        if (action) params.action = action;
+        script = params.script || config.scriptName;
+        params.token = config.token;
         params.fallbackToX1 = config.fallbackToX1;
 
         var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
@@ -1234,7 +1242,7 @@ function SSLManager(config) {
 
     me.getAutoUpdateUrl = function () {
         return _(
-            "https://%(host)/%(scriptName)?appid=%(appid)&token=%(token)&action=auto-update",
+            "https://%(host)/%(scriptName)?appid=%(appid)&token=%(token)&action=" + AUTO_UPDATE,
             {
                 host : window.location.host,
                 scriptName : config.scriptName,
@@ -1458,7 +1466,7 @@ function SSLManager(config) {
 
         resp = jelastic.dev.scripting.Eval("appstore", session, "GetApps", {
             targetAppid: config.envAppid,
-            search: {"appstore":"1","app_id":"letsencrypt-ssl-addon", "nodeGroup": {"!=":config.nodeGroup}}
+            search: {"appstore":"1","app_id": LE_ADDON_IDENTIFIER, "nodeGroup": {"!=":config.nodeGroup}}
         });
 
         me.logAction("isMoreLEAppInstalled", resp);
@@ -1577,6 +1585,7 @@ function SSLManager(config) {
             sValidationPath,
             sValidationUrl,
             oBackupScript,
+            sAppUniqueName,
             oBLMaster,
             sBackupPath,
             envInfo,
@@ -1754,7 +1763,7 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
-        
+
         me.isIPv4Exists = function isIPv4Exists(node) {
             return !!(node.extIPs && node.extIPs.length);
         };
@@ -1794,6 +1803,33 @@ function SSLManager(config) {
 
         me.updateEnvInfo = function updateEnvInfo() {
             return me.getEnvInfo(true);
+        };
+
+        me.getAppUniqueName = function() {
+            var envinfo = me.getEnvInfo(),
+                addons,
+                node;
+
+            if (!sAppUniqueName) {
+                for (var i = 0, n = envinfo.nodes.length; i < n; i++) {
+                    node = envinfo.nodes[i];
+                    if (node.nodeGroup == config.nodeGroup) {
+                        addons = node.addons;
+                        break;
+                    }
+                }
+
+                if (addons) {
+                    for (i = 0, n = addons.length; i < n; i++) {
+                        if (addons[i].appTemplateId == LE_ADDON_IDENTIFIER) {
+                            sAppUniqueName = addons[i].uniqueName;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return sAppUniqueName || "";
         };
 
         me.getEntryPointGroup = function () {
