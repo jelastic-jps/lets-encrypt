@@ -119,19 +119,22 @@ onUninstall:
 onBeforeDelete: delete
 
 onAfterClone:
-  install: ${baseUrl}/manifest.jps?_r=${fn.random}
-  envName: ${event.response.env.envName}
-  nodeGroup: ${globals.nodeGroup}
-  settings:
-    customDomains: ''
+  - forEach(event.response.nodes):
+    - if ('${@i.nodeGroup}' == 'cp' || '${@i.nodeGroup}' == 'bl'):
+      - script: return jelastic.env.control.ExecCmdById('${event.response.env.envName}', session, '${@i.id}', toJSON([{ command:"crontab -l | grep -v 'auto-update-ssl-cert.sh' | crontab -;" }]), true, 'root');
+  - install: ${baseUrl}/manifest.jps?_r=${fn.random}
+    envName: ${event.response.env.envName}
     nodeGroup: ${globals.nodeGroup}
-    deployHookType: ${globals.deployHookType}
-    undeployHookType: ${globals.undeployHookType}
-    withExtIp: ${globals.withExtIp}
-    webroot: ${globals.webroot}
-    webrootPath: ${globals.webrootPath}
-    fallbackToX1: ${globals.fallbackToX1}
-    test: ${globals.test}
+    settings:
+      customDomains: ''
+      nodeGroup: ${globals.nodeGroup}
+      deployHookType: ${globals.deployHookType}
+      undeployHookType: ${globals.undeployHookType}
+      withExtIp: ${globals.withExtIp}
+      webroot: ${globals.webroot}
+      webrootPath: ${globals.webrootPath}
+      fallbackToX1: ${globals.fallbackToX1}
+      test: ${globals.test}
 
 onAfterConfirmTransfer: installScript
 
