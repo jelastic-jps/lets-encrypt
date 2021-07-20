@@ -1369,6 +1369,13 @@ function SSLManager(config) {
                 if (resp.result != 0) return resp;
 
                 resp = me.exec(me.bindSSLCerts);
+                if (resp.result == 2352) {
+                    resp = {
+                        result: resp.result,
+                        type: "warning",
+                        message: resp.error
+                    }
+                }
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
