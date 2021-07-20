@@ -1366,7 +1366,9 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                me.exec(me.bindSSLCerts);
+                if (resp.result != 0) return resp;
+
+                resp = me.exec(me.bindSSLCerts);
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
