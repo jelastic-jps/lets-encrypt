@@ -41,6 +41,7 @@ function SSLManager(config) {
         INVALID_WEBROOT_DIR = 12005,
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
+        NO_VALID_IP_ADDRESSES = 12008,
         VALIDATION_SCRIPT = "validation.sh",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
@@ -998,6 +999,7 @@ function SSLManager(config) {
         SHELL_CODES[INVALID_WEBROOT_DIR] = 25;
         SHELL_CODES[UPLOADER_ERROR] = 26;
         SHELL_CODES[READ_TIMED_OUT] = 27;
+        SHELL_CODES[NO_VALID_IP_ADDRESSES] = 28;
     };
 
     me.generateSslCerts = function generateSslCerts() {
@@ -1123,6 +1125,17 @@ function SSLManager(config) {
             };
         }
 
+        if (resp.result == NO_VALID_IP_ADDRESSES) {
+            text = "Error: " + resp.response;
+            return {
+                result: NO_VALID_IP_ADDRESSES,
+                error: text,
+                response: text,
+                type: "warning",
+                message: text
+            };
+        }
+
         if (resp.result && resp.result == READ_TIMED_OUT) {
             text = "The Let's Encrypt service is currently unavailable. Check the /var/log/letsencrypt log for more details or try again in a few minutes.";
             return {
@@ -1187,6 +1200,7 @@ function SSLManager(config) {
                 if (resp.exitStatus == SHELL_CODES[INVALID_WEBROOT_DIR]) return { result: INVALID_WEBROOT_DIR}
                 if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR}
                 if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
+                if (resp.exitStatus == SHELL_CODES[NO_VALID_IP_ADDRESSES]) return { result: NO_VALID_IP_ADDRESSES, response: resp.out }
                 if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_EXCEEDED]) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
             }
 
