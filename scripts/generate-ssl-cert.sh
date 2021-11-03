@@ -9,6 +9,7 @@ TOO_MANY_CERTS=22
 WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
+NO_VALID_IP_ADDRESSES=28
 counter=1
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
@@ -87,6 +88,12 @@ do
     }
 
     [[ -z $error ]] && {
+      error=$(sed -rn 's|.*"detail":"(No valid IP addresses found [^"]+)".*|\1|p' $LOG_FILE | sed '$!d')
+      invalid_domain=$(echo $error | sed -rn 's/.*for (.*)/\1/p')
+      [[ ! -z $error ]] && no_valid_ip=true
+    }
+
+    [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
         rate_limit_exceeded=true;
@@ -130,6 +137,7 @@ fi
 
 [[ $invalid_webroot_dir == true ]] && exit $WRONG_WEBROOT_ERROR;
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
+[[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
