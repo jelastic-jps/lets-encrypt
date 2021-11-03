@@ -137,7 +137,7 @@ fi
 
 [[ $invalid_webroot_dir == true ]] && exit $WRONG_WEBROOT_ERROR;
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
-[[ $no_valid_ip == true ]] && exit $NO_VALID_IP_ADDRESSES;
+[[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
