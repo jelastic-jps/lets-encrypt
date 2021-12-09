@@ -1400,12 +1400,27 @@ function SSLManager(config) {
 
     me.removeSSLCert = function removeSSLCert() {
         var resp,
-            sslCerts;
+            sslCert,
+            sslCerts,
+            extDomain;
 
         resp = jelastic.env.binder.GetSSLCerts(config.envName, session);
         if (resp.result != 0) return resp;
 
         sslCerts = resp.responses;
+
+        sslCert = sslCerts[sslCerts.length - 1];
+
+        if (sslCert.extDomains.length) {
+            for (var i = 0, n = sslCert.extDomains.length; i < n; i++) {
+                extDomain = sslCert.extDomains[i];
+
+                if (extDomain.sslEnabled) {
+                    resp = jelastic.env.binder.RemoveExtDomain(config.envName, session, extDomain.domain);
+                    if (resp.result != 0) return resp;
+                }
+            }
+        }
 
         return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
     };
