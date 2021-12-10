@@ -35,6 +35,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         SimpleDateFormat = java.text.SimpleDateFormat,
+        ENVIRONMENT_EXT_DOMAIN_NOT_ALLOWED = 2352,
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         WRONG_DNS_CUSTOM_DOMAINS = 12001,
         RATE_LIMIT_EXCEEDED = 12002,
@@ -1366,7 +1367,14 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                me.exec(me.bindSSLCerts);
+                resp = me.exec(me.bindSSLCerts);
+                if (resp.result != 0) {
+                    if (resp.result == ENVIRONMENT_EXT_DOMAIN_NOT_ALLOWED) {
+                        resp = error(ENVIRONMENT_EXT_DOMAIN_NOT_ALLOWED, resp.error + ". Please contact our support team.");
+                    } else {
+                        return resp;
+                    }
+                }
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
