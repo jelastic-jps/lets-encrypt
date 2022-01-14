@@ -72,7 +72,7 @@ do
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
 
     [[ -z $error ]] && {
-      error=$(sed -rn 's/.*\s(.*)(Invalid response from http:\/\/.*)\\\"".*/\2/p' $LOG_FILE | sed '$!d')
+      error=$(sed -rn 's/.*\s(.*)(Invalid response from https?:\/\/.*)\\\"".*/\2/p' $LOG_FILE | sed '$!d')
       [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/Invalid response from https?:\/\/([^/]*)\/\.well-known.*/\1/p')
     }
 
