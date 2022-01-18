@@ -1,42 +1,47 @@
-var extIP = "environment.externalip.enabled",
+  var extIP = "environment.externalip.enabled",
    extIPperEnv = "environment.externalip.maxcount",
    extIPperNode = "environment.externalip.maxcount.per.node",
-   markup = "", cur = null, text = "used", LE = true;
+   markup = "", cur = null, text = "used", LE = true, fields = [];
 
-var quotas = jelastic.billing.account.GetQuotas(extIP + ";"+extIPperEnv+";" + extIPperNode ).array;
-for (var i = 0; i < quotas.length; i++){
-  var q = quotas[i], n = toNative(q.quota.name);
+  var quotas = jelastic.billing.account.GetQuotas(extIP + ";"+extIPperEnv+";" + extIPperNode ).array;
+  for (var i = 0; i < quotas.length; i++){
+    var q = quotas[i], n = toNative(q.quota.name);
 
-  if (n == extIP &&  !q.value){
-    err(q, "required", 1, true);
-    LE  = false; 
+    if (n == extIP &&  !q.value){
+      err(q, "required", 1, true);
+      LE  = false; 
+    }
+
+    if (n == extIPperEnv && q.value < 1){
+      if (!markup) err(q, "required", 1, true);
+      LE = false;
+    }
+
+    if (n == extIPperNode && q.value < 1){
+      if (!markup) err(q, "required", 1, true);
+      LE = false;
+    }
   }
 
-  if (n == extIPperEnv && q.value < 1){
-    if (!markup) err(q, "required", 1, true);
-    LE = false;
+  if (!LE) {
+    for (var i = 0, field; field = jps.settings.fields[i]; i++) {
+      if (field.name == "ext_ip") {
+        field.markup = "Let's Encrypt is not available. " + markup + "Please upgrade your account.";
+        field.cls = "warning";
+        field.hidden = false;
+        field.height = 30; 
+        field.required = true;
+      }
+    }
+    jps.settings.fields.push({"type": "compositefield","height": 0,"hideLabel": true,"width": 0,"items": [{"height": 0,"type": "string","required": true}]});
+  }
+  
+  function err(e, text, cur, override){
+    var m = (e.quota.description || e.quota.name) + " - " + e.value + ", " + text + " - " + cur + ". ";
+    if (override) markup = m; else markup += m;
   }
 
-  if (n == extIPperNode && q.value < 1){
-    if (!markup) err(q, "required", 1, true);
-    LE = false;
-  }
-}
-
-if (!LE) {
-  fields["displayfield"].markup = "Some advanced features are not available. Please upgrade your account.";
-  fields["displayfield"].cls = "warning";
-  fields["displayfield"].hideLabel = true;
-  fields["displayfield"].height = 25;
-  fields["le-addon"].disabled = true;
-  fields["le-addon"].value = false;
-  fields["bl_count"].markup = "Let's Encrypt is not available. " + markup + "Please upgrade your account.";
-  fields["bl_count"].cls = "warning";
-  fields["bl_count"].hidden = false;
-  fields["bl_count"].height = 30;  
-}
-
-return {
-    result: 0,
-    settings: settings
-};
+  return {
+      result: 0,
+      settings: jps.settings
+  };
