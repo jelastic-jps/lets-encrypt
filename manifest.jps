@@ -49,6 +49,7 @@ targetNodes:
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+onBeforeInit: /scripts/settings.js?_r=${fn.random}
 logo: images/letsencrypt.png
 
 description:
