@@ -7,8 +7,6 @@ name: Let's Encrypt Free SSL
 categories:
 - apps/dev-and-admin-tools
 
-targetEditions: any
-
 targetNodes:
   nodeType:
     - tomcat6
@@ -50,7 +48,7 @@ targetNodes:
     - jenkins2
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/lazarenkoalexey/lets-encrypt/multi
 logo: images/letsencrypt.png
 
 description:
@@ -60,9 +58,11 @@ description:
 
 globals:
   scriptSufix: letsencrypt-ssl
+  app_id: letsencrypt-ssl-addon
   
 mixins:
   - configs/vers.yaml
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/actions.yml
 
 settings:
   fields:
@@ -112,21 +112,40 @@ onInstall:
       undeployHookType: ${settings.undeployHookType:}
       test: ${settings.test:}
   - checkClustering:
-      app_id: letsencrypt-ssl-addon
-  - if (${response.isSecondEnv):
-      return:
-        type: success
-    else:
-      - createLockFile
-      - installLE:
-          envName: ${response.secondEnvName}
+      app_id: ${globals.app_id}
+  - if (globals.isSecondEnv):
+      - createScript:
+          scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
+      - return:
+          type: success
+  - else:
+    - createLockFile:
+        envName: ${globals.secondEnvName}
+        app_id: ${globals.app_id}
+    - installLE:
+        envName: ${globals.secondEnvName}
   - installScript
     
 
 onUninstall:
-  - callScript:
-      action: uninstall
   - delete
+  - checkClustering:
+      app_id: letsencrypt-ssl-addon
+  - markExecutedEnvFile
+  - if (!globals.isSecondExecuted):
+      - executeAction:
+          envName: ${globals.secondEnvName}
+          action: delete
+          app_id: letsencrypt-ssl-addon
+  - removeExecutedEnvFile:
+      app_id: letsencrypt-ssl-addon
+  - if (globals.isSecondEnv):
+      script: |
+        return {result: 0}
+  - else:
+      removeExecutedEnvFile:
+        app_id: letsencrypt-ssl-addon
+        postfix: lock
 
 onBeforeDelete: delete
 
@@ -165,45 +184,31 @@ actions:
   
   update:
     - checkClustering:
-        app_id: letsencrypt-ssl-addon
-    - if (${response.isSecondEnv}):
-        - createLockFile
-        - executeAction:
-            envName: ${response.secondEnvName}
-            action: auto-update
-            app_id: letsencrypt-ssl-addon
-            params:
-              customDomains: ${settings.customDomains}
-              nodeGroup: ${globals.nodeGroup}
-              deployHookType: ${globals.deployHookType}
-              undeployHookType: ${globals.undeployHookType}
-              withExtIp: ${globals.withExtIp}
-              webroot: ${globals.webroot}
-              webrootPath: ${globals.webrootPath}
-              fallbackToX1: ${globals.fallbackToX1}
-              test: ${globals.test}
-    - callScript:
-        action: auto-update
+        app_id: ${globals.app_id}
+    - if (globals.isSecondEnv):
+        executeAction:
+          envName: ${globals.secondEnvName}
+          action: update
+          app_id: letsencrypt-ssl-addon
+    - else:
+        callScript:
+          action: auto-update
+
   
   configure: 
     - checkClustering:
         app_id: letsencrypt-ssl-addon
-    - if (${response.isSecondEnv}):
-      - createLockFile
-      - executeAction:
-          envName: ${response.secondEnvName}
-          action: auto-update
-          app_id: letsencrypt-ssl-addon
-          params:
-            customDomains: ${settings.customDomains}
-            nodeGroup: ${globals.nodeGroup}
-            deployHookType: ${globals.deployHookType}
-            undeployHookType: ${globals.undeployHookType}
-            withExtIp: ${globals.withExtIp}
-            webroot: ${globals.webroot}
-            webrootPath: ${globals.webrootPath}
-            fallbackToX1: ${globals.fallbackToX1}
-            test: ${globals.test}
+    - if (!globals.isSecondExecuted):
+        - markExecutedEnvFile
+        - executeAction:
+            envName: ${globals.secondEnvName}
+            action: configure
+            app_id: letsencrypt-ssl-addon
+    - removeExecutedEnvFile:
+        app_id: letsencrypt-ssl-addon
+    - if (globals.isSecondEnv):
+        return:
+          type: success
     - installScript
   
   delete:
@@ -211,45 +216,8 @@ actions:
       jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
       
-  checkClustering:
-    script: |
-      var secondEnvName, resp;
-      
-      resp = api.env.control.ExecCmdByGroup({
-        envName: "${env.name}",
-        session: session,
-        nodeGroup: "cp",
-        commandList: [{"command": "cat /root/clustering"}],
-        userName: "root"
-      });
-      if (resp.result != 0) return resp;
-
-      text = resp.responses[0].out.split("\n");
-
-      for (var i = 0, n = text.length; i < n; i++) {
-        tmp = text[i].split("=");
-        config[tmp[0]] = tmp[1];
-      }
-
-      if (config.cluster) config.cluster = String(config.cluster) != "false";
-      
-      secondEnvName = ("${env.name}" == config.envName1) ? config.envName2 : config.envName1;
-      
-      resp = api.env.control.ExecCmdByGroup({
-          envName: "${env.name}",
-          session: session,
-          nodeGroup: "cp",
-          commandList: [{"command": "[[ -f \"/root/${this.app_id}.lock\" ]] && echo true || echo false"}]
-        });
-      if (resp.result != 0) return resp;
-      isLockEnv = !!(resp.responses[0].out == "true");
-      
-      if (config.cluster && isLockEnv) return { result: 0, isSecondEnv: !!isLockEnv, cluster: true, secondEnvName: secondEnvName}
-      
-      return { result: 0 }
-      
   installLE:
-    install: ${baseUrl}/manifest.jps?_r=${fn.random}
+    install: http://owncloud-clone.demo.jelastic.com/public.php?service=files&t=38c459bbdd122571285f1e09f374b4dc&download
     envName: ${this.envName}
     nodeGroup: ${globals.nodeGroup}
     settings:
@@ -262,58 +230,9 @@ actions:
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
-
-  createLockFile:
+      
+  createScript:
     script: |
-      return api.env.control.ExecCmdByGroup({
-        envName: "${this.envName}",
-        session: session,
-        nodeGroup: "cp",
-        commandList: [{"command": "touch /root/${this.app_id}.lock"}]
-      });
-      
-  executeAction:
-    script: |
-      var envAppid, nodeType, resp;
-      
-      resp = api.env.control.GetEnvInfo("${this.envName}", session);
-      if (resp.result != 0) return resp;
-      
-      for (var i = 0, n = resp.nodes.length; i < n; i++) {
-        if (resp.nodes[i].nodeGroup == "${globals.nodeGroup}") {
-          nodeType = resp.nodes[i].nodeType;
-        }
-      }
-      
-      envApid = resp.env.appid;
-      
-      resp = api.dev.scripting.Eval("appstore", session, "GetApps", {
-        targetAppid: envApid,
-        search: {
-          appstore: 1,
-          nodeGroup: "cp",
-          nodeType: nodeType,
-          jpsType: "update"
-        }
-      });
-      if (resp.result != 0) return resp;
-
-      if (resp.response && resp.response.apps) {
-        for (var i = 0, n = resp.response.apps.length; i < n; i++) {
-          if (resp.response.apps[i].app_id == "${this.app_id}") {
-            uniqueName = resp.response.apps[i].uniqueName;
-            break;
-          }
-        }
-      }
-
-      return api.marketplace.jps.ExecuteAppAction({
-        appid: appid,
-        session: session,
-        appUniqueName: uniqueName,
-        action: "${this.action}",
-        params: "${this.params}"
-      });
-      
+      return jelastic.dev.scripting.CreateScript("${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md
