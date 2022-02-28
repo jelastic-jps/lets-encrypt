@@ -193,7 +193,6 @@ actions:
     - else:
         callScript:
           action: auto-update
-
   
   configure: 
     - checkClustering:
@@ -217,7 +216,7 @@ actions:
       return {result:0}
       
   installLE:
-    install: http://owncloud-clone.demo.jelastic.com/public.php?service=files&t=38c459bbdd122571285f1e09f374b4dc&download
+    install: https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps
     envName: ${this.envName}
     nodeGroup: ${globals.nodeGroup}
     settings:
