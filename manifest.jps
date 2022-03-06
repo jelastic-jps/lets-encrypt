@@ -62,7 +62,7 @@ globals:
   
 mixins:
   - configs/vers.yaml
-  - https://raw.githubusercontent.com/jelastic-jps/common/main/actions.yml
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/autoClustering.yml
 
 settings:
   fields:
@@ -131,7 +131,8 @@ onUninstall:
   - delete
   - checkClustering:
       app_id: letsencrypt-ssl-addon
-  - markExecutedEnvFile
+  - markExecutedEnvFile:
+      app_id: ${globals.app_id}
   - if (!globals.isSecondExecuted):
       - executeAction:
           envName: ${globals.secondEnvName}
@@ -198,7 +199,8 @@ actions:
     - checkClustering:
         app_id: letsencrypt-ssl-addon
     - if (!globals.isSecondExecuted):
-        - markExecutedEnvFile
+        - markExecutedEnvFile:
+            app_id: ${globals.app_id}
         - executeAction:
             envName: ${globals.secondEnvName}
             action: configure
