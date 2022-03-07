@@ -146,7 +146,7 @@ onUninstall:
   - else:
       removeExecutedEnvFile:
         app_id: letsencrypt-ssl-addon
-        postfix: lock
+        extension: lock
 
 onBeforeDelete: delete
 
