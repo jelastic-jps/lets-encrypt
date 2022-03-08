@@ -133,7 +133,7 @@ onUninstall:
       app_id: letsencrypt-ssl-addon
   - markExecutedEnvFile:
       app_id: ${globals.app_id}
-  - if (!globals.isSecondExecuted):
+  - if (!globals.isSecondaryExecuted):
       - executeAction:
           envName: ${globals.secondaryEnvName}
           action: delete
