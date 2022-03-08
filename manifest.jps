@@ -120,7 +120,7 @@ onInstall:
           - return:
               type: success
       - else:
-        - createLockFile:
+        - createFile:
             envName: ${globals.secondaryEnvName}
             app_id: ${globals.app_id}
         - installLE:
