@@ -62,7 +62,7 @@ globals:
   
 mixins:
   - configs/vers.yaml
-  - https://raw.githubusercontent.com/jelastic-jps/common/main/autoClustering.yml
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
 
 settings:
   fields:
