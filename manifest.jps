@@ -131,21 +131,21 @@ onUninstall:
   - delete
   - checkClustering:
       app_id: letsencrypt-ssl-addon
-  - markExecutedEnvFile:
-      app_id: ${globals.app_id}
   - if (!globals.isSecondaryExecuted):
+      - markExecutedEnvFile:
+          app_id: ${globals.app_id}
       - executeAction:
           envName: ${globals.secondaryEnvName}
           action: delete
-          app_id: letsencrypt-ssl-addon
-  - removeExecutedEnvFile:
-      app_id: letsencrypt-ssl-addon
+          app_id: ${globals.app_id}
+      - removeExecutedEnvFile:
+          app_id: ${globals.app_id}
   - if (globals.isSecondaryEnv):
       script: |
         return {result: 0}
   - else:
       removeExecutedEnvFile:
-        app_id: letsencrypt-ssl-addon
+        app_id: ${globals.app_id}
         extension: lock
 
 onBeforeDelete: delete
@@ -190,7 +190,7 @@ actions:
         executeAction:
           envName: ${globals.secondaryEnvName}
           action: update
-          app_id: letsencrypt-ssl-addon
+          app_id: ${globals.app_id}
     - else:
         callScript:
           action: auto-update
@@ -204,9 +204,9 @@ actions:
         - executeAction:
             envName: ${globals.secondaryEnvName}
             action: configure
-            app_id: letsencrypt-ssl-addon
-    - removeExecutedEnvFile:
-        app_id: letsencrypt-ssl-addon
+            app_id: ${globals.app_id}
+        - removeExecutedEnvFile:
+            app_id: ${globals.app_id}
     - if (globals.isSecondaryEnv):
         return:
           type: success
