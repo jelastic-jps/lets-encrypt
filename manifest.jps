@@ -113,7 +113,7 @@ onInstall:
       test: ${settings.test:}
   - checkClustering:
       app_id: ${globals.app_id}
-  - if (globals.cluster:false):
+  - if (globals.cluster):
       - if (globals.isSecondaryEnv):
           - createScript:
               scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
@@ -132,7 +132,7 @@ onUninstall:
   - delete
   - checkClustering:
       app_id: letsencrypt-ssl-addon
-  - if (globals.cluster:false):
+  - if (globals.cluster):
       - if (!globals.isSecondaryExecuted):
           - markExecutedEnvFile:
               app_id: ${globals.app_id}
@@ -188,7 +188,7 @@ actions:
   update:
     - checkClustering:
         app_id: ${globals.app_id}
-    - if (globals.cluster:false):
+    - if (globals.cluster):
         - if (globals.isSecondaryEnv):
             executeAction:
               envName: ${globals.secondaryEnvName}
@@ -201,7 +201,7 @@ actions:
   configure: 
     - checkClustering:
         app_id: letsencrypt-ssl-addon
-    - if (globals.cluster:false):
+    - if (globals.cluster):
         - if (!globals.isSecondaryExecuted):
             - markExecutedEnvFile:
                 app_id: ${globals.app_id}
