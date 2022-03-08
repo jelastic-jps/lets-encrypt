@@ -113,17 +113,17 @@ onInstall:
       test: ${settings.test:}
   - checkClustering:
       app_id: ${globals.app_id}
-  - if (globals.isSecondEnv):
+  - if (globals.isSecondaryEnv):
       - createScript:
           scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
       - return:
           type: success
   - else:
     - createLockFile:
-        envName: ${globals.secondEnvName}
+        envName: ${globals.secondaryEnvName}
         app_id: ${globals.app_id}
     - installLE:
-        envName: ${globals.secondEnvName}
+        envName: ${globals.secondaryEnvName}
   - installScript
     
 
@@ -135,12 +135,12 @@ onUninstall:
       app_id: ${globals.app_id}
   - if (!globals.isSecondExecuted):
       - executeAction:
-          envName: ${globals.secondEnvName}
+          envName: ${globals.secondaryEnvName}
           action: delete
           app_id: letsencrypt-ssl-addon
   - removeExecutedEnvFile:
       app_id: letsencrypt-ssl-addon
-  - if (globals.isSecondEnv):
+  - if (globals.isSecondaryEnv):
       script: |
         return {result: 0}
   - else:
@@ -186,9 +186,9 @@ actions:
   update:
     - checkClustering:
         app_id: ${globals.app_id}
-    - if (globals.isSecondEnv):
+    - if (globals.isSecondaryEnv):
         executeAction:
-          envName: ${globals.secondEnvName}
+          envName: ${globals.secondaryEnvName}
           action: update
           app_id: letsencrypt-ssl-addon
     - else:
@@ -198,16 +198,16 @@ actions:
   configure: 
     - checkClustering:
         app_id: letsencrypt-ssl-addon
-    - if (!globals.isSecondExecuted):
+    - if (!globals.isSecondaryExecuted):
         - markExecutedEnvFile:
             app_id: ${globals.app_id}
         - executeAction:
-            envName: ${globals.secondEnvName}
+            envName: ${globals.secondaryEnvName}
             action: configure
             app_id: letsencrypt-ssl-addon
     - removeExecutedEnvFile:
         app_id: letsencrypt-ssl-addon
-    - if (globals.isSecondEnv):
+    - if (globals.isSecondaryEnv):
         return:
           type: success
     - installScript
