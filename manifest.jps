@@ -112,6 +112,7 @@ onInstall:
       undeployHookType: ${settings.undeployHookType:}
       test: ${settings.test:}
   - checkClustering:
+      nodeGroup: ${globals.nodeGroup}
       app_id: ${globals.app_id}
   - if (globals.cluster):
       - if (globals.isSecondaryEnv):
@@ -122,6 +123,7 @@ onInstall:
       - else:
         - createFile:
             envName: ${globals.secondaryEnvName}
+            nodeGroup: ${globals.nodeGroup}
             app_id: ${globals.app_id}
         - installLE:
             envName: ${globals.secondaryEnvName}
@@ -131,22 +133,27 @@ onInstall:
 onUninstall:
   - delete
   - checkClustering:
+      nodeGroup: ${globals.nodeGroup}
       app_id: letsencrypt-ssl-addon
   - if (globals.cluster):
       - if (!globals.isSecondaryExecuted):
           - markExecutedEnvFile:
+              nodeGroup: ${globals.nodeGroup}
               app_id: ${globals.app_id}
           - executeAction:
               envName: ${globals.secondaryEnvName}
+              nodeGroup: ${globals.nodeGroup}
               action: delete
               app_id: ${globals.app_id}
           - removeExecutedEnvFile:
+              nodeGroup: ${globals.nodeGroup}
               app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
           script: |
             return {result: 0}
       - else:
           removeExecutedEnvFile:
+            nodeGroup: ${globals.nodeGroup}
             app_id: ${globals.app_id}
             extension: lock
 
@@ -187,11 +194,13 @@ actions:
   
   update:
     - checkClustering:
+        nodeGroup: ${globals.nodeGroup}
         app_id: ${globals.app_id}
     - if (globals.cluster):
         - if (globals.isSecondaryEnv):
             executeAction:
               envName: ${globals.secondaryEnvName}
+              nodeGroup: ${globals.nodeGroup}
               action: update
               app_id: ${globals.app_id}
         - else:
@@ -200,16 +209,20 @@ actions:
   
   configure: 
     - checkClustering:
+        nodeGroup: ${globals.nodeGroup}
         app_id: letsencrypt-ssl-addon
     - if (globals.cluster):
         - if (!globals.isSecondaryExecuted):
             - markExecutedEnvFile:
+                nodeGroup: ${globals.nodeGroup}
                 app_id: ${globals.app_id}
             - executeAction:
                 envName: ${globals.secondaryEnvName}
+                nodeGroup: ${globals.nodeGroup}
                 action: configure
                 app_id: ${globals.app_id}
             - removeExecutedEnvFile:
+                nodeGroup: ${globals.nodeGroup}
                 app_id: ${globals.app_id}
         - if (globals.isSecondaryEnv):
             return:
