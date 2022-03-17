@@ -235,7 +235,7 @@ actions:
       return {result:0}
       
   installLE:
-    install: https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps
+    install: ${baseUrl}/manifest.jps
     envName: ${this.envName}
     nodeGroup: ${globals.nodeGroup}
     settings:
