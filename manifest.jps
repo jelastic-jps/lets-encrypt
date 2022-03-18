@@ -7,7 +7,7 @@ name: Let's Encrypt Free SSL
 categories:
 - apps/dev-and-admin-tools
 
-targetEditions: any
+targetEditions: [ "devops", "wordpress", "lite_do", "lite_vultr", "lite_gc", "ultimate", "light", "business" ]
 
 targetNodes:
   nodeType:
