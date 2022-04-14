@@ -978,7 +978,7 @@ function SSLManager(config) {
                 appid : config.envAppid || "",
                 baseDir : config.baseDir,
                 appdomain : envDomain || "",
-                test : !!config.test || !customDomains,
+                test : config.test || !customDomains,
                 primarydomain: primaryDomain,
                 letsEncryptEnv : config.letsEncryptEnv || "",
                 withExtIp : config.withExtIp,
