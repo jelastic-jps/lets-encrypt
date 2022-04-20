@@ -46,6 +46,8 @@ function SSLManager(config) {
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
         SETTINGS_PATH = "opt/letsencrypt/settings",
+        EXECUTE_SCRIPT = "le-execute-action",
+        APP_ID = "letsencrypt-ssl-addon",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
@@ -444,6 +446,9 @@ function SSLManager(config) {
                 session = signature;
             }
 
+            resp = me.createExecuteActionScript();
+            if (resp.result != 0) return resp;
+
             resp = nodeManager.getEnvInfo();
 
             if (resp.result == 0) {
@@ -499,6 +504,27 @@ function SSLManager(config) {
         return { result : 0 };
     };
 
+    me.createExecuteActionScript = function createExecuteActionScript() {
+        var scriptBody,
+            resp;
+
+        resp = me.getScriptBody("execute-action.js");
+        if (resp.result != 0) return resp;
+
+        scriptBody = resp.scriptBody;
+        resp = jelastic.dev.scripting.DeleteScript(appid, session, EXECUTE_SCRIPT);
+        if (resp.result != 0) return resp;
+
+        //create a new script
+        resp = api.dev.scripting.CreateScript(appid, session, EXECUTE_SCRIPT, "js", scriptBody);
+        if (resp.result != 0) return resp;
+
+        java.lang.Thread.sleep(1000);
+
+        //build script to avoid caching
+        return api.dev.scripting.Build(appid, session, EXECUTE_SCRIPT);
+    };
+
     me.checkEnvAccessAndUpdate = function (errResp) {
         var errorMark = "session [xxx"; //mark of error access to a shared env
 
@@ -516,10 +542,16 @@ function SSLManager(config) {
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
-            script: config.scriptName,
+            script: EXECUTE_SCRIPT,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
-            params: { token: config.token, task: 1, action : "auto-update" }
+            params: {
+                envAppid: config.envAppid,
+                nodeGroup: config.nodeGroup,
+                action : "update",
+                app_id: APP_ID,
+                task: 1
+            }
         });
     };
 
@@ -878,18 +910,18 @@ function SSLManager(config) {
     };
 
     me.createScript = function createScript() {
-        var url = me.getScriptUrl("install-ssl.js"),
-            scriptName = config.scriptName,
+        var scriptName = config.scriptName,
             scriptBody,
             resp;
 
+        config.token = Random.getPswd(64);
+        config.patchVersion = patchBuild;
+
         try {
-            scriptBody = new Transport().get(url);
+            resp = me.getScriptBody("install-ssl.js");
+            if (resp.result != 0) return resp;
 
-            config.token = Random.getPswd(64);
-            config.patchVersion = patchBuild;
-
-            scriptBody = me.replaceText(scriptBody, config);
+            scriptBody = resp.scriptBody;
 
             resp = getScript(config.scriptName);
             if (resp.result == Response.OK) {
@@ -911,6 +943,23 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+
+    me.getScriptBody = function(scriptName) {
+        var url = me.getScriptUrl(scriptName),
+            scriptBody;
+
+        try {
+            scriptBody = new Transport().get(url);
+            scriptBody = me.replaceText(scriptBody, config);
+        } catch (ex) {
+            return error(Response.ERROR_UNKNOWN, toJSON(ex));
+        }
+
+        return {
+            result: 0,
+            scriptBody: scriptBody
+        }
     };
 
     me.evalScript = function evalScript(action) {
