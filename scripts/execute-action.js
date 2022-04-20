@@ -1,11 +1,18 @@
 var resp;
 
-resp = api.marketplace.app.GetAddonList(getParam("envAppid"), session, getParam("nodeGroup"), { app_id: getParam("app_id")});
+resp = api.dev.scripting.Eval("appstore", session, "GetApps", {
+        targetAppid: getParam("envAppid"),
+        search: {
+          appstore: 1,
+          app_id: getParam("app_id"),
+          nodeGroup: getParam("nodeGroup")
+        }
+      });
 if (resp.result != 0) return resp;
 
 return api.marketplace.installation.ExecuteAction({
   appid: appid,
   session: session,
-  appUniqueName: resp.apps[0].uniqueName,
+  appUniqueName: resp.response.apps[0].uniqueName,
   action: getParam("action")
 });
