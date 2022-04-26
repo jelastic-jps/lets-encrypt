@@ -15,7 +15,7 @@ if (resp.response) {
           appid: appid,
           session: session,
           appUniqueName: resp.response.apps[0].uniqueName,
-          action: getParam("action")
+          action: action
         });
     }            
 }
