@@ -1,6 +1,4 @@
-var resp;
-
-resp = api.dev.scripting.Eval("appstore", session, "GetApps", {
+var resp = api.dev.scripting.Eval("appstore", session, "GetApps", {
         targetAppid: "${envAppid}",
         search: {
           appstore: 1,
