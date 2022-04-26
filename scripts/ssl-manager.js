@@ -45,8 +45,9 @@ function SSLManager(config) {
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
+        EXEC_AUTO_UPDATE_ACTION_SCRIPT= "execute-auto-update-action.js",
+        AUTO_UPDATE_SCRIPT_NAME = config.scriptName + "-auto-update",
         SETTINGS_PATH = "opt/letsencrypt/settings",
-        APP_ID = "letsencrypt-ssl-addon",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
@@ -504,7 +505,7 @@ function SSLManager(config) {
     };
 
     me.createExecuteActionScript = function createExecuteActionScript() {
-        return me.createScript("execute-action.js", config.scriptName + "-auto-update");
+        return me.createScript(EXEC_AUTO_UPDATE_ACTION_SCRIPT, AUTO_UPDATE_SCRIPT_NAME);
     };
 
     me.checkEnvAccessAndUpdate = function (errResp) {
@@ -524,7 +525,7 @@ function SSLManager(config) {
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
-            script: config.scriptName + "-auto-update",
+            script: AUTO_UPDATE_SCRIPT_NAME,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
             params: {
@@ -888,11 +889,11 @@ function SSLManager(config) {
         return resp;
     };
 
-    me.createScript = function createScript (scriptName, CSScriptName) {
+    me.createScript = function createScript (scriptName, scriptingScriptName) {
         var scriptBody,
             resp;
 
-        CSScriptName = CSScriptName || scriptName;
+        scriptingScriptName = scriptingScriptName || scriptName;
 
         try {
             resp = me.getScriptBody(scriptName);
@@ -904,15 +905,15 @@ function SSLManager(config) {
             resp = getScript(CSScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript(appid, session, CSScriptName);
+                api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript(appid, session, CSScriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript(appid, session, scriptingScriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
-            jelastic.dev.scripting.Build(appid, session, CSScriptName);
+            jelastic.dev.scripting.Build(appid, session, scriptingScriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
