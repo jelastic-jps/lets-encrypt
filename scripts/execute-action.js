@@ -1,11 +1,11 @@
 var resp;
 
 resp = api.dev.scripting.Eval("appstore", session, "GetApps", {
-        targetAppid: getParam("envAppid"),
+        targetAppid: "${envAppid}",
         search: {
           appstore: 1,
-          app_id: getParam("app_id"),
-          nodeGroup: getParam("nodeGroup")
+          app_id: "${appId}",
+          nodeGroup: "${nodeGroup}"
         }
       });
 if (resp.result != 0) return resp;
