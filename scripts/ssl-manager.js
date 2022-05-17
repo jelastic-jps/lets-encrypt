@@ -518,7 +518,7 @@ function SSLManager(config) {
             session: session,
             script: config.scriptName,
             trigger: "once_delay:1000",
-            description: "update LE sertificate",
+            description: "update LE certificate",
             params: { token: config.token, task: 1, action : "auto-update" }
         });
     };
