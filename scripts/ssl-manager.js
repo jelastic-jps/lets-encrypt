@@ -902,7 +902,7 @@ function SSLManager(config) {
             scriptBody = resp.scriptBody;
             scriptBody = me.replaceText(scriptBody, config);
 
-            resp = getScript(CSScriptName);
+            resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
                 api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
