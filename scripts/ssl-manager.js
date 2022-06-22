@@ -321,7 +321,8 @@ function SSLManager(config) {
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
-                scriptPath : autoUpdateScript
+                scriptPath : autoUpdateScript,
+                nodeGroup: config.nodeGroup
             }],
             [ me.initAddOnExtIp, config.withExtIp ],
 
