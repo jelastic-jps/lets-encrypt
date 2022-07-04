@@ -120,7 +120,7 @@ onBeforeDelete: delete
 
 onAfterClone:
   - forEach(event.response.nodes):
-    - if ('${@i.nodeGroup}' == 'cp' || '${@i.nodeGroup}' == 'bl'):
+    - if ('${@i.nodeGroup}' == '${targetNodes.nodeGroup}' || '${@i.nodeGroup}' == 'bl'):
       - script: return jelastic.env.control.ExecCmdById('${event.response.env.envName}', session, '${@i.id}', toJSON([{ command:"crontab -l | grep -v 'auto-update-ssl-cert.sh' | crontab -;" }]), true, 'root');
   - install: ${baseUrl}/manifest.jps?_r=${fn.random}
     envName: ${event.response.env.envName}
