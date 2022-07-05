@@ -100,7 +100,7 @@ onInstall:
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
-      withExtIp: ${settings.withExtIp:false}
+      withExtIp: ${settings.withExtIp:true}
       webroot: ${settings.webroot:}
       webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:}
