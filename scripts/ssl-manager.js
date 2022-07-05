@@ -94,6 +94,7 @@ function SSLManager(config) {
     me.invoke = function (action) {
         var actions = {
             "install"     : me.install,
+            "delete"      : me.delete,
             "uninstall"   : me.uninstall,
             "auto-update" : me.autoUpdate,
             "backup-scripts": me.backupScripts,
@@ -314,6 +315,14 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+
+    me.delete = function() {
+        return me.execAll([
+            [ me.initAddOnExtIp, config.withExtIp ],
+
+            me.undeploy
+        ]);
     };
 
     me.uninstall = function () {
