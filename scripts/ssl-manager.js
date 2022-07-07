@@ -927,7 +927,7 @@ function SSLManager(config) {
         config.token = Random.getPswd(64);
         config.patchVersion = patchBuild;
 
-        resp = me.createScript("install-ssl.js");
+        resp = me.createScript("install-ssl.js", config.scriptName);
         if (resp.result != 0) return resp;
 
         if (resp.result == Response.OK) {
