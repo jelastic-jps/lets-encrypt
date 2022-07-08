@@ -446,9 +446,6 @@ function SSLManager(config) {
                 session = signature;
             }
 
-            resp = me.createExecuteActionScript();
-            if (resp.result != 0) return resp;
-
             resp = nodeManager.getEnvInfo();
 
             if (resp.result == 0) {
@@ -459,6 +456,9 @@ function SSLManager(config) {
                 return me.checkEnvAccessAndUpdate(resp);
             }
         }
+
+        resp = me.createExecuteActionScript();
+        if (resp.result != 0) return resp;
 
         if (config.patchVersion == patchBuild) {
             resp = me.install(true);
