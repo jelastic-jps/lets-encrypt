@@ -519,7 +519,10 @@ function SSLManager(config) {
             script: config.scriptName,
             trigger: "once_delay:1000",
             description: "update LE certificate",
-            params: { token: config.token, task: 1, action : "auto-update" }
+            params: {
+                action : "update",
+                task: 1
+            }
         });
     };
 
