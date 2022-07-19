@@ -110,52 +110,62 @@ onInstall:
       deployHookType: ${settings.deployHookType:}
       undeployHook: ${settings.undeployHook:}
       undeployHookType: ${settings.undeployHookType:}
-      test: ${settings.test:}
+      test: ${settings.test:true}
   - checkClustering:
       nodeGroup: ${globals.nodeGroup}
       app_id: ${globals.app_id}
   - if (globals.cluster):
+      - if (!globals.isOppositeExecuted):
+          - markExecutedEnvFile:
+              nodeGroup: ${targetNodes.nodeGroup}
+              app_id: ${globals.app_id}
+          - if (globals.isSecondaryEnv):
+              installLE:
+                envName: ${globals.primaryEnvName}
+          - else:
+              installLE:
+                envName: ${globals.secondaryEnvName}
+          - removeExecutedEnvFile:
+              nodeGroup: ${targetNodes.nodeGroup}
+              app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
-          - createScript:
-              scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
-          - return:
-              type: success
-      - else:
-        - createFile:
-            envName: ${globals.secondaryEnvName}
-            nodeGroup: ${globals.nodeGroup}
-            app_id: ${globals.app_id}
-        - installLE:
-            envName: ${globals.secondaryEnvName}
+          - createFile:
+              envName: ${globals.secondaryEnvName}
+              nodeGroup: ${globals.nodeGroup}
+              app_id: ${globals.app_id}
+          - script: |
+              return {result: 0}   
   - installScript
     
 
 onUninstall:
-  - delete
   - checkClustering:
       nodeGroup: ${globals.nodeGroup}
       app_id: letsencrypt-ssl-addon
   - if (globals.cluster):
-      - if (!globals.isSecondaryExecuted):
-          - markExecutedEnvFile:
-              nodeGroup: ${globals.nodeGroup}
-              app_id: ${globals.app_id}
-          - executeAction:
-              envName: ${globals.secondaryEnvName}
-              nodeGroup: ${globals.nodeGroup}
-              action: uninstall
-              app_id: ${globals.app_id}
-          - removeExecutedEnvFile:
-              nodeGroup: ${globals.nodeGroup}
-              app_id: ${globals.app_id}
+      - markExecutedEnvFile:
+          nodeGroup: ${targetNodes.nodeGroup}
+          app_id: ${globals.app_id}
+      - if (!globals.isOppositeExecuted):
+          - if (globals.isSecondaryEnv):
+              - executeAction:
+                  envName: ${globals.primaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: uninstall
+                  app_id: ${globals.app_id}
+          - else:
+              - executeAction:
+                  envName: ${globals.secondaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: uninstall
+                  app_id: ${globals.app_id}
+      - removeExecutedEnvFile:
+          nodeGroup: ${targetNodes.nodeGroup}
+          app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
           script: |
-            return {result: 0}
-      - else:
-          removeExecutedEnvFile:
-            nodeGroup: ${globals.nodeGroup}
-            app_id: ${globals.app_id}
-            extension: lock
+            return {result: 0}   
+  - delete
 
 onBeforeDelete: delete
 
@@ -197,36 +207,30 @@ actions:
         nodeGroup: ${globals.nodeGroup}
         app_id: ${globals.app_id}
     - if (globals.cluster):
-        - if (globals.isSecondaryEnv):
-            executeAction:
-              envName: ${globals.secondaryEnvName}
-              nodeGroup: ${globals.nodeGroup}
-              action: update
-              app_id: ${globals.app_id}
-        - else:
-            callScript:
-              action: auto-update
+      - if (globals.isSecondaryEnv):
+          executeAction:
+            envName: ${globals.primaryEnvName}
+            nodeGroup: ${globals.nodeGroup}
+            action: update
+            app_id: ${globals.app_id}
+      - else:
+          callScript:
+            action: auto-update
+    - else:
+        callScript:
+          action: auto-update
   
   configure: 
     - checkClustering:
         nodeGroup: ${globals.nodeGroup}
         app_id: letsencrypt-ssl-addon
     - if (globals.cluster):
-        - if (!globals.isSecondaryExecuted):
-            - markExecutedEnvFile:
-                nodeGroup: ${globals.nodeGroup}
-                app_id: ${globals.app_id}
-            - executeAction:
-                envName: ${globals.secondaryEnvName}
-                nodeGroup: ${globals.nodeGroup}
-                action: configure
-                app_id: ${globals.app_id}
-            - removeExecutedEnvFile:
-                nodeGroup: ${globals.nodeGroup}
-                app_id: ${globals.app_id}
         - if (globals.isSecondaryEnv):
-            return:
-              type: success
+            executeAction:
+              envName: ${globals.primaryEnvName}
+              nodeGroup: ${globals.nodeGroup}
+              action: update
+              app_id: ${globals.app_id}
     - installScript
   
   delete:
