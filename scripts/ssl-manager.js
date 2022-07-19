@@ -45,6 +45,8 @@ function SSLManager(config) {
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
+        EXEC_AUTO_UPDATE_ACTION_SCRIPT= "execute-auto-update-action.js",
+        AUTO_UPDATE_SCRIPT_NAME = config.scriptName + "-auto-update",
         SETTINGS_PATH = "opt/letsencrypt/settings",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
@@ -321,7 +323,8 @@ function SSLManager(config) {
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
-                scriptPath : autoUpdateScript
+                scriptPath : autoUpdateScript,
+                nodeGroup: config.nodeGroup
             }],
             [ me.initAddOnExtIp, config.withExtIp ],
 
@@ -444,6 +447,9 @@ function SSLManager(config) {
                 session = signature;
             }
 
+            resp = me.createExecuteActionScript();
+            if (resp.result != 0) return resp;
+
             resp = nodeManager.getEnvInfo();
 
             if (resp.result == 0) {
@@ -499,6 +505,10 @@ function SSLManager(config) {
         return { result : 0 };
     };
 
+    me.createExecuteActionScript = function createExecuteActionScript() {
+        return me.createScript(EXEC_AUTO_UPDATE_ACTION_SCRIPT, AUTO_UPDATE_SCRIPT_NAME);
+    };
+
     me.checkEnvAccessAndUpdate = function (errResp) {
         var errorMark = "session [xxx"; //mark of error access to a shared env
 
@@ -516,9 +526,9 @@ function SSLManager(config) {
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
-            script: config.scriptName,
+            script: AUTO_UPDATE_SCRIPT_NAME,
             trigger: "once_delay:1000",
-            description: "update LE certificate",
+            description: "update LE sertificate",
             params: {
                 action : "update",
                 task: 1
@@ -543,7 +553,7 @@ function SSLManager(config) {
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
-            [ me.createScript ],
+            [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
         ]);
     };
@@ -880,40 +890,70 @@ function SSLManager(config) {
         return resp;
     };
 
-    me.createScript = function createScript() {
-        var url = me.getScriptUrl("install-ssl.js"),
-            scriptName = config.scriptName,
-            scriptBody,
+    me.createScript = function createScript (scriptName, scriptingScriptName) {
+        var scriptBody,
             resp;
 
+        scriptingScriptName = scriptingScriptName || scriptName;
+
         try {
-            scriptBody = new Transport().get(url);
+            resp = me.getScriptBody(scriptName);
+            if (resp.result != 0) return resp;
 
-            config.token = Random.getPswd(64);
-            config.patchVersion = patchBuild;
-
+            scriptBody = resp.scriptBody;
             scriptBody = me.replaceText(scriptBody, config);
 
-            resp = getScript(config.scriptName);
+            resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
-                me.setAddOnAction(CONFIGURE);
-                me.logAction("StartConfigureLEUpdate");
                 //delete the script if it already exists
-                jelastic.dev.scripting.DeleteScript(scriptName);
+                api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
             }
-
             //create a new script
-            resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript(appid, session, scriptingScriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
-            jelastic.dev.scripting.Build(scriptName);
+            jelastic.dev.scripting.Build(appid, session, scriptingScriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
 
         return resp;
+    };
+
+    me.createLEScript = function createScript() {
+        var resp;
+
+        config.token = Random.getPswd(64);
+        config.patchVersion = patchBuild;
+
+        resp = me.createScript("install-ssl.js", config.scriptName);
+        if (resp.result != 0) return resp;
+
+        if (resp.result == Response.OK) {
+            me.setAddOnAction(CONFIGURE);
+            me.logAction("StartConfigureLEUpdate");
+        }
+
+        return resp;
+    };
+
+    me.getScriptBody = function(scriptName) {
+        var url = me.getScriptUrl(scriptName),
+            scriptBody;
+
+        try {
+            scriptBody = new Transport().get(url);
+            scriptBody = me.replaceText(scriptBody, config);
+        } catch (ex) {
+            return error(Response.ERROR_UNKNOWN, toJSON(ex));
+        }
+
+        return {
+            result: 0,
+            scriptBody: scriptBody
+        }
     };
 
     me.evalScript = function evalScript(action) {
@@ -1757,7 +1797,7 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
-        
+
         me.isIPv4Exists = function isIPv4Exists(node) {
             return !!(node.extIPs && node.extIPs.length);
         };
@@ -1929,7 +1969,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return jelastic.dev.scripting.GetScript(name);
+        return jelastic.dev.scripting.GetScript(appid, session, name);
     }
 
     function compareVersions(a, b) {
