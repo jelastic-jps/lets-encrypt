@@ -243,7 +243,7 @@ actions:
     envName: ${this.envName}
     nodeGroup: ${globals.nodeGroup}
     settings:
-      customDomains: ''
+      customDomains: ${settings.customDomains}
       nodeGroup: ${globals.nodeGroup}
       deployHookType: ${globals.deployHookType}
       undeployHookType: ${globals.undeployHookType}
