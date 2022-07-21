@@ -115,6 +115,11 @@ onInstall:
       nodeGroup: ${globals.nodeGroup}
       app_id: ${globals.app_id}
   - if (globals.cluster):
+      - if (globals.isSecondaryEnv):
+          - createFile:
+              envName: ${globals.secondaryEnvName}
+              nodeGroup: ${globals.nodeGroup}
+              app_id: ${globals.app_id}
       - if (!globals.isOppositeExecuted):
           - markExecutedEnvFile:
               nodeGroup: ${targetNodes.nodeGroup}
@@ -129,12 +134,8 @@ onInstall:
               nodeGroup: ${targetNodes.nodeGroup}
               app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
-          - createFile:
-              envName: ${globals.secondaryEnvName}
-              nodeGroup: ${globals.nodeGroup}
-              app_id: ${globals.app_id}
-          - script: |
-              return {result: 0}   
+          script: |
+            return {result: 0}   
   - installScript
     
 
@@ -225,12 +226,28 @@ actions:
         nodeGroup: ${globals.nodeGroup}
         app_id: letsencrypt-ssl-addon
     - if (globals.cluster):
+        - if (!globals.isOppositeExecuted):
+            - markExecutedEnvFile:
+                nodeGroup: ${targetNodes.nodeGroup}
+                app_id: ${globals.app_id}
+            - if (globals.isSecondaryEnv):
+                executeAction:
+                  envName: ${globals.primaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: configure
+                  app_id: ${globals.app_id}
+            - else:
+                executeAction:
+                  envName: ${globals.secondaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: configure
+                  app_id: ${globals.app_id}
+            - removeExecutedEnvFile:
+                nodeGroup: ${targetNodes.nodeGroup}
+                app_id: ${globals.app_id}
         - if (globals.isSecondaryEnv):
-            executeAction:
-              envName: ${globals.primaryEnvName}
-              nodeGroup: ${globals.nodeGroup}
-              action: update
-              app_id: ${globals.app_id}
+            script: |
+              return {result: 0}
     - installScript
   
   delete:
