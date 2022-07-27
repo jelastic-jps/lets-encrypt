@@ -32,6 +32,7 @@ function SSLManager(config) {
      */
 
     var Response = com.hivext.api.Response,
+        EnvResponse = com.hivext.api.environment.response.EnvironmentResponse,
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         SimpleDateFormat = java.text.SimpleDateFormat,
@@ -1369,7 +1370,7 @@ function SSLManager(config) {
                 if (resp.result != 0) return resp;
 
                 resp = me.exec(me.bindSSLCerts);
-                if (resp.result == 2352) {
+                if (resp.result == EnvResponse.ENVIRONMENT_EXT_DOMAIN_NOT_ALLOWED) {
                     resp = {
                         result: resp.result,
                         type: "warning",
