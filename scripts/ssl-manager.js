@@ -521,30 +521,34 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
-        var platformVersion = getPlatformVersion();
+        var platformVersion = getPlatformVersion(),
+            params,
+            script;
+
         me.logAction("AddLEAutoUpdateTask");
 
-        if (compareVersions(platformVersion, '7.0.0') < 0) {
-            return jelastic.utils.scheduler.AddTask({
-                appid: appid,
-                session: session,
-                script: config.scriptName,
-                trigger: "once_delay:1000",
-                description: "update LE sertificate",
-                params: { token: config.token, task: 1, action : "auto-update" }
-            });
+        if (compareVersions(platformVersion, '7.0.0') >= 0) {
+            script = AUTO_UPDATE_SCRIPT_NAME;
+            params = {
+                task: 1,
+                action: "update"
+            };
+        } else {
+            script = config.scriptName;
+            params = {
+                token: config.token,
+                task: 1,
+                action: "auto-update"
+            };
         }
 
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
-            script: AUTO_UPDATE_SCRIPT_NAME,
+            script: script,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
-            params: {
-                action : "update",
-                task: 1
-            }
+            params: params
         });
     };
 
