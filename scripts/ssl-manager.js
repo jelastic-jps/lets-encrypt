@@ -522,24 +522,18 @@ function SSLManager(config) {
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
         var platformVersion = getPlatformVersion(),
-            params,
+            params = { task: 1 },
             script;
 
         me.logAction("AddLEAutoUpdateTask");
 
         if (compareVersions(platformVersion, '7.0.0') >= 0) {
             script = AUTO_UPDATE_SCRIPT_NAME;
-            params = {
-                task: 1,
-                action: "update"
-            };
+            params.action = "update";
         } else {
             script = config.scriptName;
-            params = {
-                token: config.token,
-                task: 1,
-                action: "auto-update"
-            };
+            params.token = config.token;
+            params.action = "auto-update";
         }
 
         return jelastic.utils.scheduler.AddTask({
