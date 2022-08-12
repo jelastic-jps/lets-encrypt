@@ -115,11 +115,10 @@ onInstall:
       nodeGroup: ${globals.nodeGroup}
       app_id: ${globals.app_id}
   - if (globals.cluster):
-      - if (globals.isSecondaryEnv):
-          - createFile:
-              envName: ${globals.secondaryEnvName}
-              nodeGroup: ${globals.nodeGroup}
-              app_id: ${globals.app_id}
+      - createFile:
+          envName: ${globals.secondaryEnvName}
+          nodeGroup: ${globals.nodeGroup}
+          app_id: ${globals.app_id}
       - if (!globals.isOppositeExecuted):
           - markExecutedEnvFile:
               nodeGroup: ${targetNodes.nodeGroup}
@@ -135,8 +134,11 @@ onInstall:
               app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
           script: |
-            return {result: 0}   
-  - installScript
+            return {result: 0}  
+      - else:
+          installScript
+  - else:
+      installScript
     
 
 onUninstall:
