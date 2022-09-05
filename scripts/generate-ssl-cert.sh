@@ -4,6 +4,7 @@ LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
+TOO_MANY_FAILED_AUTH=23
 GENERAL_RESULT_ERROR=21
 TOO_MANY_CERTS=22
 WRONG_WEBROOT_ERROR=25
@@ -87,6 +88,14 @@ do
     }
 
     [[ -z $error ]] && {
+      error=$(sed -rn 's/.*(Error creating new order \:\:) (too many failed authorizations recently.*)\",/\2/p' $LOG_FILE | sed '$!d');
+      [[ ! -z $error ]] && {
+        rate_limit_auth_exceeded=true;
+        break;
+      }
+    }
+
+    [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
         rate_limit_exceeded=true;
@@ -132,6 +141,7 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
+[[ $rate_limit_auth_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_FAILED_AUTH; }
 
 #To be sure that r/w access
 mkdir -p /tmp/
