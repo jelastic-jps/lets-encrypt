@@ -1356,7 +1356,7 @@ function SSLManager(config) {
             return me.exec(me.evalCode, hookBody, config);
         }
 
-        return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { hook : hookBody });
+        return me.exec(me.cmd, "/bin/bash -c %(hook) >> %(log)", { hook : hookBody });
     };
 
     me.evalCode = function evalCode(code, params) {
