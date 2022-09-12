@@ -52,6 +52,13 @@ function run() {
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
+    
+    if (!body) {
+        return {
+            result : com.hivext.api.Response.ERROR_UNKNOWN,
+            error: "Error: Unable to get ssl-manager script from GitHub"
+        }
+    }
 
     return new (new Function("return " + body)())(config);
 }
