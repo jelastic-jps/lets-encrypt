@@ -1366,7 +1366,7 @@ function SSLManager(config) {
             return me.exec(me.evalCode, hookBody, config);
         }
 
-        return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { hook : hookBody });
+        return me.exec(me.cmd, "/bin/bash -c %(hook) >> %(log)", { hook : hookBody });
     };
 
     me.evalCode = function evalCode(code, params) {
@@ -1474,7 +1474,7 @@ function SSLManager(config) {
                 if (expiredResp.result != 0) return expiredResp;
             }
 
-            return me.sendErrResp(resp);
+            return me.sendErrResp(resp, isUpdate);
         }
 
         return me.sendEmail(
@@ -1523,7 +1523,7 @@ function SSLManager(config) {
         return !!(resp && resp.apps && resp.apps.length);
     };
 
-    me.sendErrResp = function sendErrResp(resp) {
+    me.sendErrResp = function sendErrResp(resp, isUpdate) {
         resp = resp || {};
 
         if (!me.getCustomDomains() && me.getSkippedDomains()) {
@@ -1540,7 +1540,8 @@ function SSLManager(config) {
         return me.sendEmail("Error", "html/update-error.html", {
             SUPPORT_EMAIL : SUPPORT_EMAIL,
             ENV_DOMAIN: config.envDomain,
-            RESP : resp || ""
+            RESP : resp || "",
+            TYPE: isUpdate ? "update" : "installation",
         });
     };
 
