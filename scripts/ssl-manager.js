@@ -1350,6 +1350,7 @@ function SSLManager(config) {
 
     me.evalHook = function evalHook(hook, hookType) {
         var urlRegex = new RegExp("^[a-z]+:\\/\\/"),
+            hookQuotedParts,
             hookBody;
 
         if (urlRegex.test(hook)) {
@@ -1365,8 +1366,17 @@ function SSLManager(config) {
         if (hookType == "js") {
             return me.exec(me.evalCode, hookBody, config);
         }
-
-        return me.exec(me.cmd, "/bin/bash -c %(hook) >> %(log)", { hook : hookBody });
+        
+        hookQuotedParts = hookBody.match(/^"(.*)"$|^'(.*)'$/);
+        
+        if (hookQuotedParts) {
+            hookBody = hookQuotedParts[1] || hookQuotedParts[2];
+        }
+        
+        return me.exec(me.cmd, [
+            'hook=$(cat << \'EOF\'', '%(hook)', 'EOF', ')',
+            'test -f "${hook}" && /bin/bash "${hook}" >> %(log) || /bin/bash -c "${hook}" >> %(log)'
+        ].join('\n'), { hook : hookBody });
     };
 
     me.evalCode = function evalCode(code, params) {
