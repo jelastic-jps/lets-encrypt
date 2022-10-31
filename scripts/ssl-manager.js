@@ -199,6 +199,7 @@ function SSLManager(config) {
         var skippedDomains = me.getSkippedDomains();
 
         if (skippedDomains) {
+            resp.skipped = me.formatDomains(skippedDomains) || "";
             skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
         }
 
