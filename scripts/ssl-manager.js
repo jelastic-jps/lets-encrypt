@@ -145,7 +145,16 @@ function SSLManager(config) {
         me.exec(me.sendResp, resp, isUpdate);
         me.exec(me.checkSkippedDomainsInSuccess, resp);
 
-        return resp;
+        api.marketplace.console.WriteLog("me.getSkippedDomains() 11->" + me.getSkippedDomains());
+        api.marketplace.console.WriteLog("me.getSkippedDomains().split 1121->" + me.getSkippedDomains().split(" "));
+        api.marketplace.console.WriteLog("me.getSkip->");
+        return {
+            type: "success",
+            // message: "return",
+            data: {
+                skippedDomains: me.getSkippedDomains().split(" ")
+            }
+        }
     };
 
     me.parseDate = function(date) {
