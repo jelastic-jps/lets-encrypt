@@ -52,7 +52,7 @@ function SSLManager(config) {
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
         DATE_FORMAT = "yyyy-MM-dd HH:mm:ss",
-        SEPARATOR = " ",
+        DOMAIN_SEP = " ",
         CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
@@ -211,7 +211,7 @@ function SSLManager(config) {
     }
 
     me.checkSkippedDomainsInSuccess = function checkSkippedDomainsInSuccess(resp) {
-        var skippedDomains = me.getSkippedDomains().join(SEPARATOR);
+        var skippedDomains = me.getSkippedDomains().join(DOMAIN_SEP);
 
         if (skippedDomains) {
             skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
@@ -281,7 +281,7 @@ function SSLManager(config) {
         resp = resp.out.replace(/\'/g, "").split("\n");
 
         me.setCustomDomains(resp[0]);
-        me.setSkippedDomains(resp[1].split(" "));
+        me.setSkippedDomains(resp[1].split(DOMAIN_SEP));
 
         return {
             result: 0
@@ -354,7 +354,7 @@ function SSLManager(config) {
                     nodeManager.getScriptPath(INSTALL_LE_SCRIPT),
                     nodeManager.getScriptPath(VALIDATION_SCRIPT),
                     autoUpdateScript
-                ].join(SEPARATOR)
+                ].join(DOMAIN_SEP)
             }]
         ]);
     };
@@ -607,7 +607,7 @@ function SSLManager(config) {
                 }
             }
 
-            me.setCustomDomains(domains.join(SEPARATOR));
+            me.setCustomDomains(domains.join(DOMAIN_SEP));
         }
 
         return { result : 0 };
@@ -1023,7 +1023,7 @@ function SSLManager(config) {
             customDomains = me.getCustomDomains();
 
         if (customDomains) {
-            customDomains = me.parseDomains(customDomains).join(SEPARATOR);
+            customDomains = me.parseDomains(customDomains).join(DOMAIN_SEP);
         }
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
@@ -1223,7 +1223,7 @@ function SSLManager(config) {
 
     me.getOnlyCustomDomains = function () {
         var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
-        return String(java.lang.String(config.customDomains.replace(regex, SEPARATOR)).trim());
+        return String(java.lang.String(config.customDomains.replace(regex, DOMAIN_SEP)).trim());
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl(ancientPython) {
@@ -1494,7 +1494,7 @@ function SSLManager(config) {
             skippedDomains = me.getSkippedDomains(),
             expiredResp;
 
-        skippedDomains = skippedDomains.join(SEPARATOR);
+        skippedDomains = skippedDomains.join(DOMAIN_SEP);
 
         if (resp.result != 0) {
             if (isUpdate) {
@@ -1552,7 +1552,7 @@ function SSLManager(config) {
     };
 
     me.sendErrResp = function sendErrResp(resp, isUpdate) {
-        var skippedDomains = me.getSkippedDomains().join(SEPARATOR);
+        var skippedDomains = me.getSkippedDomains().join(DOMAIN_SEP);
         resp = resp || {};
 
         if (!me.getCustomDomains() && skippedDomains) {
