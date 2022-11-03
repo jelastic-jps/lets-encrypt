@@ -758,7 +758,7 @@ function SSLManager(config) {
         }
 
         me.setSkippedDomains(busyDomains);
-        me.setCustomDomains(readyToGenerate);
+        me.setCustomDomains(readyToGenerate.join(DOMAIN_SEP));
 
         if (freeDomains.length) {
             return jelastic.env.binder.BindExtDomains({
