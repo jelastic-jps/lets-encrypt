@@ -149,10 +149,10 @@ function SSLManager(config) {
         return {
             result: 0,
             "onAfterReturn": [{
-                    "setGlobals": {
-                        skippedDomainsText: resp.skippedDomains || ""
-                    }
-                },{
+                "setGlobals": {
+                    skippedDomainsText: resp.skippedDomains || ""
+                 }
+            },{
                 "return": {
                     type: "success",
                     data: {
