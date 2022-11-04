@@ -85,6 +85,11 @@ do
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
+    
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*\s(.*)(Fetching https?:\/\/.*): Error getting validation data.*/\2/p' $LOG_FILE | sed '$!d')
+      invalid_domain=$(echo $error | sed -rn 's/Fetching https?:\/\/(.*)\/.well-known.*/\1/p')
+    }
 
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');

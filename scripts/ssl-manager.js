@@ -52,6 +52,7 @@ function SSLManager(config) {
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
         DATE_FORMAT = "yyyy-MM-dd HH:mm:ss",
+        DOMAINS_SEP = " ",
         CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
@@ -145,7 +146,21 @@ function SSLManager(config) {
         me.exec(me.sendResp, resp, isUpdate);
         me.exec(me.checkSkippedDomainsInSuccess, resp);
 
-        return resp;
+        return {
+            result: 0,
+            "onAfterReturn": [{
+                "setGlobals": {
+                    skippedDomainsText: resp.skippedDomains || ""
+                 }
+            },{
+                "return": {
+                    type: "success",
+                    data: {
+                        skippedDomains: me.getSkippedDomains()
+                    }
+                }
+            }]
+        }
     };
 
     me.parseDate = function(date) {
@@ -196,7 +211,7 @@ function SSLManager(config) {
     }
 
     me.checkSkippedDomainsInSuccess = function checkSkippedDomainsInSuccess(resp) {
-        var skippedDomains = me.getSkippedDomains();
+        var skippedDomains = me.getSkippedDomains().join(DOMAINS_SEP);
 
         if (skippedDomains) {
             skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
@@ -266,7 +281,7 @@ function SSLManager(config) {
         resp = resp.out.replace(/\'/g, "").split("\n");
 
         me.setCustomDomains(resp[0]);
-        me.setSkippedDomains(resp[1]);
+        me.setSkippedDomains(resp[1].split(DOMAINS_SEP));
 
         return {
             result: 0
@@ -339,7 +354,7 @@ function SSLManager(config) {
                     nodeManager.getScriptPath(INSTALL_LE_SCRIPT),
                     nodeManager.getScriptPath(VALIDATION_SCRIPT),
                     autoUpdateScript
-                ].join(" ")
+                ].join(DOMAINS_SEP)
             }]
         ]);
     };
@@ -555,7 +570,7 @@ function SSLManager(config) {
     };
 
     me.createScriptAndInstall = function createInstallationScript() {
-        return me.exec([
+        var resp =  me.exec([
             [ me.initCustomConfigs ],
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
@@ -566,6 +581,8 @@ function SSLManager(config) {
             [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
         ]);
+        if (resp.result != 0) return resp;
+        return resp.response;
     };
 
     me.parseDomains = function (domains) {
@@ -590,7 +607,7 @@ function SSLManager(config) {
                 }
             }
 
-            me.setCustomDomains(domains.join(" "));
+            me.setCustomDomains(domains.join(DOMAINS_SEP));
         }
 
         return { result : 0 };
@@ -609,7 +626,7 @@ function SSLManager(config) {
     };
 
     me.getSkippedDomains = function () {
-        return config.skippedDomains || "";
+        return config.skippedDomains || [];
     };
 
     me.formatDomains = function (domains, bList) {
@@ -740,8 +757,8 @@ function SSLManager(config) {
             }
         }
 
-        me.setSkippedDomains(busyDomains.join(" "));
-        me.setCustomDomains(readyToGenerate.join(" "));
+        me.setSkippedDomains(busyDomains);
+        me.setCustomDomains(readyToGenerate.join(DOMAINS_SEP));
 
         if (freeDomains.length) {
             return jelastic.env.binder.BindExtDomains({
@@ -1003,11 +1020,10 @@ function SSLManager(config) {
     me.generateSslConfig = function generateSslConfig() {
         var primaryDomain = window.location.host,
             envDomain = config.envDomain,
-            skippedDomains = me.getSkippedDomains(),
             customDomains = me.getCustomDomains();
 
         if (customDomains) {
-            customDomains = me.parseDomains(customDomains).join(" ");
+            customDomains = me.parseDomains(customDomains).join(DOMAINS_SEP);
         }
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
@@ -1207,7 +1223,7 @@ function SSLManager(config) {
 
     me.getOnlyCustomDomains = function () {
         var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
-        return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
+        return String(java.lang.String(config.customDomains.replace(regex, DOMAINS_SEP)).trim());
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl(ancientPython) {
@@ -1478,6 +1494,8 @@ function SSLManager(config) {
             skippedDomains = me.getSkippedDomains(),
             expiredResp;
 
+        skippedDomains = skippedDomains.join(DOMAINS_SEP);
+
         if (resp.result != 0) {
             if (isUpdate) {
                 expiredResp = me.exec(me.checkUpdateExpiration);
@@ -1534,10 +1552,11 @@ function SSLManager(config) {
     };
 
     me.sendErrResp = function sendErrResp(resp, isUpdate) {
+        var skippedDomains = me.getSkippedDomains().join(DOMAINS_SEP);
         resp = resp || {};
 
-        if (!me.getCustomDomains() && me.getSkippedDomains()) {
-            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(me.getSkippedDomains()) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt</a> settings.<br><br>" +
+        if (!me.getCustomDomains() && skippedDomains) {
+            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(skippedDomains) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt</a> settings.<br><br>" +
                 "If you no longer require SSL certificates within the <b>" + config.envDomain + "</b> environment, remove the Let's Encrypt add-on to stop receiving this error message.";
         } else {
             resp = {
