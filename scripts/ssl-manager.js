@@ -45,11 +45,14 @@ function SSLManager(config) {
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
         AUTO_UPDATE_SCRIPT = "auto-update-ssl-cert.sh",
+        EXEC_AUTO_UPDATE_ACTION_SCRIPT= "execute-auto-update-action.js",
+        AUTO_UPDATE_SCRIPT_NAME = config.scriptName + "-auto-update",
         SETTINGS_PATH = "opt/letsencrypt/settings",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
         SUPPORT_EMAIL = "support@jelastic.com",
         DATE_FORMAT = "yyyy-MM-dd HH:mm:ss",
+        DOMAINS_SEP = " ",
         CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
@@ -143,7 +146,21 @@ function SSLManager(config) {
         me.exec(me.sendResp, resp, isUpdate);
         me.exec(me.checkSkippedDomainsInSuccess, resp);
 
-        return resp;
+        return {
+            result: 0,
+            "onAfterReturn": [{
+                "setGlobals": {
+                    skippedDomainsText: resp.skippedDomains || ""
+                 }
+            },{
+                "return": {
+                    type: "success",
+                    data: {
+                        skippedDomains: me.getSkippedDomains()
+                    }
+                }
+            }]
+        }
     };
 
     me.parseDate = function(date) {
@@ -194,7 +211,7 @@ function SSLManager(config) {
     }
 
     me.checkSkippedDomainsInSuccess = function checkSkippedDomainsInSuccess(resp) {
-        var skippedDomains = me.getSkippedDomains();
+        var skippedDomains = me.getSkippedDomains().join(DOMAINS_SEP);
 
         if (skippedDomains) {
             skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
@@ -264,7 +281,7 @@ function SSLManager(config) {
         resp = resp.out.replace(/\'/g, "").split("\n");
 
         me.setCustomDomains(resp[0]);
-        me.setSkippedDomains(resp[1]);
+        me.setSkippedDomains(resp[1].split(DOMAINS_SEP));
 
         return {
             result: 0
@@ -321,7 +338,8 @@ function SSLManager(config) {
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
-                scriptPath : autoUpdateScript
+                scriptPath : autoUpdateScript,
+                nodeGroup: config.nodeGroup
             }],
             [ me.initAddOnExtIp, config.withExtIp ],
 
@@ -336,7 +354,7 @@ function SSLManager(config) {
                     nodeManager.getScriptPath(INSTALL_LE_SCRIPT),
                     nodeManager.getScriptPath(VALIDATION_SCRIPT),
                     autoUpdateScript
-                ].join(" ")
+                ].join(DOMAINS_SEP)
             }]
         ]);
     };
@@ -444,6 +462,9 @@ function SSLManager(config) {
                 session = signature;
             }
 
+            resp = me.createExecuteActionScript();
+            if (resp.result != 0) return resp;
+
             resp = nodeManager.getEnvInfo();
 
             if (resp.result == 0) {
@@ -499,6 +520,10 @@ function SSLManager(config) {
         return { result : 0 };
     };
 
+    me.createExecuteActionScript = function createExecuteActionScript() {
+        return me.createScript(EXEC_AUTO_UPDATE_ACTION_SCRIPT, AUTO_UPDATE_SCRIPT_NAME);
+    };
+
     me.checkEnvAccessAndUpdate = function (errResp) {
         var errorMark = "session [xxx"; //mark of error access to a shared env
 
@@ -511,15 +536,28 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
+        var platformVersion = getPlatformVersion(),
+            params = { task: 1 },
+            script;
+
         me.logAction("AddLEAutoUpdateTask");
+
+        if (compareVersions(platformVersion, '7.0.0') >= 0) {
+            script = AUTO_UPDATE_SCRIPT_NAME;
+            params.action = "update";
+        } else {
+            script = config.scriptName;
+            params.token = config.token;
+            params.action = "auto-update";
+        }
 
         return jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
-            script: config.scriptName,
+            script: script,
             trigger: "once_delay:1000",
             description: "update LE sertificate",
-            params: { token: config.token, task: 1, action : "auto-update" }
+            params: params
         });
     };
 
@@ -532,7 +570,7 @@ function SSLManager(config) {
     };
 
     me.createScriptAndInstall = function createInstallationScript() {
-        return me.exec([
+        var resp =  me.exec([
             [ me.initCustomConfigs ],
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
@@ -540,9 +578,11 @@ function SSLManager(config) {
             [ me.applyCustomDomains, config.customDomains ],
             [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
-            [ me.createScript ],
+            [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
         ]);
+        if (resp.result != 0) return resp;
+        return resp.response;
     };
 
     me.parseDomains = function (domains) {
@@ -567,7 +607,7 @@ function SSLManager(config) {
                 }
             }
 
-            me.setCustomDomains(domains.join(" "));
+            me.setCustomDomains(domains.join(DOMAINS_SEP));
         }
 
         return { result : 0 };
@@ -586,7 +626,7 @@ function SSLManager(config) {
     };
 
     me.getSkippedDomains = function () {
-        return config.skippedDomains || "";
+        return config.skippedDomains || [];
     };
 
     me.formatDomains = function (domains, bList) {
@@ -717,8 +757,8 @@ function SSLManager(config) {
             }
         }
 
-        me.setSkippedDomains(busyDomains.join(" "));
-        me.setCustomDomains(readyToGenerate.join(" "));
+        me.setSkippedDomains(busyDomains);
+        me.setCustomDomains(readyToGenerate.join(DOMAINS_SEP));
 
         if (freeDomains.length) {
             return jelastic.env.binder.BindExtDomains({
@@ -877,40 +917,70 @@ function SSLManager(config) {
         return resp;
     };
 
-    me.createScript = function createScript() {
-        var url = me.getScriptUrl("install-ssl.js"),
-            scriptName = config.scriptName,
-            scriptBody,
+    me.createScript = function createScript (scriptName, scriptingScriptName) {
+        var scriptBody,
             resp;
 
+        scriptingScriptName = scriptingScriptName || scriptName;
+
         try {
-            scriptBody = new Transport().get(url);
+            resp = me.getScriptBody(scriptName);
+            if (resp.result != 0) return resp;
 
-            config.token = Random.getPswd(64);
-            config.patchVersion = patchBuild;
-
+            scriptBody = resp.scriptBody;
             scriptBody = me.replaceText(scriptBody, config);
 
-            resp = getScript(config.scriptName);
+            resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
-                me.setAddOnAction(CONFIGURE);
-                me.logAction("StartConfigureLEUpdate");
                 //delete the script if it already exists
-                jelastic.dev.scripting.DeleteScript(scriptName);
+                api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
             }
-
             //create a new script
-            resp = jelastic.dev.scripting.CreateScript(scriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript(appid, session, scriptingScriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
-            jelastic.dev.scripting.Build(scriptName);
+            jelastic.dev.scripting.Build(appid, session, scriptingScriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
 
         return resp;
+    };
+
+    me.createLEScript = function createScript() {
+        var resp;
+
+        config.token = Random.getPswd(64);
+        config.patchVersion = patchBuild;
+
+        resp = me.createScript("install-ssl.js", config.scriptName);
+        if (resp.result != 0) return resp;
+
+        if (resp.result == Response.OK) {
+            me.setAddOnAction(CONFIGURE);
+            me.logAction("StartConfigureLEUpdate");
+        }
+
+        return resp;
+    };
+
+    me.getScriptBody = function(scriptName) {
+        var url = me.getScriptUrl(scriptName),
+            scriptBody;
+
+        try {
+            scriptBody = new Transport().get(url);
+            scriptBody = me.replaceText(scriptBody, config);
+        } catch (ex) {
+            return error(Response.ERROR_UNKNOWN, toJSON(ex));
+        }
+
+        return {
+            result: 0,
+            scriptBody: scriptBody
+        }
     };
 
     me.evalScript = function evalScript(action) {
@@ -950,11 +1020,10 @@ function SSLManager(config) {
     me.generateSslConfig = function generateSslConfig() {
         var primaryDomain = window.location.host,
             envDomain = config.envDomain,
-            skippedDomains = me.getSkippedDomains(),
             customDomains = me.getCustomDomains();
 
         if (customDomains) {
-            customDomains = me.parseDomains(customDomains).join(" ");
+            customDomains = me.parseDomains(customDomains).join(DOMAINS_SEP);
         }
 
         return nodeManager.cmd('printf "%(params)" > %(path)', {
@@ -1154,7 +1223,7 @@ function SSLManager(config) {
 
     me.getOnlyCustomDomains = function () {
         var regex = new RegExp("\\s*" + config.envDomain + "\\s*");
-        return String(java.lang.String(config.customDomains.replace(regex, " ")).trim());
+        return String(java.lang.String(config.customDomains.replace(regex, DOMAINS_SEP)).trim());
     };
 
     me.tryRegenerateSsl = function tryRegenerateSsl(ancientPython) {
@@ -1297,6 +1366,7 @@ function SSLManager(config) {
 
     me.evalHook = function evalHook(hook, hookType) {
         var urlRegex = new RegExp("^[a-z]+:\\/\\/"),
+            hookQuotedParts,
             hookBody;
 
         if (urlRegex.test(hook)) {
@@ -1312,8 +1382,17 @@ function SSLManager(config) {
         if (hookType == "js") {
             return me.exec(me.evalCode, hookBody, config);
         }
-
-        return me.exec(me.cmd, "/bin/bash %(hook) >> %(log)", { hook : hookBody });
+        
+        hookQuotedParts = hookBody.match(/^"(.*)"$|^'(.*)'$/);
+        
+        if (hookQuotedParts) {
+            hookBody = hookQuotedParts[1] || hookQuotedParts[2];
+        }
+        
+        return me.exec(me.cmd, [
+            'hook=$(cat << \'EOF\'', '%(hook)', 'EOF', ')',
+            'test -f "${hook}" && /bin/bash "${hook}" >> %(log) || /bin/bash -c "${hook}" >> %(log)'
+        ].join('\n'), { hook : hookBody });
     };
 
     me.evalCode = function evalCode(code, params) {
@@ -1415,13 +1494,15 @@ function SSLManager(config) {
             skippedDomains = me.getSkippedDomains(),
             expiredResp;
 
+        skippedDomains = skippedDomains.join(DOMAINS_SEP);
+
         if (resp.result != 0) {
             if (isUpdate) {
                 expiredResp = me.exec(me.checkUpdateExpiration);
                 if (expiredResp.result != 0) return expiredResp;
             }
 
-            return me.sendErrResp(resp);
+            return me.sendErrResp(resp, isUpdate);
         }
 
         return me.sendEmail(
@@ -1470,11 +1551,12 @@ function SSLManager(config) {
         return !!(resp && resp.apps && resp.apps.length);
     };
 
-    me.sendErrResp = function sendErrResp(resp) {
+    me.sendErrResp = function sendErrResp(resp, isUpdate) {
+        var skippedDomains = me.getSkippedDomains().join(DOMAINS_SEP);
         resp = resp || {};
 
-        if (!me.getCustomDomains() && me.getSkippedDomains()) {
-            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(me.getSkippedDomains()) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt</a> settings.<br><br>" +
+        if (!me.getCustomDomains() && skippedDomains) {
+            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(skippedDomains) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt</a> settings.<br><br>" +
                 "If you no longer require SSL certificates within the <b>" + config.envDomain + "</b> environment, remove the Let's Encrypt add-on to stop receiving this error message.";
         } else {
             resp = {
@@ -1487,7 +1569,8 @@ function SSLManager(config) {
         return me.sendEmail("Error", "html/update-error.html", {
             SUPPORT_EMAIL : SUPPORT_EMAIL,
             ENV_DOMAIN: config.envDomain,
-            RESP : resp || ""
+            RESP : resp || "",
+            TYPE: isUpdate ? "update" : "installation",
         });
     };
 
@@ -1754,7 +1837,7 @@ function SSLManager(config) {
 
             return { result : 0, node : node };
         };
-        
+
         me.isIPv4Exists = function isIPv4Exists(node) {
             return !!(node.extIPs && node.extIPs.length);
         };
@@ -1926,7 +2009,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return jelastic.dev.scripting.GetScript(name);
+        return jelastic.dev.scripting.GetScript(appid, session, name);
     }
 
     function compareVersions(a, b) {
