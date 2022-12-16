@@ -571,12 +571,7 @@ function SSLManager(config) {
 
     me.createScriptAndInstall = function createInstallationScript() {
         var resp =  me.exec([
-            [ me.initCustomConfigs ],
-            [ me.initAddOnExtIp, config.withExtIp ],
-            [ me.initWebrootMethod, config.webroot ],
-            [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
-            [ me.initEntryPoint ],
             [ me.validateEntryPoint ],
             [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
@@ -757,6 +752,9 @@ function SSLManager(config) {
             }
         }
 
+        log("busyDomains->" + busyDomains);
+        log("readyToGenerate->" + readyToGenerate);
+        log("freeDomains->" + freeDomains);
         me.setSkippedDomains(busyDomains);
         me.setCustomDomains(readyToGenerate.join(DOMAINS_SEP));
 
