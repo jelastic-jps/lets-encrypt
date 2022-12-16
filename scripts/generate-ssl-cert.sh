@@ -74,6 +74,7 @@ do
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*\s(.*)(Invalid response from https?:\/\/.*).*/\2/p' $LOG_FILE | sed '$!d')
       [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's|(.+)addressesResolved|\1|p' | sed -rn 's|(.+)hostname.*|\1|p' | sed -rn 's|.*hostname\"\:\"([^\"]*).*|\1|p')
+      [[ -z $invalid_domain ]] && invalid_domain=$(echo $error | sed -rn 's|(.+)addressesResolved|\1|p' | sed -rn 's|.*hostname\":\"(.*)|\1|p' | sed -rn 's|\",.*||p')
     }
 
     [[ -z $error ]] && {
@@ -85,7 +86,7 @@ do
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
-    
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*\s(.*)(Fetching https?:\/\/.*): Error getting validation data.*/\2/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Fetching https?:\/\/(.*)\/.well-known.*/\1/p')
@@ -97,6 +98,11 @@ do
         rate_limit_exceeded=true;
         break;
       }
+    }
+
+    [[ -z $error ]] && {
+        error=$(sed -rn 's/.*\s.*(no valid A records found for.*);.*/\1/p' $LOG_FILE | sed '$!d')
+        [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/no valid A records found for (.*)$/\1/p')
     }
 
     all_invalid_domains_errors+=$error";"
