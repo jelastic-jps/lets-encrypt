@@ -572,7 +572,6 @@ function SSLManager(config) {
     me.createScriptAndInstall = function createInstallationScript() {
         var resp =  me.exec([
             [ me.applyCustomDomains, config.customDomains ],
-            [ me.validateEntryPoint ],
             [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
         ]);
