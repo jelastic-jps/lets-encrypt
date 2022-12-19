@@ -571,13 +571,7 @@ function SSLManager(config) {
 
     me.createScriptAndInstall = function createInstallationScript() {
         var resp =  me.exec([
-            [ me.initCustomConfigs ],
-            [ me.initAddOnExtIp, config.withExtIp ],
-            [ me.initWebrootMethod, config.webroot ],
-            [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
-            [ me.initEntryPoint ],
-            [ me.validateEntryPoint ],
             [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
         ]);
@@ -749,7 +743,10 @@ function SSLManager(config) {
                 continue;
             }
 
-            if (me.isBusyExtDomain(domain)) {
+            resp = me.isBusyExtDomain(domain);
+            if (resp.result != 0) return resp;
+
+            if (resp.isBusy) {
                 busyDomains.push(domain);
             } else {
                 readyToGenerate.push(domain);
@@ -757,7 +754,7 @@ function SSLManager(config) {
             }
         }
 
-        me.setSkippedDomains(busyDomains);
+        me.setSkippedDomains(busyDomains.join(DOMAINS_SEP));
         me.setCustomDomains(readyToGenerate.join(DOMAINS_SEP));
 
         if (freeDomains.length) {
@@ -780,9 +777,12 @@ function SSLManager(config) {
             session: session,
             extdomain: domain
         });
-
         if (resp.result != 0 && resp.result != BUSY_RESULT) return resp;
-        return !!(resp.result == BUSY_RESULT);
+
+        return {
+            result: 0,
+            isBusy: !!(resp.result == BUSY_RESULT)
+        };
     };
 
     me.initEntryPoint = function initEntryPoint() {
