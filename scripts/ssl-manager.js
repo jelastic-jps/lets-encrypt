@@ -751,10 +751,10 @@ function SSLManager(config) {
             }
         }
 
-        log("busyDomains->" + busyDomains);
+        log("busyDomains2->" + busyDomains);
         log("readyToGenerate->" + readyToGenerate);
         log("freeDomains->" + freeDomains);
-        me.setSkippedDomains(busyDomains);
+        me.setSkippedDomains(busyDomains.join(DOMAINS_SEP));
         me.setCustomDomains(readyToGenerate.join(DOMAINS_SEP));
 
         if (freeDomains.length) {
