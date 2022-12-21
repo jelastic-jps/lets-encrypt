@@ -60,9 +60,11 @@ description:
 
 globals:
   scriptSufix: letsencrypt-ssl
+  app_id: letsencrypt-ssl-addon
   
 mixins:
   - configs/vers.yaml
+  - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
 
 settings:
   fields:
@@ -111,29 +113,70 @@ onInstall:
       undeployHook: ${settings.undeployHook:}
       undeployHookType: ${settings.undeployHookType:}
       test: ${settings.test:}
-  - installScript
+  - checkClustering:
+      nodeGroup: ${globals.nodeGroup}
+      app_id: ${globals.app_id}
+  - if (globals.cluster):
+      - createFile:
+          envName: ${globals.secondaryEnvName}
+          nodeGroup: ${globals.nodeGroup}
+          app_id: ${globals.app_id}
+      - if (!globals.isOppositeExecuted):
+          - markExecutedEnvFile:
+              nodeGroup: ${targetNodes.nodeGroup}
+              app_id: ${globals.app_id}
+          - if (globals.isSecondaryEnv):
+              installLE:
+                envName: ${globals.primaryEnvName}
+          - else:
+              installLE:
+                envName: ${globals.secondaryEnvName}
+          - removeExecutedEnvFile:
+              nodeGroup: ${targetNodes.nodeGroup}
+              app_id: ${globals.app_id}
+      - if (globals.isSecondaryEnv):
+          script: |
+            return {result: 0}  
+      - else:
+          installScript
+  - else:
+      installScript
+    
 
 onUninstall:
-  - callScript:
-      action: uninstall
+  - checkClustering:
+      nodeGroup: ${globals.nodeGroup}
+      app_id: letsencrypt-ssl-addon
+  - if (globals.cluster):
+      - markExecutedEnvFile:
+          nodeGroup: ${targetNodes.nodeGroup}
+          app_id: ${globals.app_id}
+      - if (!globals.isOppositeExecuted):
+          - if (globals.isSecondaryEnv):
+              - executeAction:
+                  envName: ${globals.primaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: uninstall
+                  app_id: ${globals.app_id}
+          - else:
+              - executeAction:
+                  envName: ${globals.secondaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: uninstall
+                  app_id: ${globals.app_id}
+      - removeExecutedEnvFile:
+          nodeGroup: ${targetNodes.nodeGroup}
+          app_id: ${globals.app_id}
+      - if (globals.isSecondaryEnv):
+          script: |
+            return {result: 0}   
   - delete
 
 onBeforeDelete: delete
 
 onAfterClone:
-  install: ${baseUrl}/manifest.jps?_r=${fn.random}
-  envName: ${event.response.env.envName}
-  nodeGroup: ${globals.nodeGroup}
-  settings:
-    customDomains: ''
-    nodeGroup: ${globals.nodeGroup}
-    deployHookType: ${globals.deployHookType}
-    undeployHookType: ${globals.undeployHookType}
-    withExtIp: ${globals.withExtIp}
-    webroot: ${globals.webroot}
-    webrootPath: ${globals.webrootPath}
-    fallbackToX1: ${globals.fallbackToX1}
-    test: ${globals.test}
+  installLE:
+    envName: ${event.response.env.envName}
 
 onAfterConfirmTransfer: installScript
 
@@ -157,18 +200,82 @@ actions:
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
       clientVersion: ${globals.version_acme-sh:}
+  
   callScript:
     script: |
       var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
+  
   update:
-    - callScript:
-        action: auto-update
-  configure: installScript
+    - checkClustering:
+        nodeGroup: ${globals.nodeGroup}
+        app_id: ${globals.app_id}
+    - if (globals.cluster):
+      - if (globals.isSecondaryEnv):
+          executeAction:
+            envName: ${globals.primaryEnvName}
+            nodeGroup: ${globals.nodeGroup}
+            action: update
+            app_id: ${globals.app_id}
+      - else:
+          callScript:
+            action: auto-update
+    - else:
+        callScript:
+          action: auto-update
+  
+  configure: 
+    - checkClustering:
+        nodeGroup: ${globals.nodeGroup}
+        app_id: letsencrypt-ssl-addon
+    - if (globals.cluster):
+        - if (!globals.isOppositeExecuted):
+            - markExecutedEnvFile:
+                nodeGroup: ${targetNodes.nodeGroup}
+                app_id: ${globals.app_id}
+            - if (globals.isSecondaryEnv):
+                executeAction:
+                  envName: ${globals.primaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: configure
+                  app_id: ${globals.app_id}
+            - else:
+                executeAction:
+                  envName: ${globals.secondaryEnvName}
+                  nodeGroup: ${globals.nodeGroup}
+                  action: configure
+                  app_id: ${globals.app_id}
+            - removeExecutedEnvFile:
+                nodeGroup: ${targetNodes.nodeGroup}
+                app_id: ${globals.app_id}
+        - if (globals.isSecondaryEnv):
+            script: |
+              return {result: 0}
+    - installScript
+  
   delete:
     script: |
       jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
+      
+  installLE:
+    install: ${baseUrl}/manifest.jps
+    envName: ${this.envName}
+    nodeGroup: ${globals.nodeGroup}
+    settings:
+      customDomains: ${settings.customDomains}
+      nodeGroup: ${globals.nodeGroup}
+      deployHookType: ${globals.deployHookType}
+      undeployHookType: ${globals.undeployHookType}
+      withExtIp: ${globals.withExtIp}
+      webroot: ${globals.webroot}
+      webrootPath: ${globals.webrootPath}
+      fallbackToX1: ${globals.fallbackToX1}
+      test: ${globals.test}
+      
+  createScript:
+    script: |
+      return jelastic.dev.scripting.CreateScript("${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md
