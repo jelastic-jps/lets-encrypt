@@ -78,6 +78,10 @@ settings:
         Each of the specified external domains should be preliminarily bound via DNS record to the external IP of the node where add-on is installed (either directly via <a href="https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record" target="_blank">A Record</a> or through CDN / external balancer proxy).<br><br>
         <b>Note:</b> Leave this field blank for issuing a test SSL certificate bound to the internal environment domain.
 
+responses:
+  undefined:
+    result: 0
+
 onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
     action: backup-scripts
