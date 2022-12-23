@@ -35,6 +35,7 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         SimpleDateFormat = java.text.SimpleDateFormat,
+        FEATURE_CUSTOM_RESPONSE_DATA_VERSION = '8.1.1',
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         WRONG_DNS_CUSTOM_DOMAINS = 12001,
         RATE_LIMIT_EXCEEDED = 12002,
@@ -137,7 +138,8 @@ function SSLManager(config) {
                 [ me.validateEntryPoint ],
                 [ me.generateSslCerts ]
             ]),
-            versionInfo;
+            versionInfo,
+            skippedDomainTextGlobal;
 
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
@@ -151,24 +153,31 @@ function SSLManager(config) {
         versionInfo = getPlatformVersion();
         if (versionInfo.result != 0) return versionInfo;
 
-        if (compareVersions(versionInfo.version, '8.1.1') < 0) {
-            return resp;
+        skippedDomainTextGlobal = {
+            "setGlobals": {
+                skippedDomainsText: resp.skippedDomains || ""
+            }
+        };
+
+        if (compareVersions(versionInfo.version, FEATURE_CUSTOM_RESPONSE_DATA_VERSION) < 0) {
+            return {
+                result: 0,
+                "onAfterReturn": skippedDomainTextGlobal
+            };
         }
 
         return {
             result: 0,
-            "onAfterReturn": [{
-                "setGlobals": {
-                    skippedDomainsText: resp.skippedDomains || ""
-                 }
-            },{
-                "return": {
-                    type: "success",
-                    data: {
-                        skippedDomains: me.getSkippedDomains()
+            "onAfterReturn": [
+                skippedDomainTextGlobal,
+                {
+                    "return": {
+                        type: "success",
+                        data: {
+                            skippedDomains: me.getSkippedDomains()
+                        }
                     }
-                }
-            }]
+                }]
         }
     };
 
@@ -463,7 +472,7 @@ function SSLManager(config) {
         resp = getPlatformVersion();
         if (resp.result != 0) return resp;
 
-        if (resp.version < "4.9.5") {
+        if (compareVersions(resp.version, "4.9.5") < 0) {
             return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
         }
 
