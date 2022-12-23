@@ -136,7 +136,8 @@ function SSLManager(config) {
             [ me.generateSslConfig, isUpdate ],
             [ me.validateEntryPoint ],
             [ me.generateSslCerts ]
-        ]);
+        ]),
+        versionInfo;
 
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
@@ -145,6 +146,14 @@ function SSLManager(config) {
 
         me.exec(me.sendResp, resp, isUpdate);
         me.exec(me.checkSkippedDomainsInSuccess, resp);
+        if (resp.result != 0) return resp;
+
+        versionInfo = getPlatformVersion();
+        if (versionInfo.result != 0) return versionInfo;
+
+        if (compareVersions(versionInfo.version, '8.1.1') < 0) {
+            return resp;
+        }
 
         return {
             result: 0,
@@ -451,7 +460,10 @@ function SSLManager(config) {
     me.autoUpdate = function () {
         var resp;
 
-        if (getPlatformVersion() < "4.9.5") {
+        resp = getPlatformVersion();
+        if (resp.result != 0) return resp;
+
+        if (resp.version < "4.9.5") {
             return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
         }
 
@@ -536,13 +548,16 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
-        var platformVersion = getPlatformVersion(),
-            params = { task: 1 },
-            script;
+        var params = { task: 1 },
+            script,
+            resp;
+
+        resp = getPlatformVersion();
+        if (resp.result != 0) return resp;
 
         me.logAction("AddLEAutoUpdateTask");
 
-        if (compareVersions(platformVersion, '7.0.0') >= 0) {
+        if (compareVersions(resp.version, '7.0.0') >= 0) {
             script = AUTO_UPDATE_SCRIPT_NAME;
             params.action = "update";
         } else {
@@ -692,10 +707,15 @@ function SSLManager(config) {
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
+        var resp;
+
         withExtIp = String(withExtIp) || true;
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
-        edition = edition || getPlatformEdition();
+        resp = getPlatformEdition();
+        if (resp.result != 0) return resp;
+
+        edition = edition || resp.edition;
         config.withExtIp = (edition == LIGHT) ? false : config.withExtIp;
 
         return { result: 0 };
@@ -1898,9 +1918,12 @@ function SSLManager(config) {
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
-            var platformVersion = getPlatformVersion();
+            var resp;
 
-            if (compareVersions(platformVersion, '4.9.5') >= 0 || platformVersion.indexOf('trunk') != -1) {
+            resp = getPlatformVersion();
+            if (resp.result != 0) return resp;
+
+            if (compareVersions(resp.version, '4.9.5') >= 0 || resp.version.indexOf('trunk') != -1) {
                 return jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
             }
 
@@ -1996,20 +2019,41 @@ function SSLManager(config) {
     }
 
     function getVersion() {
-        version = version || jelastic.system.service.GetVersion();
+        if (version) return version;
+
+        version = api.system.service.GetVersion();
+        if (version.result != 0) return version;
+
         return version;
     }
 
     function getPlatformVersion() {
-        return getVersion().version.split("-").shift();
+        var versionInfo = getVersion();
+        if (versionInfo.result != 0) return versionInfo;
+
+        return {
+            result: 0,
+            version: versionInfo.version.split("-").shift() + (versionInfo.build ? "." + versionInfo.build : "")
+        };
     }
 
     function getPlatformEdition() {
-        return getVersion().edition;
+        var resp;
+
+        if (!edition) {
+            resp = getVersion();
+            if (resp.result != 0) return resp;
+            edition = resp.edition;
+        }
+
+        return {
+            result: 0,
+            edition: edition
+        };
     }
 
     function getScript(name) {
-        return jelastic.dev.scripting.GetScript(appid, session, name);
+        return api.dev.scripting.GetScript(appid, session, name);
     }
 
     function compareVersions(a, b) {
