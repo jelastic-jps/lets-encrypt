@@ -137,7 +137,8 @@ function SSLManager(config) {
             [ me.validateEntryPoint ],
             [ me.generateSslCerts ]
         ]),
-        versionInfo;
+        versionInfo,
+        setGlobals;
 
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
@@ -151,17 +152,24 @@ function SSLManager(config) {
         versionInfo = getPlatformVersion();
         if (versionInfo.result != 0) return versionInfo;
 
+        setGlobals = {
+            "setGlobals": {
+                skippedDomainsText: resp.skippedDomains || ""
+            }
+        };
+
         if (compareVersions(versionInfo.version, '8.1.1') < 0) {
-            return resp;
+            return {
+                result: 0,
+                "onAfterReturn": setGlobals
+            };
         }
 
         return {
             result: 0,
-            "onAfterReturn": [{
-                "setGlobals": {
-                    skippedDomainsText: resp.skippedDomains || ""
-                 }
-            },{
+            "onAfterReturn": [
+                setGlobals,
+            {
                 "return": {
                     type: "success",
                     data: {
