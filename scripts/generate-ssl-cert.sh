@@ -98,7 +98,7 @@ do
        [[ ! -z $validation_record ]] && {
            invalid_domain=$(echo $validation_record | sed -rn 's/\/\.well-known.*//p')
        } || {
-           invalid_domain=$(echo $error | sed -rn 's/\},\{.*//p' | sed -rn 's/.*hostname":"(.*)","port.*/\1/p')
+           invalid_domain=$(echo $error | sed 's/\.*validationRecord//p' | sed -rn 's/.*hostname":"(.*)","port.*/\1/p'  | sed '$!d')
        }
     }
 
