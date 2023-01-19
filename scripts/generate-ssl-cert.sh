@@ -96,7 +96,7 @@ do
        error=$(sed -rn 's/(.*)(Fetching https?:\/\/.*) Timeout during connect/\2/p' $LOG_FILE | sed '$!d')
        validation_record=$(echo $error | sed -rn 's/.*validationRecord":\[\{"url":"https?\:\/\/(.*)/\1/p' | sed -rn 's/(.*)\},\{.*/\1/p')
        [[ ! -z $validation_record ]] && {
-           invalid_domain=$(echo $validation_record | sed -rn 's/(.*)\/\.well-known.*/\1/p')
+           invalid_domain=$(echo $validation_record | sed -rn 's/\/\.well-known.*//p')
        } || {
            invalid_domain=$(echo $error | sed -rn 's/\},\{.*//p' | sed -rn 's/.*hostname":"(.*)","port.*/\1/p')
        }
