@@ -167,9 +167,6 @@ onUninstall:
       - removeExecutedEnvFile:
           nodeGroup: ${targetNodes.nodeGroup}
           app_id: ${globals.app_id}
-      - if (globals.isSecondaryEnv):
-          return:
-            type: success   
   - delete
 
 onBeforeDelete: delete
