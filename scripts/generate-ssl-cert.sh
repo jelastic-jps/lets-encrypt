@@ -132,10 +132,11 @@ sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
 if [ "$result_code" != "0" ]; then
     [[ $resp == *"does not exist or is not a directory"* ]] && invalid_webroot_dir=true
     [[ $resp == *"Read timed out"* ]] && timed_out=true
+    [[ $resp == *"Error retrieving account"* ]] && error_retrieve=true
 fi
 
 [[ $invalid_webroot_dir == true ]] && exit $WRONG_WEBROOT_ERROR;
-[[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
+[[ $timed_out == true || $error_retrieve == true ]] && exit $TIME_OUT_ERROR;
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 

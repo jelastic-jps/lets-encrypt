@@ -52,7 +52,15 @@ function run() {
 
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
+        error,
+        body;
+
+    try {
         body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
+    } catch (e) {
+        error = !body ? "Unable to download 'ssl-manager' script from GitHub. Error: " + e : "";
+        if (error) return error;
+    }
 
     return new (new Function("return " + body)())(config);
 }
