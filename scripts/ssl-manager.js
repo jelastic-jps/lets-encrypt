@@ -32,6 +32,7 @@ function SSLManager(config) {
      */
 
     var Response = com.hivext.api.Response,
+        EnvResponse = com.hivext.api.environment.response.EnvironmentResponse,
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         SimpleDateFormat = java.text.SimpleDateFormat,
@@ -1474,7 +1475,16 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                me.exec(me.bindSSLCerts);
+                if (resp.result != 0) return resp;
+
+                resp = me.exec(me.bindSSLCerts);
+                if (resp.result == EnvResponse.ENVIRONMENT_EXT_DOMAIN_NOT_ALLOWED) {
+                    resp = {
+                        result: resp.result,
+                        type: "warning",
+                        message: resp.error
+                    }
+                }
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
