@@ -89,6 +89,9 @@ do
 
     [[ -z $error ]] && {
       error=$(sed -rn 's|.*"detail":"(No valid IP addresses found [^"]+)".*|\1|p' $LOG_FILE | sed '$!d')
+      [[ -z $error ]] && {
+          error=$(sed -rn 's|.*"detail":"(no valid A records found for [^;]+).*|\1|p' $LOG_FILE | sed '$!d')
+      }
       invalid_domain=$(echo $error | sed -rn 's/.*for (.*)/\1/p')
       [[ ! -z $error ]] && no_valid_ip=true
     }
