@@ -4,6 +4,7 @@ LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
+TOO_MANY_FAILED_AUTH=23
 GENERAL_RESULT_ERROR=21
 TOO_MANY_CERTS=22
 WRONG_WEBROOT_ERROR=25
@@ -63,7 +64,7 @@ do
   [[ -z $domain ]] && break;
   LOG_FILE=$LOG_FILE"-"$counter
 
-  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
+  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --server letsencrypt --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
@@ -90,6 +91,14 @@ do
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*\s(.*)(Fetching https?:\/\/.*): Error getting validation data.*/\2/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Fetching https?:\/\/(.*)\/.well-known.*/\1/p')
+    }
+
+    [[ -z $error ]] && {
+      error=$(sed -rn 's/.*(Error creating new order \:\:) (too many failed authorizations recently.*)\",/\2/p' $LOG_FILE | sed '$!d');
+      [[ ! -z $error ]] && {
+        rate_limit_auth_exceeded=true;
+        break;
+      }
     }
 
     [[ -z $error ]] && {
@@ -138,6 +147,7 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
+[[ $rate_limit_auth_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_FAILED_AUTH; }
 
 #To be sure that r/w access
 mkdir -p /tmp/

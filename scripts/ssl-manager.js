@@ -42,6 +42,7 @@ function SSLManager(config) {
         INVALID_WEBROOT_DIR = 12005,
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
+        RATE_LIMIT_AUTH_EXCEEDED = 12003,
         VALIDATION_SCRIPT = "validation.sh",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
@@ -1089,10 +1090,11 @@ function SSLManager(config) {
             path : nodeManager.getPath(SETTINGS_PATH)
         });
     };
-
+    
     me.defineShellCodes = function() {
         SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS] = 21;
         SHELL_CODES[RATE_LIMIT_EXCEEDED] = 22;
+        SHELL_CODES[RATE_LIMIT_AUTH_EXCEEDED] = 23;
         SHELL_CODES[INVALID_WEBROOT_DIR] = 25;
         SHELL_CODES[UPLOADER_ERROR] = 26;
         SHELL_CODES[READ_TIMED_OUT] = 27;
@@ -1286,6 +1288,7 @@ function SSLManager(config) {
                 if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR}
                 if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
                 if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_EXCEEDED]) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
+                if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_AUTH_EXCEEDED]) return { result: RATE_LIMIT_AUTH_EXCEEDED, response: resp.out }
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output
