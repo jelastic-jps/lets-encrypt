@@ -69,6 +69,7 @@ _delta_time=$(( $_exp_date_unixtime - $_cur_date_unixtime  ));
     echo "$(date) - update required" >> /var/log/letsencrypt.log;
     validateLatestVersion
     resp=$($WGET --no-check-certificate -qO- "${auto_update_url}");
+    [[ $? -ne 0 ]] && [[ -z $resp ]] && resp="Temporary network Issue";
     { echo "${resp#*response*}" | sed 's/"//g' | grep -q 'result:0' ;} || $WGET -qO- "${jerror_url}/jerror?appid=$appid&actionname=updatefromcontainer&callparameters=$auto_update_url&email=$email&errorcode=4121&errormessage=$resp&priority=high"
 }
 
