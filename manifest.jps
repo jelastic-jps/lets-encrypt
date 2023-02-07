@@ -135,8 +135,8 @@ onInstall:
               nodeGroup: ${targetNodes.nodeGroup}
               app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
-          script: |
-            return {result: 0}  
+          return:
+            type: success 
       - else:
           installScript
   - else:
@@ -167,9 +167,6 @@ onUninstall:
       - removeExecutedEnvFile:
           nodeGroup: ${targetNodes.nodeGroup}
           app_id: ${globals.app_id}
-      - if (globals.isSecondaryEnv):
-          script: |
-            return {result: 0}   
   - delete
 
 onBeforeDelete: delete
@@ -250,8 +247,8 @@ actions:
                 nodeGroup: ${targetNodes.nodeGroup}
                 app_id: ${globals.app_id}
         - if (globals.isSecondaryEnv):
-            script: |
-              return {result: 0}
+            return:
+              type: success
     - installScript
   
   delete:
