@@ -606,6 +606,7 @@ function SSLManager(config) {
             [ me.createLEScript ],
             [ me.evalScript, INSTALL ]
         ]);
+        api.marketplace.console.WriteLog("resp77->" + resp);
         if (resp.result != 0) return resp;
         return resp.response;
     };
