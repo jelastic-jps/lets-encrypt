@@ -65,6 +65,8 @@ globals:
 mixins:
   - configs/vers.yaml
   - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
+  
+onBeforeInit: /scripts/onBeforeInit.js
 
 settings:
   fields:
