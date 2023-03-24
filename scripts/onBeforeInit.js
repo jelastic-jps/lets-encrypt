@@ -28,6 +28,9 @@ if (!isFieldExists && resp.array[0].value == 0) {
     value: 'false',
     hidden: true
   });
+  jps.settings.fields.push(
+    {"type": "displayfield", "cls": "warning", "height": 30, "hideLabel": true, "markup": "Using of public IP's is not possible because of such quota's value: 'environment.externalip.enabled'"}
+  );
 }
 
 return { result: 0, settings: jps.settings}
