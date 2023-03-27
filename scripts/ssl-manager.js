@@ -35,12 +35,14 @@ function SSLManager(config) {
         Transport = com.hivext.api.core.utils.Transport,
         StrSubstitutor = org.apache.commons.lang3.text.StrSubstitutor,
         SimpleDateFormat = java.text.SimpleDateFormat,
+        FEATURE_CUSTOM_RESPONSE_DATA_VERSION = '8.1.1',
         ENVIRONMENT_EXT_DOMAIN_IS_BUSY = 2330,
         WRONG_DNS_CUSTOM_DOMAINS = 12001,
         RATE_LIMIT_EXCEEDED = 12002,
         INVALID_WEBROOT_DIR = 12005,
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
+        NO_VALID_IP_ADDRESSES = 12008,
         VALIDATION_SCRIPT = "validation.sh",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
@@ -127,16 +129,18 @@ function SSLManager(config) {
 
     me.install = function (isUpdate) {
         var resp = me.exec([
-            [ me.initCustomConfigs ],
-            [ me.initAddOnExtIp, config.withExtIp ],
-            [ me.initWebrootMethod, config.webroot ],
-            [ me.initFalbackToFake, config.fallbackToX1 ],
-            [ me.initEntryPoint ],
-            [ me.installLetsEncrypt ],
-            [ me.generateSslConfig, isUpdate ],
-            [ me.validateEntryPoint ],
-            [ me.generateSslCerts ]
-        ]);
+                [ me.initCustomConfigs ],
+                [ me.initAddOnExtIp, config.withExtIp ],
+                [ me.initWebrootMethod, config.webroot ],
+                [ me.initFalbackToFake, config.fallbackToX1 ],
+                [ me.initEntryPoint ],
+                [ me.installLetsEncrypt ],
+                [ me.generateSslConfig, isUpdate ],
+                [ me.validateEntryPoint ],
+                [ me.generateSslCerts ]
+            ]),
+            versionInfo,
+            skippedDomainTextGlobal;
 
         if (resp.result == 0) {
             me.exec(me.scheduleAutoUpdate);
@@ -145,21 +149,36 @@ function SSLManager(config) {
 
         me.exec(me.sendResp, resp, isUpdate);
         me.exec(me.checkSkippedDomainsInSuccess, resp);
+        if (resp.result != 0) return resp;
+
+        versionInfo = getPlatformVersion();
+        if (versionInfo.result != 0) return versionInfo;
+
+        skippedDomainTextGlobal = {
+            "setGlobals": {
+                skippedDomainsText: resp.skippedDomains || ""
+            }
+        };
+
+        if (compareVersions(versionInfo.version, FEATURE_CUSTOM_RESPONSE_DATA_VERSION) < 0) {
+            return {
+                result: 0,
+                "onAfterReturn": skippedDomainTextGlobal
+            };
+        }
 
         return {
             result: 0,
-            "onAfterReturn": [{
-                "setGlobals": {
-                    skippedDomainsText: resp.skippedDomains || ""
-                 }
-            },{
-                "return": {
-                    type: "success",
-                    data: {
-                        skippedDomains: me.getSkippedDomains()
+            "onAfterReturn": [
+                skippedDomainTextGlobal,
+                {
+                    "return": {
+                        type: "success",
+                        data: {
+                            skippedDomains: me.getSkippedDomains()
+                        }
                     }
-                }
-            }]
+                }]
         }
     };
 
@@ -451,7 +470,10 @@ function SSLManager(config) {
     me.autoUpdate = function () {
         var resp;
 
-        if (getPlatformVersion() < "4.9.5") {
+        resp = getPlatformVersion();
+        if (resp.result != 0) return resp;
+
+        if (compareVersions(resp.version, "4.9.5") < 0) {
             return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
         }
 
@@ -536,13 +558,16 @@ function SSLManager(config) {
     };
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
-        var platformVersion = getPlatformVersion(),
-            params = { task: 1 },
-            script;
+        var params = { task: 1 },
+            script,
+            resp;
+
+        resp = getPlatformVersion();
+        if (resp.result != 0) return resp;
 
         me.logAction("AddLEAutoUpdateTask");
 
-        if (compareVersions(platformVersion, '7.0.0') >= 0) {
+        if (compareVersions(resp.version, '7.0.0') >= 0) {
             script = AUTO_UPDATE_SCRIPT_NAME;
             params.action = "update";
         } else {
@@ -692,10 +717,15 @@ function SSLManager(config) {
     };
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
+        var resp;
+
         withExtIp = String(withExtIp) || true;
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
-        edition = edition || getPlatformEdition();
+        resp = getPlatformEdition();
+        if (resp.result != 0) return resp;
+
+        edition = edition || resp.edition;
         config.withExtIp = (edition == LIGHT) ? false : config.withExtIp;
 
         return { result: 0 };
@@ -1067,6 +1097,7 @@ function SSLManager(config) {
         SHELL_CODES[INVALID_WEBROOT_DIR] = 25;
         SHELL_CODES[UPLOADER_ERROR] = 26;
         SHELL_CODES[READ_TIMED_OUT] = 27;
+        SHELL_CODES[NO_VALID_IP_ADDRESSES] = 28;
     };
 
     me.generateSslCerts = function generateSslCerts() {
@@ -1192,6 +1223,17 @@ function SSLManager(config) {
             };
         }
 
+        if (resp.result == NO_VALID_IP_ADDRESSES) {
+            text = "Error: " + resp.response;
+            return {
+                result: NO_VALID_IP_ADDRESSES,
+                error: text,
+                response: text,
+                type: "warning",
+                message: text
+            };
+        }
+
         if (resp.result && resp.result == READ_TIMED_OUT) {
             text = "The Let's Encrypt service is currently unavailable. Check the /var/log/letsencrypt log for more details or try again in a few minutes.";
             return {
@@ -1256,6 +1298,7 @@ function SSLManager(config) {
                 if (resp.exitStatus == SHELL_CODES[INVALID_WEBROOT_DIR]) return { result: INVALID_WEBROOT_DIR}
                 if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR}
                 if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
+                if (resp.exitStatus == SHELL_CODES[NO_VALID_IP_ADDRESSES]) return { result: NO_VALID_IP_ADDRESSES, response: resp.out }
                 if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_EXCEEDED]) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
             }
 
@@ -1898,9 +1941,12 @@ function SSLManager(config) {
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
-            var platformVersion = getPlatformVersion();
+            var resp;
 
-            if (compareVersions(platformVersion, '4.9.5') >= 0 || platformVersion.indexOf('trunk') != -1) {
+            resp = getPlatformVersion();
+            if (resp.result != 0) return resp;
+
+            if (compareVersions(resp.version, '4.9.5') >= 0 || resp.version.indexOf('trunk') != -1) {
                 return jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
             }
 
@@ -1996,20 +2042,41 @@ function SSLManager(config) {
     }
 
     function getVersion() {
-        version = version || jelastic.system.service.GetVersion();
+        if (version) return version;
+
+        version = api.system.service.GetVersion();
+        if (version.result != 0) return version;
+
         return version;
     }
 
     function getPlatformVersion() {
-        return getVersion().version.split("-").shift();
+        var versionInfo = getVersion();
+        if (versionInfo.result != 0) return versionInfo;
+
+        return {
+            result: 0,
+            version: versionInfo.version.split("-").shift() + (versionInfo.build ? "." + versionInfo.build : "")
+        };
     }
 
     function getPlatformEdition() {
-        return getVersion().edition;
+        var resp;
+
+        if (!edition) {
+            resp = getVersion();
+            if (resp.result != 0) return resp;
+            edition = resp.edition;
+        }
+
+        return {
+            result: 0,
+            edition: edition
+        };
     }
 
     function getScript(name) {
-        return jelastic.dev.scripting.GetScript(appid, session, name);
+        return api.dev.scripting.GetScript(appid, session, name);
     }
 
     function compareVersions(a, b) {
