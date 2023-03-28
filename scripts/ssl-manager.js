@@ -1247,6 +1247,16 @@ function SSLManager(config) {
             };
         }
 
+        if (resp.result && resp.result == UNEXPECTED_END_FILE) {
+            return {
+                result: UNEXPECTED_END_FILE,
+                error: resp.response,
+                response: resp.response,
+                type: "warning",
+                message: resp.response
+            };
+        }
+
         return resp;
     };
 

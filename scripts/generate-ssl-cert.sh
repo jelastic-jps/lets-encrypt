@@ -159,7 +159,7 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
-[[ $unexpected_end_file == true ]] && { echo "$error"; exit $UNEXPECTED_END_FILE; }
+[[ $unexpected_end_file == true ]] && { echo "$resp"; exit $UNEXPECTED_END_FILE; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
 #To be sure that r/w access
