@@ -43,6 +43,7 @@ function SSLManager(config) {
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
         NO_VALID_IP_ADDRESSES = 12008,
+        UNEXPECTED_END_FILE = 12009,
         VALIDATION_SCRIPT = "validation.sh",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
@@ -1098,6 +1099,7 @@ function SSLManager(config) {
         SHELL_CODES[UPLOADER_ERROR] = 26;
         SHELL_CODES[READ_TIMED_OUT] = 27;
         SHELL_CODES[NO_VALID_IP_ADDRESSES] = 28;
+        SHELL_CODES[UNEXPECTED_END_FILE] = 29;
     };
 
     me.generateSslCerts = function generateSslCerts() {
@@ -1294,12 +1296,13 @@ function SSLManager(config) {
             out = resp.error + resp.errOut + resp.out;
 
             if (resp) {
-                if (resp.exitStatus == SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS]) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out}
-                if (resp.exitStatus == SHELL_CODES[INVALID_WEBROOT_DIR]) return { result: INVALID_WEBROOT_DIR}
-                if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR}
-                if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
+                if (resp.exitStatus == SHELL_CODES[WRONG_DNS_CUSTOM_DOMAINS]) return { result: WRONG_DNS_CUSTOM_DOMAINS, response: resp.out }
+                if (resp.exitStatus == SHELL_CODES[INVALID_WEBROOT_DIR]) return { result: INVALID_WEBROOT_DIR }
+                if (resp.exitStatus == SHELL_CODES[UPLOADER_ERROR]) return { result: UPLOADER_ERROR }
+                if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT }
                 if (resp.exitStatus == SHELL_CODES[NO_VALID_IP_ADDRESSES]) return { result: NO_VALID_IP_ADDRESSES, response: resp.out }
                 if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_EXCEEDED]) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
+                if (resp.exitStatus == SHELL_CODES[UNEXPECTED_END_FILE]) return { result: UNEXPECTED_END_FILE, response: resp.out }
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output

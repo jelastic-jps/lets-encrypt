@@ -10,6 +10,7 @@ WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
 NO_VALID_IP_ADDRESSES=28
+UNEXPECTED_END_FILE=29
 counter=1
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
@@ -111,6 +112,13 @@ do
       }
     }
 
+    [[ -z $error ]] && {
+      grep -q "syntax error: unexpected end of file2" <<< $resp && {
+        unexpected_end_file=true;
+        break;
+      }
+    }
+
     [[ ! -z "$error" ]] && {
       all_invalid_domains_errors+=$error";";
       all_invalid_domains+=$invalid_domain" ";
@@ -151,6 +159,7 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
+[[ $unexpected_end_file == true ]] && { echo "$error"; exit $UNEXPECTED_END_FILE; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
 #To be sure that r/w access
