@@ -113,7 +113,7 @@ do
     }
 
     [[ -z $error ]] && {
-      grep -q "syntax error: unexpected end of file2" <<< $resp && {
+      grep -q "syntax error: unexpected end of file" <<< $resp && {
         unexpected_end_file=true;
         break;
       }
