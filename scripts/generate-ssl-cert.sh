@@ -10,6 +10,7 @@ WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
 NO_VALID_IP_ADDRESSES=28
+UNEXPECTED_END_FILE=29
 counter=1
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
@@ -62,56 +63,66 @@ result_code=$GENERAL_RESULT_ERROR;
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
-  LOG_FILE=$LOG_FILE"-"$counter
+  [[ $counter -eq '5' ]] && break;
+  LOOP_LOG_FILE=$LOG_FILE"-"$counter
 
-  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
+  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOOP_LOG_FILE 2>&1)
 
-  grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
+  grep -q 'Cert success' $LOOP_LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOOP_LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
   [[ "$result_code" == "$GENERAL_RESULT_ERROR" ]] && {
-    error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
+    error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOOP_LOG_FILE | sed '$!d')
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
 
     [[ -z $error ]] && {
-      error=$(sed -rn 's/.*\s(.*)(Invalid response from https?:\/\/.*).*/\2/p' $LOG_FILE | sed '$!d')
+      error=$(sed -rn 's/.*\s(.*)(Invalid response from https?:\/\/.*).*/\2/p' $LOOP_LOG_FILE | sed '$!d')
       [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's|(.+)addressesResolved|\1|p' | sed -rn 's|(.+)hostname.*|\1|p' | sed -rn 's|.*hostname\"\:\"([^\"]*).*|\1|p')
       [[ -z $invalid_domain ]] && invalid_domain=$(echo $error | sed -rn 's|(.+)addressesResolved|\1|p' | sed -rn 's|.*hostname\":\"(.*)|\1|p' | sed -rn 's|\",.*||p')
     }
 
     [[ -z $error ]] && {
-      error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOG_FILE | sed '$!d')
+      error=$(sed -rn 's/.*\s(.*)(Verify error:)/\1/p' $LOOP_LOG_FILE | sed '$!d')
       [[ ! -z $error ]] && invalid_domain=$(echo $error | sed  "s/:.*//")
     }
 
     [[ -z $error ]] && {
-      error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
+      error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOOP_LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
     
     [[ -z $error ]] && {
-      error=$(sed -rn 's/.*\s(.*)(Fetching https?:\/\/.*): Error getting validation data.*/\2/p' $LOG_FILE | sed '$!d')
+      error=$(sed -rn 's/.*\s(.*)(Fetching https?:\/\/.*): Error getting validation data.*/\2/p' $LOOP_LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Fetching https?:\/\/(.*)\/.well-known.*/\1/p')
     }
 
     [[ -z $error ]] && {
-      error=$(sed -rn 's|.*"detail":"(No valid IP addresses found [^"]+)".*|\1|p' $LOG_FILE | sed '$!d')
+      error=$(sed -rn 's|.*"detail":"(No valid IP addresses found [^"]+)".*|\1|p' $LOOP_LOG_FILE | sed '$!d')
       [[ -z $error ]] && {
-          error=$(sed -rn 's|.*"detail":"(no valid A records found for [^;]+).*|\1|p' $LOG_FILE | sed '$!d')
+          error=$(sed -rn 's|.*"detail":"(no valid A records found for [^;]+).*|\1|p' $LOOP_LOG_FILE | sed '$!d')
       }
       invalid_domain=$(echo $error | sed -rn 's/.*for (.*)/\1/p')
       [[ ! -z $error ]] && no_valid_ip=true
     }
 
     [[ -z $error ]] && {
-      error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOG_FILE | sed '$!d');
+      error=$(sed -rn 's/.*(Error creating new order \:\: )(.*)\"\,/\2/p' $LOOP_LOG_FILE | sed '$!d');
       [[ ! -z $error ]] && {
         rate_limit_exceeded=true;
         break;
       }
     }
 
-    all_invalid_domains_errors+=$error";"
-    all_invalid_domains+=$invalid_domain" "
+    [[ -z $error ]] && {
+      grep -q "syntax error: unexpected end of file" <<< $resp && {
+        unexpected_end_file=true;
+        break;
+      }
+    }
+
+    [[ ! -z "$error" ]] && {
+      all_invalid_domains_errors+=$error";";
+      all_invalid_domains+=$invalid_domain" ";
+    }
 
     domain=$(echo $domain | sed 's/'${invalid_domain}'\(\s-d\s\)\?//')
     domain=$(echo $domain | sed "s/\s-d$//")
@@ -148,6 +159,7 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
+[[ $unexpected_end_file == true ]] && { echo "$resp"; exit $UNEXPECTED_END_FILE; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
 #To be sure that r/w access
