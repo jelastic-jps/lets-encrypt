@@ -595,8 +595,10 @@ function SSLManager(config) {
     };
 
     me.createScriptAndInstall = function createInstallationScript() {
-        var resp =  me.exec([
-            [ me.initCustomConfigs ],
+        let resp = me.initCustomConfigs();
+        if (resp.result != 0) return resp;
+
+        resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
@@ -699,7 +701,7 @@ function SSLManager(config) {
 
             while (propNames.hasMoreElements()) {
                 propName = propNames.nextElement().toString();
-                config[propName] = config[propName] || String(properties.getProperty(propName));
+                config[propName] = String(properties.getProperty(propName)) || config[propName];
             }
         }
 
@@ -719,9 +721,11 @@ function SSLManager(config) {
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         var resp;
 
-        withExtIp = String(withExtIp) || true;
+        //withExtIp = String(withExtIp) || true;
+        log("withExtIp->" + withExtIp);
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
 
+        log("config.withExtIp->" + config.withExtIp);
         resp = getPlatformEdition();
         if (resp.result != 0) return resp;
 
