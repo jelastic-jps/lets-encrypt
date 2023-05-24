@@ -595,8 +595,10 @@ function SSLManager(config) {
     };
 
     me.createScriptAndInstall = function createInstallationScript() {
-        var resp =  me.exec([
-            [ me.initCustomConfigs ],
+        var resp = me.initCustomConfigs();
+        if (resp.result != 0) return resp;
+        
+        resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
