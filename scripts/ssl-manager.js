@@ -1345,9 +1345,10 @@ function SSLManager(config) {
             );
         }else{
             resp = nodeManager.cmd(
-                "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || { for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \\\"LEmasq\\\"' | sed -r 's/.*#s+handles+([0-9]+)/\\\1/g' 2>/dev/null); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done; } } || { " + CENTOS_IPTABLES + " }",
+                "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || { for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \\\"LEmasq\\\"' | sed -rn 's|.*#\\shandle\\s([0-9])|\\1|p'); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done; } } || { " + CENTOS_IPTABLES + " }",
                 {
                     action    : '-D',
+                    nodeGroup : config.nodeGroup,
                     nodeIp    : config.nodeIp
                 }
             );
