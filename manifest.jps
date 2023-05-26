@@ -48,6 +48,7 @@ targetNodes:
     - llsmp
     - jenkins
     - jenkins2
+    - atomcat
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
@@ -104,7 +105,7 @@ onInstall:
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
-      withExtIp: ${settings.withExtIp:true}
+      withExtIp: ${settings.withExtIp:}
       webroot: ${settings.webroot:}
       webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:}
