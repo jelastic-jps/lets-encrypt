@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
-LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
+DEFAULT_LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="$DIR/opt/letsencrypt/settings"
 DOMAIN_SEP=" -d "
@@ -51,18 +51,27 @@ mkdir -p $DIR/var/log/letsencrypt
 [[ "$webroot" == "false" ]] && {
     service tinyproxy start || { echo "Failed to start proxy server" ; exit 3 ; }
 
+ if grep -a 'AlmaLinux' /etc/system-release ; then
+    /usr/sbin/nft insert rule ip filter INPUT tcp dport ${PROXY_PORT} counter accept comment "LE"
+    /usr/sbin/nft insert rule ip filter INPUT tcp dport ${LE_PORT} counter accept comment "LE"
+    /usr/sbin/nft insert rule ip6 filter INPUT tcp dport ${LE_PORT} counter accept comment "LE"
+    /usr/sbin/nft insert rule ip nat PREROUTING ip saddr != 127.0.0.1 tcp dport 80 counter redirect to ${PROXY_PORT} comment "LE"
+    /usr/sbin/nft insert rule ip6 nat PREROUTING ip6 saddr ::0 ip6 daddr ::0 tcp dport 80 counter redirect to ${LE_PORT} comment "LE" || \
+        /usr/sbin/nft insert rule ip6 filter INPUT tcp dport 80 counter drop comment "LE"
+ else
     iptables -I INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
     iptables -I INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
     ip6tables -I INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
     iptables -t nat -I PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
     ip6tables -t nat -I PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j DROP
+ fi
 }
 result_code=$GENERAL_RESULT_ERROR;
 
 while [ "$result_code" != "0" ]
 do
   [[ -z $domain ]] && break;
-  LOG_FILE=$LOG_FILE"-"$counter
+  LOG_FILE=$DEFAULT_LOG_FILE"-"$counter
 
   resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
@@ -87,7 +96,7 @@ do
       error=$(sed -rn 's/.*(Cannot issue for .*)",/\1/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Cannot issue for \\\"(.*)\\\":.*/\1/p')
     }
-    
+
     [[ -z $error ]] && {
       error=$(sed -rn 's/.*\s(.*)(Fetching https?:\/\/.*): Error getting validation data.*/\2/p' $LOG_FILE | sed '$!d')
       invalid_domain=$(echo $error | sed -rn 's/Fetching https?:\/\/(.*)\/.well-known.*/\1/p')
@@ -129,12 +138,21 @@ domain=$(echo $domain | sed -r "s/\s-d//g");
 sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
 
 [[ "$webroot" == "false" ]] && {
+ if grep -a 'AlmaLinux' /etc/system-release ; then
+    for _family in ip ip6; do
+        for _table in 'filter INPUT' 'nat PREROUTING'; do
+            for handle in $(nft -a list table $_family ${_table/ *} | grep 'comment \"LE\"'| sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g' 2>/dev/null); do
+                /usr/sbin/nft delete rule $_family $_table handle $handle;
+            done
+        done
+    done
+ else
     iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
     ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
     iptables -D INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
     iptables -D INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
     ip6tables -D INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
-
+ fi
     service tinyproxy stop || echo "Failed to stop proxy server"
     chkconfig tinyproxy off
 }
@@ -178,7 +196,7 @@ function uploadCerts() {
 
     result_code=$?;
     [[ $result_code != 0 ]] && { echo "$uploadresult" && exit $UPLOAD_CERTS_ERROR; }
-    
+
     #Save urls to certificate files
     echo $uploadresult | awk -F '{"file":"' '{print $2}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/privkey.url
     echo $uploadresult | awk -F '{"file":"' '{print $3}' | awk -F ":\"" '{print $1}' | sed 's/","name"//g' > /tmp/fullchain.url
