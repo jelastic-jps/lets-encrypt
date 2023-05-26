@@ -1338,6 +1338,7 @@ function SSLManager(config) {
             resp = nodeManager.cmd(
                 "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || /usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \\\"LEmasq\\\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \\\"LEmasq\\\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \\\"LEmasq\\\"; } || { " + CENTOS_IPTABLES + " }",
                 {
+                    action    : '-I',
                     nodeGroup : config.nodeGroup,
                     nodeIp    : config.nodeIp
                 }
@@ -1346,6 +1347,7 @@ function SSLManager(config) {
             resp = nodeManager.cmd(
                 "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || { for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -r 's/.*#s+handles+([0-9]+)/\1/g' 2>/dev/null); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done; } || { " + CENTOS_IPTABLES + " }",
                 {
+                    action    : '-D',
                     nodeIp    : config.nodeIp
                 }
             );
@@ -1439,13 +1441,13 @@ function SSLManager(config) {
         if (hookType == "js") {
             return me.exec(me.evalCode, hookBody, config);
         }
-
+        
         hookQuotedParts = hookBody.match(/^"(.*)"$|^'(.*)'$/);
-
+        
         if (hookQuotedParts) {
             hookBody = hookQuotedParts[1] || hookQuotedParts[2];
         }
-
+        
         return me.exec(me.cmd, [
             'hook=$(cat << \'EOF\'', '%(hook)', 'EOF', ')',
             'test -f "${hook}" && /bin/bash "${hook}" >> %(log) || /bin/bash -c "${hook}" >> %(log)'
