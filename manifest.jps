@@ -48,7 +48,6 @@ targetNodes:
     - llsmp
     - jenkins
     - jenkins2
-    - atomcat
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
