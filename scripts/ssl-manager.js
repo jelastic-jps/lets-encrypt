@@ -1332,11 +1332,11 @@ function SSLManager(config) {
 
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
-        let CENTOS_IPTABLES = "ip a | grep -q  '%(nodeIp)' || { iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE; }";
+        let CENTOS_IPTABLES = "ip a | grep -q  '%(nodeIp)' || iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE;";
         let resp;
         if (action == 'add'){
             resp = nodeManager.cmd(
-                "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || /usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \\\"LEmasq\\\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \\\"LEmasq\\\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \\\"LEmasq\\\"; } || { " + CENTOS_IPTABLES + " } }",
+                "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || /usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \\\"LEmasq\\\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \\\"LEmasq\\\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \\\"LEmasq\\\"; } || { " + CENTOS_IPTABLES + " }",
                 {
                     nodeGroup : config.nodeGroup,
                     nodeIp    : config.nodeIp
@@ -1344,7 +1344,7 @@ function SSLManager(config) {
             );
         }else{
             resp = nodeManager.cmd(
-                "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || { for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -r 's/.*#s+handles+([0-9]+)/\1/g' 2>/dev/null); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done; } || { " + CENTOS_IPTABLES + " } }",
+                "grep -q 'AlmaLinux' /etc/system-release && { ip a | grep -q  '%(nodeIp)' || { for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -r 's/.*#s+handles+([0-9]+)/\1/g' 2>/dev/null); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done; } || { " + CENTOS_IPTABLES + " }",
                 {
                     nodeIp    : config.nodeIp
                 }
