@@ -128,6 +128,10 @@ function SSLManager(config) {
     };
 
     me.install = function (isUpdate) {
+        var test = me.exec(me.manageDnat, "add");
+        log("test -> "+ test);
+        // var test = me.exec(me.manageDnat, "remove");
+        // log("test -> "+ test);
         var resp = me.exec([
                 [ me.initCustomConfigs ],
                 [ me.initAddOnExtIp, config.withExtIp ],
