@@ -27,10 +27,17 @@ echo "Installing required packages"
       }
     }
   }
-  yum-config-manager --save --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5
-  yum -y install epel-release git bc nss;
-  yum -y install tinyproxy socat --enablerepo='epel';
-  
+  if grep -a 'AlmaLinux' /etc/system-release ; then
+    microdnf -y install epel-release; microdnf install -y git bc nss socat --enablerepo='epel';
+    wget http://repository.jelastic.com/pub/tinyproxy-1.8.3-2.el9.x86_64.rpm -O /tmp/tinyproxy-1.8.3-2.el9.x86_64.rpm
+    dnf install -y /tmp/tinyproxy-1.8.3-2.el9.x86_64.rpm --disablerepo=* ; rm -f /tmp/tinyproxy-1.8.3-2.el9.x86_64.rpm
+  else
+
+    yum-config-manager --save --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5
+    yum -y install epel-release git bc nss;
+    yum -y install tinyproxy socat --enablerepo='epel';
+  fi
+
   mkdir -p ${DIR}/opt;
 
   [[ -z $CLIENT_VERSION ]] && {
