@@ -16,7 +16,7 @@ var baseDir          = getParam("baseDir", "/"),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
     fallbackToX1     = getParam("fallbackToX1", ""),
     test             = getParam("test", ""),
-    envAppid         = getParams("envAppid", "${env.appid}"),
+    envAppid         = getParam("envAppid", "${env.appid}"),
     clientVersion    = getParam("clientVersion", "");
 
 function run() {
