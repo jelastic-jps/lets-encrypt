@@ -50,7 +50,7 @@ targetNodes:
     - jenkins2
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/JE-56113
 logo: images/letsencrypt.png
 
 description:
@@ -104,15 +104,16 @@ onInstall:
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
-      withExtIp: ${settings.withExtIp:}
-      webroot: ${settings.webroot:}
-      webrootPath: ${settings.webrootPath:}
+      withExtIp: ${settings.withExtIp:false}
+      webroot: ${settings.webroot:true}
+      webrootPath: ${settings.webrootPath:/var/www/webroot/ROOT}
       fallbackToX1: ${settings.fallbackToX1:}
       deployHook: ${settings.deployHook:}
       deployHookType: ${settings.deployHookType:}
       undeployHook: ${settings.undeployHook:}
       undeployHookType: ${settings.undeployHookType:}
       test: ${settings.test:}
+      envAppid: ${env.appid}
   - checkClustering:
       nodeGroup: ${globals.nodeGroup}
       app_id: ${globals.app_id}
@@ -199,6 +200,7 @@ actions:
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
       clientVersion: ${globals.version_acme-sh:}
+      envAppid: ${globals.envAppid}
   
   callScript:
     script: |
