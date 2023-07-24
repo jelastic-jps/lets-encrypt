@@ -522,7 +522,7 @@ function SSLManager(config) {
             sCode = nodeManager.getCSScriptCode();
 
         me.logAction("AutoPatchLEScriptRestore");
-        return jelastic.dev.scripting.CreateScript(config.scriptName, "js", sCode);
+        return api.dev.scripting.CreateScript("${env.appid}", session, config.scriptName, "js", sCode);
     };
 
     me.restoreDataIfNeeded = function () {
@@ -965,10 +965,10 @@ function SSLManager(config) {
             resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
+                api.dev.scripting.DeleteScript("${env.appid}", session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript(appid, session, scriptingScriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript("${env.appid}", session, scriptingScriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
 
@@ -1021,7 +1021,7 @@ function SSLManager(config) {
         if (action) params.action = action;
         params.fallbackToX1 = config.fallbackToX1;
 
-        var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
+        var resp = jelastic.dev.scripting.Eval("${env.appid}", session, config.scriptName, params);
 
         if (me.getAddOnAction() == CONFIGURE) {
             me.logAction("EndConfigureLEUpdate", resp);
@@ -2102,7 +2102,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return api.dev.scripting.GetScript(appid, session, name);
+        return api.dev.scripting.GetScript("${env.appid}", session, name);
     }
 
     function compareVersions(a, b) {
