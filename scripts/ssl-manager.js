@@ -1332,12 +1332,12 @@ function SSLManager(config) {
 
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
-        let GREP_IP = "ip a | grep -q  '%(nodeIp)'";
-        let GREP_ALMA = "grep -q 'AlmaLinux' /etc/system-release";
-        let CENTOS_IPTABLES = "iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE;";
-        let ALMA_LINUX_ADD_RULES = "/usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \"LEmasq\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \"LEmasq\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \"LEmasq\"; ";
-        let ALMA_LINUX_REMOVE_RULES = "for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -rn 's|.*#\shandle\s([0-9])|\1|p'); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done;";
-        let resp;
+        var GREP_IP = "ip a | grep -q  '%(nodeIp)'",
+            GREP_ALMA = "grep -q 'AlmaLinux' /etc/system-release",
+            CENTOS_IPTABLES = "iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE;",
+            ALMA_LINUX_ADD_RULES = "/usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \"LEmasq\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \"LEmasq\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \"LEmasq\"; ",
+            ALMA_LINUX_REMOVE_RULES = "for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -rn 's|.*#\shandle\s([0-9])|\1|p'); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done;",
+            resp;
 
         if (action == 'add'){
             resp = nodeManager.cmd(
