@@ -78,9 +78,9 @@ function SSLManager(config) {
 
     var resp = getPlatformVersion();
     if (resp.result != 0) return resp;
-    log("resp.version->" + resp.version);
-    
-    scriptsAppid = (compareVersions(resp.version, "8.4.1") < 0) ? appid : config.envAppid;
+    log("resp.version2->" + resp.version);
+
+    scriptsAppid = (compareVersions("8.4.1", "8.4.1") < 0) ? appid : config.envAppid;
     log("scriptsAppid->" + scriptsAppid);
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
