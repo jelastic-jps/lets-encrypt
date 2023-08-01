@@ -16,7 +16,6 @@ var baseDir          = getParam("baseDir", "/"),
     appId            = getParam("appId", "letsencrypt-ssl-addon"),
     fallbackToX1     = getParam("fallbackToX1", ""),
     test             = getParam("test", ""),
-    envAppid         = getParam("envAppid", "${env.appid}"),
     clientVersion    = getParam("clientVersion", "");
 
 function run() {
@@ -43,8 +42,7 @@ function run() {
         envDomain        : "${env.domain}",
         envAppid         : "${env.appid}",
         email            : "${user.email}",
-        clientVersion    : clientVersion,
-        envAppid         : envAppid
+        clientVersion    : clientVersion
     });
 
     jelastic.local.ReturnResult(
