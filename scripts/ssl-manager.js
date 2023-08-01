@@ -78,7 +78,7 @@ function SSLManager(config) {
 
     var resp = getPlatformVersion();
     if (resp.result != 0) return resp;
-    log("resp.version2->" + resp.version);
+    log("resp.version233->" + resp.version);
 
     scriptsAppid = (compareVersions("8.4.1", "8.4.1") < 0) ? appid : config.envAppid;
     log("scriptsAppid->" + scriptsAppid);
@@ -976,8 +976,8 @@ function SSLManager(config) {
                 api.dev.scripting.DeleteScript(scriptsAppid, session, scriptingScriptName);
             }
             //create a new script
+            log("scriptsAppid CreateScript->" + scriptsAppid);
             resp = api.dev.scripting.CreateScript(scriptsAppid, session, scriptingScriptName, "js", scriptBody);
-
             log("resp CreateScript->" + resp);
             java.lang.Thread.sleep(1000);
 
