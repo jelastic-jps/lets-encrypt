@@ -58,6 +58,7 @@ function SSLManager(config) {
         CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
+        scriptsAppid = "",
         INSTALL = "install",
         LIGHT = "LIGHT",
         me = this,
@@ -74,6 +75,12 @@ function SSLManager(config) {
 
     config = config || {};
     session = config.session || "";
+    
+    var resp = getPlatformVersion();
+    if (resp.result != 0) return resp;
+
+    scriptsAppid = (compareVersions(resp.version, "8.4.1") < 0) ? appid : config.envAppid;
+    log("scriptsAppid->" + scriptsAppid);
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
@@ -522,7 +529,7 @@ function SSLManager(config) {
             sCode = nodeManager.getCSScriptCode();
 
         me.logAction("AutoPatchLEScriptRestore");
-        return api.dev.scripting.CreateScript("${env.appid}", session, config.scriptName, "js", sCode);
+        return api.dev.scripting.CreateScript(scriptsAppid, session, config.scriptName, "js", sCode);
     };
 
     me.restoreDataIfNeeded = function () {
@@ -597,7 +604,7 @@ function SSLManager(config) {
     me.createScriptAndInstall = function createInstallationScript() {
         var resp = me.initCustomConfigs();
         if (resp.result != 0) return resp;
-        
+
         resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
@@ -965,10 +972,10 @@ function SSLManager(config) {
             resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript("${env.appid}", session, scriptingScriptName);
+                api.dev.scripting.DeleteScript(scriptsAppid, session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript("${env.appid}", session, scriptingScriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript(scriptsAppid, session, scriptingScriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
 
@@ -1021,7 +1028,7 @@ function SSLManager(config) {
         if (action) params.action = action;
         params.fallbackToX1 = config.fallbackToX1;
 
-        var resp = jelastic.dev.scripting.Eval("${env.appid}", session, config.scriptName, params);
+        var resp = jelastic.dev.scripting.Eval(scriptsAppid, session, config.scriptName, params);
 
         if (me.getAddOnAction() == CONFIGURE) {
             me.logAction("EndConfigureLEUpdate", resp);
@@ -1451,13 +1458,13 @@ function SSLManager(config) {
         if (hookType == "js") {
             return me.exec(me.evalCode, hookBody, config);
         }
-        
+
         hookQuotedParts = hookBody.match(/^"(.*)"$|^'(.*)'$/);
-        
+
         if (hookQuotedParts) {
             hookBody = hookQuotedParts[1] || hookQuotedParts[2];
         }
-        
+
         return me.exec(me.cmd, [
             'hook=$(cat << \'EOF\'', '%(hook)', 'EOF', ')',
             'test -f "${hook}" && /bin/bash "${hook}" >> %(log) || /bin/bash -c "${hook}" >> %(log)'
@@ -2102,7 +2109,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return api.dev.scripting.GetScript("${env.appid}", session, name);
+        return api.dev.scripting.GetScript(scriptsAppid, session, name);
     }
 
     function compareVersions(a, b) {
