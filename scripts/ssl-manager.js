@@ -75,10 +75,11 @@ function SSLManager(config) {
 
     config = config || {};
     session = config.session || "";
-    
+
     var resp = getPlatformVersion();
     if (resp.result != 0) return resp;
-
+    log("resp.version->" + resp.version);
+    
     scriptsAppid = (compareVersions(resp.version, "8.4.1") < 0) ? appid : config.envAppid;
     log("scriptsAppid->" + scriptsAppid);
 
