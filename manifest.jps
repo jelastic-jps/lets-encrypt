@@ -104,9 +104,9 @@ onInstall:
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
-      withExtIp: ${settings.withExtIp:false}
-      webroot: ${settings.webroot:true}
-      webrootPath: ${settings.webrootPath:/var/www/webroot/ROOT}
+      withExtIp: ${settings.withExtIp:}
+      webroot: ${settings.webroot:}
+      webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:}
       deployHook: ${settings.deployHook:}
       deployHookType: ${settings.deployHookType:}
