@@ -204,7 +204,8 @@ actions:
   
   callScript:
     script: |
-      var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
+      var appidValue = (${fn.compareEngine(8.4-1)} >= 1) ? "${env.appid}" : appid;
+      var j = jelastic, resp = j.dev.scripting.Eval(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
   
@@ -257,7 +258,8 @@ actions:
   
   delete:
     script: |
-      jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
+      var appidValue = (${fn.compareEngine(8.4-1)} >= 1) ? "${env.appid}" : appid;
+      jelastic.dev.scripting.DeleteScript(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
       
   installLE:
@@ -277,6 +279,7 @@ actions:
       
   createScript:
     script: |
-      return jelastic.dev.scripting.CreateScript("${this.scriptName}", "js", "${this.code:}")
+      var appidValue = (${fn.compareEngine(8.4-1)} >= 1) ? "${env.appid}" : appid;
+      return jelastic.dev.scripting.CreateScript(appidValue, session, "${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md
