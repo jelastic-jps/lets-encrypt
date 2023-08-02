@@ -78,10 +78,8 @@ function SSLManager(config) {
 
     var resp = getPlatformVersion();
     if (resp.result != 0) return resp;
-    log("resp.version233->" + resp.version);
 
-    scriptsAppid = (compareVersions("8.4.1", "8.4.1") < 0) ? appid : config.envAppid;
-    log("scriptsAppid->" + scriptsAppid);
+    scriptsAppid = (compareVersions(resp.version, "8.4.1") < 0) ? appid : config.envAppid;
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
