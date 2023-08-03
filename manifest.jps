@@ -204,7 +204,7 @@ actions:
   
   callScript:
     script: |
-      var appidValue = (${fn.compareEngine(8.4-1)} >= 1) ? "${env.appid}" : appid;
+      var appidValue = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
       var j = jelastic, resp = j.dev.scripting.Eval(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
@@ -258,7 +258,7 @@ actions:
   
   delete:
     script: |
-      var appidValue = (${fn.compareEngine(8.4-1)} >= 1) ? "${env.appid}" : appid;
+      var appidValue = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
       jelastic.dev.scripting.DeleteScript(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
       
@@ -279,7 +279,7 @@ actions:
       
   createScript:
     script: |
-      var appidValue = (${fn.compareEngine(8.4-1)} >= 1) ? "${env.appid}" : appid;
+      var appidValue = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
       return jelastic.dev.scripting.CreateScript(appidValue, session, "${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md
