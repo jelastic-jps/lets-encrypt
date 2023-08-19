@@ -975,7 +975,7 @@ function SSLManager(config) {
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
-            jelastic.dev.scripting.Build(appid, session, scriptingScriptName);
+            jelastic.dev.scripting.Build(targetAppid, session, scriptingScriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
