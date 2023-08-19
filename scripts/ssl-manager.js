@@ -2104,7 +2104,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return api.dev.scripting.GetScript(scriptsAppid, session, name);
+        return api.dev.scripting.GetScript(targetAppid, session, name);
     }
 
     function compareVersions(a, b) {
