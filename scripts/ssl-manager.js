@@ -971,7 +971,7 @@ function SSLManager(config) {
                 api.dev.scripting.DeleteScript(scriptsAppid, session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript(scriptsAppid, session, scriptingScriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript(targetAppid, session, scriptingScriptName, "js", scriptBody);
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
