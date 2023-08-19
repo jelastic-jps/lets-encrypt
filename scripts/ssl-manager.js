@@ -1085,7 +1085,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : config.skippedDomains || "",
+                skipped : me.getSkippedDomains().join(DOMAINS_SEP),
                 updateDecreased: !!config.updateDecreased,
                 updateDisabled: !!config.updateDisabled
             }),
