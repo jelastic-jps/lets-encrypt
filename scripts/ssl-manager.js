@@ -968,7 +968,7 @@ function SSLManager(config) {
             resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript(scriptsAppid, session, scriptingScriptName);
+                api.dev.scripting.DeleteScript(targetAppid, session, scriptingScriptName);
             }
             //create a new script
             resp = api.dev.scripting.CreateScript(targetAppid, session, scriptingScriptName, "js", scriptBody);
