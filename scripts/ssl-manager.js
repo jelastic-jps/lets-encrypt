@@ -58,7 +58,7 @@ function SSLManager(config) {
         CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
-        scriptsAppid = "",
+        targetAppid,
         INSTALL = "install",
         LIGHT = "LIGHT",
         me = this,
