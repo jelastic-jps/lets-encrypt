@@ -259,7 +259,7 @@ actions:
   delete:
     script: |
       var appidValue = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
-      jelastic.dev.scripting.DeleteScript(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
+      api.dev.scripting.DeleteScript(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
       
   installLE:
