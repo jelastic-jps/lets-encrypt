@@ -2119,7 +2119,7 @@ function SSLManager(config) {
     }
 
     function log(message) {
-        if (jelastic.marketplace && jelastic.marketplace.console && message) {
+        if (api.marketplace && api.marketplace.console && message) {
             return api.marketplace.console.WriteLog(message);
         }
 
