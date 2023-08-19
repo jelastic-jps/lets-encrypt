@@ -1023,7 +1023,7 @@ function SSLManager(config) {
         if (action) params.action = action;
         params.fallbackToX1 = config.fallbackToX1;
 
-        var resp = jelastic.dev.scripting.Eval(scriptsAppid, session, config.scriptName, params);
+        var resp = api.dev.scripting.Eval(targetAppid, session, config.scriptName, params);
 
         if (me.getAddOnAction() == CONFIGURE) {
             me.logAction("EndConfigureLEUpdate", resp);
