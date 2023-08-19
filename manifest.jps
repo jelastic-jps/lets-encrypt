@@ -280,6 +280,6 @@ actions:
   createScript:
     script: |
       var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
-      return jelastic.dev.scripting.CreateScript(appidValue, session, "${this.scriptName}", "js", "${this.code:}")
+      return api.dev.scripting.CreateScript(targetAppid, session, "${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md
