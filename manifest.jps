@@ -205,7 +205,7 @@ actions:
   callScript:
     script: |
       var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
-      var j = jelastic, resp = j.dev.scripting.Eval(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
+      var resp = api.dev.scripting.Eval(appidValue, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
   
