@@ -525,7 +525,7 @@ function SSLManager(config) {
             sCode = nodeManager.getCSScriptCode();
 
         me.logAction("AutoPatchLEScriptRestore");
-        return api.dev.scripting.CreateScript(scriptsAppid, session, config.scriptName, "js", sCode);
+        return api.dev.scripting.CreateScript(targetAppid, session, config.scriptName, "js", sCode);
     };
 
     me.restoreDataIfNeeded = function () {
