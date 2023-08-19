@@ -258,7 +258,7 @@ actions:
   
   delete:
     script: |
-      var appidValue = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
       api.dev.scripting.DeleteScript(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
       
