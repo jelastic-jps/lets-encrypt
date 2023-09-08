@@ -7,7 +7,7 @@ function SSLManager(config) {
      *      envDomain : {String}
      *      envAppid : {String}
      *      baseUrl : {String}
-     *      baseDir : {String}     
+     *      baseDir : {String}
      *      scriptName : {String}
      *      cronTime : {String}
      *      email : {String}
@@ -354,6 +354,7 @@ function SSLManager(config) {
 
     me.uninstall = function () {
         var autoUpdateScript = nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT);
+        log("uninstall config.nodeGroup->" + config.nodeGroup);
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
@@ -522,7 +523,7 @@ function SSLManager(config) {
             sCode = nodeManager.getCSScriptCode();
 
         me.logAction("AutoPatchLEScriptRestore");
-        return jelastic.dev.scripting.CreateScript(config.scriptName, "js", sCode);
+        return api.dev.scripting.CreateScript("${env.appid}", session, config.scriptName, "js", sCode);
     };
 
     me.restoreDataIfNeeded = function () {
@@ -597,7 +598,7 @@ function SSLManager(config) {
     me.createScriptAndInstall = function createInstallationScript() {
         var resp = me.initCustomConfigs();
         if (resp.result != 0) return resp;
-        
+
         resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initWebrootMethod, config.webroot ],
@@ -965,10 +966,10 @@ function SSLManager(config) {
             resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
+                api.dev.scripting.DeleteScript("${env.appid}", session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript(appid, session, scriptingScriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript("${env.appid}", session, scriptingScriptName, "js", scriptBody);
 
             java.lang.Thread.sleep(1000);
 
@@ -1021,7 +1022,7 @@ function SSLManager(config) {
         if (action) params.action = action;
         params.fallbackToX1 = config.fallbackToX1;
 
-        var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
+        var resp = jelastic.dev.scripting.Eval("${env.appid}", session, config.scriptName, params);
 
         if (me.getAddOnAction() == CONFIGURE) {
             me.logAction("EndConfigureLEUpdate", resp);
@@ -1385,6 +1386,8 @@ function SSLManager(config) {
     me.scheduleAutoUpdate = function scheduleAutoUpdate(crontime) {
         var scriptUrl = me.getScriptUrl(AUTO_UPDATE_SCRIPT);
 
+        log("nodeId->" + nodeId);
+
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
             "chmod +x %(scriptPath)",
@@ -1451,13 +1454,13 @@ function SSLManager(config) {
         if (hookType == "js") {
             return me.exec(me.evalCode, hookBody, config);
         }
-        
+
         hookQuotedParts = hookBody.match(/^"(.*)"$|^'(.*)'$/);
-        
+
         if (hookQuotedParts) {
             hookBody = hookQuotedParts[1] || hookQuotedParts[2];
         }
-        
+
         return me.exec(me.cmd, [
             'hook=$(cat << \'EOF\'', '%(hook)', 'EOF', ')',
             'test -f "${hook}" && /bin/bash "${hook}" >> %(log) || /bin/bash -c "${hook}" >> %(log)'
@@ -2102,7 +2105,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return api.dev.scripting.GetScript(appid, session, name);
+        return api.dev.scripting.GetScript("${env.appid}", session, name);
     }
 
     function compareVersions(a, b) {
