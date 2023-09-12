@@ -1397,7 +1397,7 @@ function SSLManager(config) {
             cronTime : crontime ? crontime : config.cronTime,
             scriptPath : nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT),
             autoUpdateUrl : me.getAutoUpdateUrl(),
-            nodeId: balancerNode ? balancerNode.id : ""
+            nodeId: (balancerNode && config.nodeGroup == balancerNode.nodeGroup) ? balancerNode.id : ""
         }, "", true);
     };
 
