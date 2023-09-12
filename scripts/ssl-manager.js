@@ -354,11 +354,13 @@ function SSLManager(config) {
 
     me.uninstall = function () {
         var autoUpdateScript = nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT);
+        var resp = nodeManager.getNode();
+        if (resp.result != 0) return resp;
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
                 scriptPath : autoUpdateScript,
-                nodeGroup: config.nodeGroup
+                nodeGroup: resp && resp.node ? resp.node.nodeGroup : config.nodeGroup
             }],
             [ me.initAddOnExtIp, config.withExtIp ],
 
@@ -1384,6 +1386,7 @@ function SSLManager(config) {
 
     me.scheduleAutoUpdate = function scheduleAutoUpdate(crontime) {
         var scriptUrl = me.getScriptUrl(AUTO_UPDATE_SCRIPT);
+        var balancerNode = nodeManager.getBalancerMasterNode();
 
         return nodeManager.cmd([
             "wget --no-check-certificate '%(url)' -O %(scriptPath)",
@@ -1395,7 +1398,8 @@ function SSLManager(config) {
             url : scriptUrl,
             cronTime : crontime ? crontime : config.cronTime,
             scriptPath : nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT),
-            autoUpdateUrl : me.getAutoUpdateUrl()
+            autoUpdateUrl : me.getAutoUpdateUrl(),
+            nodeId: balancerNode ? balancerNode.id : ""
         }, "", true);
     };
 
