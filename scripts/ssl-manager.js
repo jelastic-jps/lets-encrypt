@@ -354,13 +354,11 @@ function SSLManager(config) {
 
     me.uninstall = function () {
         var autoUpdateScript = nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT);
-        var resp = nodeManager.getNode();
-        if (resp.result != 0) return resp;
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
                 scriptPath : autoUpdateScript,
-                nodeGroup: resp && resp.node ? resp.node.nodeGroup : config.nodeGroup
+                nodeGroup: config.nodeGroup
             }],
             [ me.initAddOnExtIp, config.withExtIp ],
 
