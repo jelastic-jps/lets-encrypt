@@ -50,7 +50,7 @@ targetNodes:
     - jenkins2
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/stage
 logo: images/letsencrypt.png
 
 description:
@@ -105,6 +105,7 @@ onInstall:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
       withExtIp: ${settings.withExtIp:}
+      withIntSSL: ${settings.withIntSSL:}
       webroot: ${settings.webroot:}
       webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:}
@@ -194,6 +195,7 @@ actions:
       undeployHook: ${globals.undeployHook}
       undeployHookType: ${globals.undeployHookType}
       withExtIp: ${globals.withExtIp}
+      withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
@@ -268,6 +270,7 @@ actions:
       deployHookType: ${globals.deployHookType}
       undeployHookType: ${globals.undeployHookType}
       withExtIp: ${globals.withExtIp}
+      withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
