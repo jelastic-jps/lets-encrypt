@@ -1423,7 +1423,7 @@ function SSLManager(config) {
         }
 
         if (customSSLCheck || !config.withExtIp) {
-            return me.exec(me.bindSSL(customSSLCheck));
+            return me.exec(me.bindSSL);
         }
 
         return { result : 0 };
@@ -1499,7 +1499,7 @@ function SSLManager(config) {
         });
     };
 
-    me.bindSSL = function bindSSL(customSSLCheck) {
+    me.bindSSL = function bindSSL() {
         var cert_key = nodeManager.readFile("/tmp/privkey.url"),
             cert     = nodeManager.readFile("/tmp/cert.url"),
             chain    = nodeManager.readFile("/tmp/fullchain.url"),
