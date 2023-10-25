@@ -1439,9 +1439,10 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            return config.withExtIp ? me.exec(me.removeSSL) : me.exec(me.removeSSLCert);
+            return config.withExtIp ? me.exec(me.removeSSL) :
+                   config.withIntSSL ? me.exec([[me.removeSSL], [me.removeSSLCert]]) :
+                   me.exec(me.removeSSLCert);
         }
-
         return { result : 0 };
     };
 
