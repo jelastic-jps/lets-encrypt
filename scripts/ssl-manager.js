@@ -1416,13 +1416,11 @@ function SSLManager(config) {
     };
 
     me.deploy = function deploy() {
-        var customSSLCheck = nodeManager.checkCustomSSL();
-        
         if (config.deployHook) {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
 
-        if (customSSLCheck || !config.withExtIp) {
+        if (nodeManager.checkCustomSSL() || !config.withExtIp) {
             return me.exec(me.bindSSL);
         }
 
@@ -1439,10 +1437,9 @@ function SSLManager(config) {
         }
 
         if (nodeManager.checkCustomSSL()) {
-            return config.withExtIp ? me.exec(me.removeSSL) :
-                   config.withIntSSL ? me.exec([[me.removeSSL], [me.removeSSLCert]]) :
-                   me.exec(me.removeSSLCert);
+            return config.withExtIp ? me.exec(me.removeSSL) : me.exec(me.removeSSLCert);
         }
+
         return { result : 0 };
     };
 
@@ -1528,7 +1525,7 @@ function SSLManager(config) {
                     interm: chain.body
                 });
                 me.exec(me.bindSSLCerts);
-                if (config.withIntSSL) {
+                if (config.withIntSSL && nodeManager.checkCustomSSL()) {
                     me.exec(me.bindSSLOnExtraNode, cert_key.body, cert.body, chain.body);
                 }
             }
