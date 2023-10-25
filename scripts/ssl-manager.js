@@ -1416,12 +1416,14 @@ function SSLManager(config) {
     };
 
     me.deploy = function deploy() {
+        var customSSLCheck = nodeManager.checkCustomSSL();
+        
         if (config.deployHook) {
             return me.evalHook(config.deployHook, config.deployHookType);
         }
 
-        if (nodeManager.checkCustomSSL() || !config.withExtIp) {
-            return me.exec(me.bindSSL);
+        if (customSSLCheck || !config.withExtIp) {
+            return me.exec(me.bindSSL(customSSLCheck));
         }
 
         return { result : 0 };
@@ -1496,7 +1498,7 @@ function SSLManager(config) {
         });
     };
 
-    me.bindSSL = function bindSSL() {
+    me.bindSSL = function bindSSL(customSSLCheck) {
         var cert_key = nodeManager.readFile("/tmp/privkey.url"),
             cert     = nodeManager.readFile("/tmp/cert.url"),
             chain    = nodeManager.readFile("/tmp/fullchain.url"),
@@ -1525,7 +1527,7 @@ function SSLManager(config) {
                     interm: chain.body
                 });
                 me.exec(me.bindSSLCerts);
-                if (config.withIntSSL && nodeManager.checkCustomSSL()) {
+                if (config.withIntSSL && customSSLCheck) {
                     me.exec(me.bindSSLOnExtraNode, cert_key.body, cert.body, chain.body);
                 }
             }
