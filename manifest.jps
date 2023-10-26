@@ -105,7 +105,7 @@ onInstall:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
       withExtIp: ${settings.withExtIp:}
-      withIntSSL: ${settings.withIntSSL:}
+      withIntSSL: ${settings.withIntSSL:true}
       webroot: ${settings.webroot:}
       webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:}
