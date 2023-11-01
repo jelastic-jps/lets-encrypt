@@ -1524,7 +1524,6 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                if (resp.result != 0) return resp;
                 
                 resp = me.exec(me.bindSSLCerts);
                 if (resp.result != 0) return resp;
