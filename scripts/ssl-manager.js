@@ -2120,7 +2120,7 @@ function SSLManager(config) {
 
     function log(message) {
         if (api.marketplace && api.marketplace.console && message) {
-            return api.marketplace.console.WriteLog(message);
+            return api.marketplace.console.WriteLog(appid, session, message);
         }
 
         return { result : 0 };
