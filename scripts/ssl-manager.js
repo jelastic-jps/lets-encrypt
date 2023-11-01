@@ -554,7 +554,6 @@ function SSLManager(config) {
 
         if (errResp.result == Response.USER_NOT_AUTHENTICATED && errResp.error.indexOf(errorMark) > -1) {
             //creating new session using Scheduler
-            return "before addAutoUpdateTask errResp->" + errResp;
             return me.exec(me.addAutoUpdateTask);
         }
 
