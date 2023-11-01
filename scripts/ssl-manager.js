@@ -474,6 +474,7 @@ function SSLManager(config) {
         var resp;
 
         resp = getPlatformVersion();
+        return "getPlatformVersion->" + resp;
         if (resp.result != 0) return resp;
 
         if (compareVersions(resp.version, "4.9.5") < 0) {
