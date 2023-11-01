@@ -494,7 +494,7 @@ function SSLManager(config) {
 
             if (resp.result == 0) {
                 resp = log("checkPermissions");
-                return "checkPermissions resp->" + resp;
+                return "c11heckPermissions resp->" + resp;
             }
             if (resp && resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
@@ -2122,7 +2122,7 @@ function SSLManager(config) {
 
     function log(message) {
         if (api.marketplace && api.marketplace.console && message) {
-            return api.marketplace.console.WriteLog(message);
+            return api.marketplace.console.WriteLog(appid, session, message);
         }
 
         return { result : 0 };
