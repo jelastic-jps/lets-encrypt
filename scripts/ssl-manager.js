@@ -589,6 +589,7 @@ function SSLManager(config) {
 
         resp = api.utils.scheduler.CreateEnvTask({
             appid: targetAppid,
+            session: session,
             envName: config.envName,
             script: script,
             trigger: "once_delay:1000",
@@ -596,7 +597,7 @@ function SSLManager(config) {
             params: params
         });
 
-        return "CreateEnvTask->" + resp;
+        return "CreateEnvTask + session->" + resp;
     };
 
     me.hasAddedEnvDomain = function () {
