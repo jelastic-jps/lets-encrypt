@@ -480,7 +480,7 @@ function SSLManager(config) {
             return me.exec(me.sendEmail, "Action Required", "html/update-required.html");
         }
 
-        return "222->" + resp;
+        return "222->" + compareVersions(resp.version, "4.9.5") + "-" + resp;
 
         if (!config.isTask) {
             me.logAction("StartUpdateLEFromContainer");
