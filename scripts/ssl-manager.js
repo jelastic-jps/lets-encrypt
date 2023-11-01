@@ -1525,8 +1525,7 @@ function SSLManager(config) {
                     interm: chain.body
                 });
                 
-                resp = me.exec(me.bindSSLCerts);
-                if (resp.result != 0) return resp;
+                me.exec(me.bindSSLCerts);
 
                 if (config.withIntSSL && nodeManager.checkCustomSSL()) {
                     me.exec(me.bindSSLOnExtraNode, cert_key.body, cert.body, chain.body);
