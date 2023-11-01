@@ -587,7 +587,16 @@ function SSLManager(config) {
             params: params
         });
 
-        return "AddTask->" + resp;
+        resp = api.utils.scheduler.CreateEnvTask({
+            appid: targetAppid,
+            envName: config.envName,
+            script: script,
+            trigger: "once_delay:1000",
+            description: "update LE sertificate",
+            params: params
+        });
+
+        return "CreateEnvTask->" + resp;
     };
 
     me.hasAddedEnvDomain = function () {
