@@ -488,18 +488,18 @@ function SSLManager(config) {
             }
 
             resp = me.createExecuteActionScript();
-            return "createExecuteActionScript resp->" + resp;
             if (resp.result != 0) return resp;
 
             resp = nodeManager.getEnvInfo();
 
             if (resp.result == 0) {
                 resp = log("checkPermissions");
+                return "checkPermissions resp->" + resp;
             }
-
             if (resp && resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
             }
+            return "getEnvInfo resp->" + resp;
         }
 
         if (config.patchVersion == patchBuild) {
@@ -555,6 +555,7 @@ function SSLManager(config) {
 
         if (errResp.result == Response.USER_NOT_AUTHENTICATED && errResp.error.indexOf(errorMark) > -1) {
             //creating new session using Scheduler
+            return "before addAutoUpdateTask errResp->" + errResp;
             return me.exec(me.addAutoUpdateTask);
         }
 
