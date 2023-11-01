@@ -494,7 +494,6 @@ function SSLManager(config) {
 
             if (resp.result == 0) {
                 resp = log("checkPermissions");
-                return "c22heckPermissions resp->" + resp;
             }
             if (resp && resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
@@ -580,8 +579,7 @@ function SSLManager(config) {
             params.token = config.token;
             params.action = "auto-update";
         }
-
-        return jelastic.utils.scheduler.AddTask({
+        resp = jelastic.utils.scheduler.AddTask({
             appid: appid,
             session: session,
             script: script,
@@ -589,6 +587,8 @@ function SSLManager(config) {
             description: "update LE sertificate",
             params: params
         });
+
+        return "AddTask->" + resp;
     };
 
     me.hasAddedEnvDomain = function () {
