@@ -492,9 +492,10 @@ function SSLManager(config) {
 
             resp = nodeManager.getEnvInfo();
 
+            return "getEnvInfo resp->" + resp;
             if (resp.result == 0) {
                 resp = log("checkPermissions");
-                return "c11heckPermissions resp->" + resp;
+                return "c22heckPermissions resp->" + resp;
             }
             if (resp && resp.result != 0) {
                 return me.checkEnvAccessAndUpdate(resp);
