@@ -24,6 +24,7 @@ function SSLManager(config) {
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
      *      [withExtIp] : {Boolean}
+     *      [withIntSSL] : {Boolean}
      *      [webroot] : {Boolean}
      *      [webrootPath] : {String}
      *      [test] : {Boolean}
@@ -131,6 +132,7 @@ function SSLManager(config) {
         var resp = me.exec([
                 [ me.initCustomConfigs ],
                 [ me.initAddOnExtIp, config.withExtIp ],
+                [ me.initIntSSL, config.withIntSSL ],
                 [ me.initWebrootMethod, config.webroot ],
                 [ me.initFalbackToFake, config.fallbackToX1 ],
                 [ me.initEntryPoint ],
@@ -325,6 +327,7 @@ function SSLManager(config) {
             webroot             : config.webroot || "",
             webrootPath         : config.webrootPath || "",
             withExtIp           : config.withExtIp,
+            withIntSSL          : config.withIntSSL,
             customDomains       : me.getCustomDomains(),
             nodeGroup           : config.nodeGroup || "",
             deployHook          : config.deployHook || "",
@@ -600,6 +603,7 @@ function SSLManager(config) {
         
         resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initIntSSL, config.withIntSSL ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
@@ -718,6 +722,12 @@ function SSLManager(config) {
         return { result: 0 };
     };
 
+    me.initIntSSL = function initIntSSL(withIntSSL) {
+        withIntSSL = String(withIntSSL) || false;
+        config.withIntSSL = me.initBoolValue(withIntSSL);
+        return { result: 0 };
+    };
+    
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         var resp;
 
@@ -1514,7 +1524,12 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
+                
                 me.exec(me.bindSSLCerts);
+
+                if (config.withIntSSL && nodeManager.checkCustomSSL()) {
+                    me.exec(me.bindSSLOnExtraNode, cert_key.body, cert.body, chain.body);
+                }
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
