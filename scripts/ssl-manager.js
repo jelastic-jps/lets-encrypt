@@ -1982,16 +1982,17 @@ function SSLManager(config) {
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
-            var resp;
+            var platformVersion = getPlatformVersion(),
+                binderService = api.env.binder || api.env.control;
 
             resp = getPlatformVersion();
             if (resp.result != 0) return resp;
 
-            if (compareVersions(resp.version, '4.9.5') >= 0 || resp.version.indexOf('trunk') != -1) {
-                return jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
+            if (compareVersions(platformVersion, '4.9.5') >= 0 || platformVersion.indexOf('trunk') != -1) {
+                return binderService.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
             }
 
-            return jelastic.env.control.AttachExtIp(envName, session, nodeId);
+            return binderService.AttachExtIp(envName, session, nodeId);
         };
 
         me.cmd = function (cmd, values, sep, disableLogging) {
