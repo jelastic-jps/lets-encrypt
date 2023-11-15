@@ -1982,13 +1982,11 @@ function SSLManager(config) {
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
-            var platformVersion = getPlatformVersion(),
-                binderService = api.env.binder || api.env.control;
-
-            resp = getPlatformVersion();
+            var binderService = api.env.binder || api.env.control;
+            var resp = getPlatformVersion();
             if (resp.result != 0) return resp;
 
-            if (compareVersions(platformVersion, '4.9.5') >= 0 || platformVersion.indexOf('trunk') != -1) {
+            if (compareVersions(resp.version, '4.9.5') >= 0 || resp.version.indexOf('trunk') != -1) {
                 return binderService.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
             }
 
