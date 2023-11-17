@@ -50,7 +50,7 @@ targetNodes:
     - jenkins2
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/JE-56113
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
 logo: images/letsencrypt.png
 
 description:
