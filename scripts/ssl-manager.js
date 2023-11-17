@@ -24,6 +24,7 @@ function SSLManager(config) {
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
      *      [withExtIp] : {Boolean}
+     *      [withIntSSL] : {Boolean}
      *      [webroot] : {Boolean}
      *      [webrootPath] : {String}
      *      [test] : {Boolean}
@@ -134,6 +135,7 @@ function SSLManager(config) {
         var resp = me.exec([
                 [ me.initCustomConfigs ],
                 [ me.initAddOnExtIp, config.withExtIp ],
+                [ me.initIntSSL, config.withIntSSL ],
                 [ me.initWebrootMethod, config.webroot ],
                 [ me.initFalbackToFake, config.fallbackToX1 ],
                 [ me.initEntryPoint ],
@@ -328,6 +330,7 @@ function SSLManager(config) {
             webroot             : config.webroot || "",
             webrootPath         : config.webrootPath || "",
             withExtIp           : config.withExtIp,
+            withIntSSL          : config.withIntSSL,
             customDomains       : me.getCustomDomains(),
             nodeGroup           : config.nodeGroup || "",
             deployHook          : config.deployHook || "",
@@ -603,6 +606,7 @@ function SSLManager(config) {
 
         resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
+            [ me.initIntSSL, config.withIntSSL ],
             [ me.initWebrootMethod, config.webroot ],
             [ me.initFalbackToFake, config.fallbackToX1 ],
             [ me.applyCustomDomains, config.customDomains ],
@@ -721,6 +725,12 @@ function SSLManager(config) {
         return { result: 0 };
     };
 
+    me.initIntSSL = function initIntSSL(withIntSSL) {
+        withIntSSL = String(withIntSSL) || false;
+        config.withIntSSL = me.initBoolValue(withIntSSL);
+        return { result: 0 };
+    };
+    
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         var resp;
 
@@ -1087,7 +1097,7 @@ function SSLManager(config) {
                 withExtIp : config.withExtIp,
                 webroot : config.webroot,
                 webrootPath : config.webrootPath || "",
-                skipped : config.skippedDomains || "",
+                skipped : me.getSkippedDomains().join(DOMAINS_SEP),
                 updateDecreased: !!config.updateDecreased,
                 updateDisabled: !!config.updateDisabled
             }),
@@ -1334,12 +1344,12 @@ function SSLManager(config) {
 
     //managing certificate challenge validation by routing all requests to master node with let's encrypt engine
     me.manageDnat = function manageDnat(action) {
-        let GREP_IP = "ip a | grep -q  '%(nodeIp)'";
-        let GREP_ALMA = "grep -q 'AlmaLinux' /etc/system-release";
-        let CENTOS_IPTABLES = "iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE;";
-        let ALMA_LINUX_ADD_RULES = "/usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \"LEmasq\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \"LEmasq\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \"LEmasq\"; ";
-        let ALMA_LINUX_REMOVE_RULES = "for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -rn 's|.*#\shandle\s([0-9])|\1|p'); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done;";
-        let resp;
+        var GREP_IP = "ip a | grep -q  '%(nodeIp)'",
+            GREP_ALMA = "grep -q 'AlmaLinux' /etc/system-release",
+            CENTOS_IPTABLES = "iptables -t nat %(action) PREROUTING -p tcp --dport 80 -j DNAT --to-destination %(nodeIp):80; iptables %(action) FORWARD -p tcp -j ACCEPT;  iptables -t nat %(action) POSTROUTING -d %(nodeIp) -j MASQUERADE;",
+            ALMA_LINUX_ADD_RULES = "/usr/sbin/nft insert rule ip nat PREROUTING tcp dport 80 counter dnat to %(nodeIp):80 comment \"LEmasq\"; /usr/sbin/nft insert rule ip filter FORWARD meta l4proto tcp counter accept  comment \"LEmasq\"; /usr/sbin/nft insert rule ip nat POSTROUTING ip daddr %(nodeIp) counter masquerade comment \"LEmasq\"; ",
+            ALMA_LINUX_REMOVE_RULES = "for _table in 'filter FORWARD' 'nat PREROUTING' 'nat POSTROUTING'; do for handle in $(nft -a list chain ip $_table | grep 'comment \"LEmasq\"' | sed -rn 's|.*#\shandle\s([0-9])|\1|p'); do /usr/sbin/nft delete rule ip $_table handle $handle; done; done;",
+            resp;
 
         if (action == 'add'){
             resp = nodeManager.cmd(
@@ -1516,7 +1526,12 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
+                
                 me.exec(me.bindSSLCerts);
+
+                if (config.withIntSSL && nodeManager.checkCustomSSL()) {
+                    me.exec(me.bindSSLOnExtraNode, cert_key.body, cert.body, chain.body);
+                }
             }
         } else {
             resp = error(Response.ERROR_UNKNOWN, "Can't read SSL certificate: key=%(key) cert=%(cert) chain=%(chain)", {
@@ -1969,16 +1984,15 @@ function SSLManager(config) {
         };
 
         me.attachExtIp = function attachExtIp(nodeId) {
-            var resp;
-
-            resp = getPlatformVersion();
+            var binderService = api.env.binder || api.env.control;
+            var resp = getPlatformVersion();
             if (resp.result != 0) return resp;
 
             if (compareVersions(resp.version, '4.9.5') >= 0 || resp.version.indexOf('trunk') != -1) {
-                return jelastic.env.control.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
+                return binderService.AttachExtIp({ envName : envName, session : session, nodeid : nodeId });
             }
 
-            return jelastic.env.control.AttachExtIp(envName, session, nodeId);
+            return binderService.AttachExtIp(envName, session, nodeId);
         };
 
         me.cmd = function (cmd, values, sep, disableLogging) {

@@ -122,8 +122,7 @@ do
     all_invalid_domains_errors+=$error";"
     all_invalid_domains+=$invalid_domain" "
 
-    domain=$(echo $domain | sed 's/'${invalid_domain}'\(\s-d\s\)\?//')
-    domain=$(echo $domain | sed "s/\s-d$//")
+    domain=$(echo $domain | sed 's/^'${invalid_domain}'\s-d\s//' | sed 's/\s-d\s'${invalid_domain}'\s-d\s//' | sed 's/\s-d\s'${invalid_domain}'$//' | sed 's/'${invalid_domain}'//')
   }
   counter=$((counter + 1))
 done

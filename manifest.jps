@@ -105,6 +105,7 @@ onInstall:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
       withExtIp: ${settings.withExtIp:}
+      withIntSSL: ${settings.withIntSSL:true}
       webroot: ${settings.webroot:}
       webrootPath: ${settings.webrootPath:}
       fallbackToX1: ${settings.fallbackToX1:}
@@ -195,6 +196,7 @@ actions:
       undeployHook: ${globals.undeployHook}
       undeployHookType: ${globals.undeployHookType}
       withExtIp: ${globals.withExtIp}
+      withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
@@ -272,6 +274,7 @@ actions:
       deployHookType: ${globals.deployHookType}
       undeployHookType: ${globals.undeployHookType}
       withExtIp: ${globals.withExtIp}
+      withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
