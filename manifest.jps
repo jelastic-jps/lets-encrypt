@@ -114,6 +114,7 @@ onInstall:
       undeployHook: ${settings.undeployHook:}
       undeployHookType: ${settings.undeployHookType:}
       test: ${settings.test:}
+      envAppid: ${env.appid}
   - checkClustering:
       nodeGroup: ${globals.nodeGroup}
       app_id: ${globals.app_id}
@@ -201,10 +202,12 @@ actions:
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
       clientVersion: ${globals.version_acme-sh:}
+      envAppid: ${globals.envAppid}
   
   callScript:
     script: |
-      var j = jelastic, resp = j.dev.scripting.Eval(appid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
+      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      var resp = api.dev.scripting.Eval(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
   
@@ -257,7 +260,8 @@ actions:
   
   delete:
     script: |
-      jelastic.dev.scripting.DeleteScript('${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
+      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      api.dev.scripting.DeleteScript(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
       
   installLE:
@@ -278,6 +282,7 @@ actions:
       
   createScript:
     script: |
-      return jelastic.dev.scripting.CreateScript("${this.scriptName}", "js", "${this.code:}")
+      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      return api.dev.scripting.CreateScript(targetAppid, session, "${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md

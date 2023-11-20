@@ -59,6 +59,7 @@ function SSLManager(config) {
         CONFIGURE = "configure",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
+        targetAppid,
         INSTALL = "install",
         LIGHT = "LIGHT",
         me = this,
@@ -75,6 +76,8 @@ function SSLManager(config) {
 
     config = config || {};
     session = config.session || "";
+
+    targetAppid = api.dev.apps.CreatePersistence ? config.envAppid : appid;
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
@@ -525,7 +528,7 @@ function SSLManager(config) {
             sCode = nodeManager.getCSScriptCode();
 
         me.logAction("AutoPatchLEScriptRestore");
-        return jelastic.dev.scripting.CreateScript(config.scriptName, "js", sCode);
+        return api.dev.scripting.CreateScript(targetAppid, session, config.scriptName, "js", sCode);
     };
 
     me.restoreDataIfNeeded = function () {
@@ -600,7 +603,7 @@ function SSLManager(config) {
     me.createScriptAndInstall = function createInstallationScript() {
         var resp = me.initCustomConfigs();
         if (resp.result != 0) return resp;
-        
+
         resp =  me.exec([
             [ me.initAddOnExtIp, config.withExtIp ],
             [ me.initIntSSL, config.withIntSSL ],
@@ -975,15 +978,14 @@ function SSLManager(config) {
             resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript(appid, session, scriptingScriptName);
+                api.dev.scripting.DeleteScript(targetAppid, session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript(appid, session, scriptingScriptName, "js", scriptBody);
-
+            resp = api.dev.scripting.CreateScript(targetAppid, session, scriptingScriptName, "js", scriptBody);
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
-            jelastic.dev.scripting.Build(appid, session, scriptingScriptName);
+            jelastic.dev.scripting.Build(targetAppid, session, scriptingScriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
@@ -1031,7 +1033,7 @@ function SSLManager(config) {
         if (action) params.action = action;
         params.fallbackToX1 = config.fallbackToX1;
 
-        var resp = jelastic.dev.scripting.Eval(config.scriptName, params);
+        var resp = api.dev.scripting.Eval(targetAppid, session, config.scriptName, params);
 
         if (me.getAddOnAction() == CONFIGURE) {
             me.logAction("EndConfigureLEUpdate", resp);
@@ -1461,13 +1463,13 @@ function SSLManager(config) {
         if (hookType == "js") {
             return me.exec(me.evalCode, hookBody, config);
         }
-        
+
         hookQuotedParts = hookBody.match(/^"(.*)"$|^'(.*)'$/);
-        
+
         if (hookQuotedParts) {
             hookBody = hookQuotedParts[1] || hookQuotedParts[2];
         }
-        
+
         return me.exec(me.cmd, [
             'hook=$(cat << \'EOF\'', '%(hook)', 'EOF', ')',
             'test -f "${hook}" && /bin/bash "${hook}" >> %(log) || /bin/bash -c "${hook}" >> %(log)'
@@ -2116,7 +2118,7 @@ function SSLManager(config) {
     }
 
     function getScript(name) {
-        return api.dev.scripting.GetScript(appid, session, name);
+        return api.dev.scripting.GetScript(targetAppid, session, name);
     }
 
     function compareVersions(a, b) {
@@ -2131,8 +2133,8 @@ function SSLManager(config) {
     }
 
     function log(message) {
-        if (jelastic.marketplace && jelastic.marketplace.console && message) {
-            return jelastic.marketplace.console.WriteLog(appid, session, message);
+        if (api.marketplace && api.marketplace.console && message) {
+            return api.marketplace.console.WriteLog(appid, session, message);
         }
 
         return { result : 0 };
