@@ -1559,6 +1559,10 @@ function SSLManager(config) {
             });
     };
 
+    me.removeSSLOnExtraNode = function removeSSLOnExtraNode() {
+        return me.cmd([ 'jem ssl remove' ]);
+    };
+
     me.removeSSL = function removeSSL() {
         return jelastic.env.binder.RemoveSSL(config.envName, session);
     };
