@@ -31,10 +31,16 @@ function validateLatestVersion(){
 }
 
 function updateScripts(){
-    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/auto-update-ssl-cert.sh -O /tmp/auto-update-ssl-cert.sh
-    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/install-le.sh -O /tmp/install-le.sh
-    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/validation.sh -O /tmp/validation.sh
-    $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/generate-ssl-cert.sh -O /tmp/generate-ssl-cert.sh
+    for sh_script_name in auto-update-ssl-cert install-le validation.sh generate-ssl-cert.sh; do
+        for i in {1..5}; do 
+            $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/${sh_script_name}.sh -O /tmp/${sh_script_name}.sh
+            if (( $? == 0 )); then 
+                break
+            else
+                sleep 1;
+            fi
+        done
+    done
 }
 
 updateScripts

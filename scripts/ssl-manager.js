@@ -77,6 +77,8 @@ function SSLManager(config) {
     config = config || {};
     session = config.session || "";
 
+    wgetRetries = "5";
+
     targetAppid = api.dev.apps.CreatePersistence ? config.envAppid : appid;
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
@@ -924,13 +926,14 @@ function SSLManager(config) {
         var resp = nodeManager.cmd([
             "mkdir -p $(dirname %(path))",
             "mkdir -p $(dirname %(logPath))",
-            "wget --no-check-certificate '%(url)' -O '%(path)'",
+            "for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
             "chmod +x %(path) >> %(log)"
         ], {
             url : url,
             logPath : nodeManager.getLogPath(),
             path : nodeManager.getScriptPath(fileName),
-            nodeId: validateNodeId
+	    wgetRetries : wgetRetries,
+            nodeId : validateNodeId
         });
         if (resp.result != 0) return resp;
 
@@ -1050,13 +1053,14 @@ function SSLManager(config) {
         var url = me.getScriptUrl(INSTALL_LE_SCRIPT);
 
         return nodeManager.cmd([
-            "wget --no-check-certificate '%(url)' -O '%(path)'",
+            "for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
             "chmod +x %(path)",
             "%(path) %(baseUrl) %(clientVersion) >> %(log)"
         ], {
             url : url,
-            baseUrl: config.baseUrl,
-            clientVersion: config.clientVersion || "",
+            baseUrl : config.baseUrl,
+	    wgetRetries : wgetRetries,
+            clientVersion : config.clientVersion || "",
             path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
         });
     };
@@ -1131,15 +1135,16 @@ function SSLManager(config) {
         me.execAll([
             //download SSL generation script
             [ me.cmd, [
-                "wget --no-check-certificate '%(url)' -O %(path)",
+                "for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
                 "chmod +x %(path)",
-                "wget --no-check-certificate '%(validationUrl)' -O %(validationPath)",
-                "chmod +x %(validationPath)",
-                "wget --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf",
+		"for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(validationUrl)' -O '%(validationPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
+		"for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
+		"chmod +x %(validationPath)"
             ], {
                 validationUrl : me.getScriptUrl(validationFileName),
                 validationPath : nodeManager.getScriptPath(validationFileName),
                 proxyConfigUrl : me.getConfigUrl(proxyConfigName),
+		wgetRetries : wgetRetries,
                 url : url,
                 path : generateSSLScript
             }]
@@ -1398,7 +1403,7 @@ function SSLManager(config) {
         var scriptUrl = me.getScriptUrl(AUTO_UPDATE_SCRIPT);
 
         return nodeManager.cmd([
-            "wget --no-check-certificate '%(url)' -O %(scriptPath)",
+	    "for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(url)' -O '%(scriptPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
             "chmod +x %(scriptPath)",
             "crontab -l | grep -v '/root/.acme.sh' | crontab -",
             "crontab -l | grep -v '%(scriptPath)' | crontab -",
@@ -1406,6 +1411,7 @@ function SSLManager(config) {
         ], {
             url : scriptUrl,
             cronTime : crontime ? crontime : config.cronTime,
+	    wgetRetries : wgetRetries,
             scriptPath : nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT),
             autoUpdateUrl : me.getAutoUpdateUrl()
         }, "", true);
@@ -2043,11 +2049,12 @@ function SSLManager(config) {
 
                     if ((!isDefined(bCustomSSLSupported) || node.type != "DOCKERIZED") && node.nodemission != "docker") {
                         resp = me.cmd([
-                            "wget --no-check-certificate '%(url)' -O '%(path)'",
+                            "for i in {1..%(wgetRetries)}; do wget --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
                             "source %(path)",
                             "validateCustomSSL"
                         ], {
                             url : nodeManager.getValidationScriptUrl(),
+			    wgetRetries : wgetRetries,
                             path : nodeManager.getValidationPath()
                         });
 
