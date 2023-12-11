@@ -7,8 +7,8 @@ OPENSSL=$(which openssl)
 GREP=$(which grep)
 SED=$(which sed)
 GIT=$(which git);
-BASE_REPO_URL="https://github.com/jelastic-jps/lets-encrypt"
-RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/scripts/"
+BASE_REPO_URL="https://github.com/DmytroZubelevych/lets-encrypt"
+RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/DmytroZubelevych/lets-encrypt/master/scripts/"
 SETTINGS_CUSTOM="/var/lib/jelastic/keys/letsencrypt/settings-custom"
 
 [[ -z "$WGET" || -z "$OPENSSL" || -z "$GREP" || -z "$SED" || -z "$GIT" ]] && { echo "PATH not set with neccessary commands"; exit 3 ; }
@@ -33,7 +33,7 @@ function validateLatestVersion(){
 function updateScripts(){
     for sh_script_name in auto-update-ssl-cert install-le validation.sh generate-ssl-cert.sh; do
         for i in {1..5}; do 
-            $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/${sh_script_name}.sh -O /tmp/${sh_script_name}.sh
+            $WGET --timeout=5 --waitretry=0 --tries=1 --no-check-certificate $RAW_REPO_SCRIPS_URL/${sh_script_name}.sh -O /tmp/${sh_script_name}.sh
             if (( $? == 0 )); then 
                 break
             else
