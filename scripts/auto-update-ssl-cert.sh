@@ -7,7 +7,7 @@ OPENSSL=$(which openssl)
 GREP=$(which grep)
 SED=$(which sed)
 GIT=$(which git);
-BASE_REPO_URL="https://github.com/DmytroZubelevych/lets-encrypt"
+BASE_REPO_URL="https://github.com/jelastic-jps/lets-encrypt"
 RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/DmytroZubelevych/lets-encrypt/master/scripts/"
 SETTINGS_CUSTOM="/var/lib/jelastic/keys/letsencrypt/settings-custom"
 
