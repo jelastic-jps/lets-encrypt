@@ -33,7 +33,7 @@ function validateLatestVersion(){
 function updateScripts(){
     for sh_script_name in auto-update-ssl-cert install-le validation.sh generate-ssl-cert.sh; do
         for i in {1..5}; do 
-            $WGET  --no-check-certificate $RAW_REPO_SCRIPS_URL/${sh_script_name}.sh -O /tmp/${sh_script_name}.sh
+            $WGET --timeout=5 --waitretry=0 --tries=1 --no-check-certificate $RAW_REPO_SCRIPS_URL/${sh_script_name}.sh -O /tmp/${sh_script_name}.sh
             if (( $? == 0 )); then 
                 break
             else
