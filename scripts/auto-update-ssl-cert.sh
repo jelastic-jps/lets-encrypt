@@ -7,8 +7,8 @@ OPENSSL=$(which openssl)
 GREP=$(which grep)
 SED=$(which sed)
 GIT=$(which git);
-BASE_REPO_URL="https://github.com/DmytroZubelevych/lets-encrypt"
-RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/DmytroZubelevych/lets-encrypt/master/scripts/"
+BASE_REPO_URL="https://github.com/jelastic-jps/lets-encrypt"
+RAW_REPO_SCRIPS_URL="https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/JE-69430/scripts/"
 SETTINGS_CUSTOM="/var/lib/jelastic/keys/letsencrypt/settings-custom"
 
 [[ -z "$WGET" || -z "$OPENSSL" || -z "$GREP" || -z "$SED" || -z "$GIT" ]] && { echo "PATH not set with neccessary commands"; exit 3 ; }
@@ -31,7 +31,7 @@ function validateLatestVersion(){
 }
 
 function updateScripts(){
-    for sh_script_name in auto-update-ssl-cert install-le validation.sh generate-ssl-cert.sh; do
+    for sh_script_name in auto-update-ssl-cert install-le validation generate-ssl-cert; do
         for i in {1..5}; do 
             $WGET --timeout=5 --waitretry=0 --tries=1 --no-check-certificate $RAW_REPO_SCRIPS_URL/${sh_script_name}.sh -O /tmp/${sh_script_name}.sh
             if (( $? == 0 )); then 
@@ -65,6 +65,7 @@ seconds_before_expire=$(( $DAYS_BEFORE_EXPIRE * 24 * 60 * 60 ));
     exp_date=$(date --utc --date="$exp_date_raw" "+%Y-%m-%d %H:%M:%S");
 }
 
+$( [[ -e /usr/bin/python ]] || ln -s /usr/bin/python3 /usr/bin/python )
 [[ -f "/var/lib/jelastic/SSL/jelastic.crt" && "$withExtIp" != "false" ]] && exp_date=$(jem ssl checkdomain | python -c "import sys, json; print (json.load(sys.stdin)['expiredate'])");
 
 [ -z "$exp_date" ] && { echo "$(date) - no certificates for update" >> /var/log/letsencrypt.log; exit 0; };

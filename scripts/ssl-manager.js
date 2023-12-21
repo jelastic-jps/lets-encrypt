@@ -586,7 +586,7 @@ function SSLManager(config) {
         }
 
         return jelastic.utils.scheduler.AddTask({
-            appid: appid,
+            appid: targetAppid,
             session: session,
             script: script,
             trigger: "once_delay:1000",
@@ -1054,15 +1054,22 @@ function SSLManager(config) {
     me.installLetsEncrypt = function installLetsEncrypt() {
         var url = me.getScriptUrl(INSTALL_LE_SCRIPT);
 
-        return nodeManager.cmd([
-            "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
+        var resp = nodeManager.cmd([
+            "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done"
+        ], {
+            url : url,
+	    wgetRetries : wgetRetries,
+	    wgetTimeout : wgetTimeout,
+            path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
+        });
+
+        if (resp.result != 0) return resp;
+
+	return nodeManager.cmd([
             "chmod +x %(path)",
             "%(path) %(baseUrl) %(clientVersion) >> %(log)"
         ], {
-            url : url,
             baseUrl : config.baseUrl,
-	    wgetRetries : wgetRetries,
-	    wgetTimeout : wgetTimeout,
             clientVersion : config.clientVersion || "",
             path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
         });
@@ -1890,7 +1897,7 @@ function SSLManager(config) {
         };
 
         me.jemSslCheckdomain = function() {
-            var resp = nodeManager.cmd([ "jem ssl checkdomain | python -c \"import sys, json; print (json.load(sys.stdin)['expiredate'])\"" ]);
+            var resp = nodeManager.cmd([ "$( [[ -e /usr/bin/python ]] || ln -s /usr/bin/python3 /usr/bin/python ); jem ssl checkdomain | python -c \"import sys, json; print (json.load(sys.stdin)['expiredate'])\"" ]);
             return me.jemResponseParse(resp);
         };
 
