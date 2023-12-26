@@ -73,7 +73,8 @@ do
   [[ -z $domain ]] && break;
   LOG_FILE=$DEFAULT_LOG_FILE"-"$counter
 
-  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
+  $DIR/opt/letsencrypt/acme.sh --set-default-ca --server letsencrypt
+  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 -k 2048 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
@@ -172,7 +173,7 @@ mkdir -p /tmp/
 chmod -R 777 /tmp/
 appdomain=$(cut -d"." -f2- <<< $appdomain)
 
-certspath=$(sed -n 's/.*][[:space:][:digit:]{4}[:space:]]Your[[:space:]]cert[[:space:]]is[[:space:]]in[[:space:]]\{2\}\(.*\)./\1/p' $LOG_FILE)
+certspath=$(sed -n 's/.*][[:space:][:digit:]{4}[:space:]]Your[[:space:]]cert[[:space:]]is[[:space:]]in[:]\{0,1\}[[:space:]]\{1,2\}\(.*\)./\0/p' $LOG_FILE|awk '{print $NF}')
 certdir=$(echo $certspath | sed 's/[^\/]*\.cer$//' | tail -n 1)
 certname=$(echo $certspath | sed 's/.*\///' | tail -n 1)
 certdomain=$(echo $certspath | sed 's/.*\///' | sed 's/\.cer$//')
