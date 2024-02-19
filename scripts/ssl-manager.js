@@ -7,7 +7,7 @@ function SSLManager(config) {
      *      envDomain : {String}
      *      envAppid : {String}
      *      baseUrl : {String}
-     *      baseDir : {String}     
+     *      baseDir : {String}
      *      scriptName : {String}
      *      cronTime : {String}
      *      email : {String}
@@ -57,6 +57,7 @@ function SSLManager(config) {
         DATE_FORMAT = "yyyy-MM-dd HH:mm:ss",
         DOMAINS_SEP = " ",
         CONFIGURE = "configure",
+        UPDATE = "update",
         Random = com.hivext.api.utils.Random,
         isAddedEnvDomain = false,
         targetAppid,
@@ -578,7 +579,17 @@ function SSLManager(config) {
 
         if (compareVersions(resp.version, '7.0.0') >= 0) {
             script = AUTO_UPDATE_SCRIPT_NAME;
-            params.action = "update";
+
+            resp = me.checkLEScript();
+            if (resp.result != 0) return resp;
+
+            if (resp.scriptExists) {
+                params.action = UPDATE;
+            } else {
+                me.logAction("StartRestoreLEScript");
+                params.action = CONFIGURE;
+                params.customDomains = me.getCustomDomains();
+            }
         } else {
             script = config.scriptName;
             params.token = config.token;
@@ -733,7 +744,7 @@ function SSLManager(config) {
         config.withIntSSL = me.initBoolValue(withIntSSL);
         return { result: 0 };
     };
-    
+
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         var resp;
 
@@ -1013,6 +1024,18 @@ function SSLManager(config) {
         }
 
         return resp;
+    };
+
+    me.checkLEScript = function checkLEScript() {
+        var resp = api.dev.scripting.GetScript(targetAppid, session, config.scriptName),
+            scriptExists = true;
+
+        if (resp.result != 0) {
+            log("[WARNING]: cannot get script '" + config.scriptName + "': " + resp);
+            scriptExists = false;
+        }
+
+        return { result: 0, scriptExists: scriptExists };
     };
 
     me.getScriptBody = function(scriptName) {
@@ -1545,7 +1568,7 @@ function SSLManager(config) {
                     cert: cert.body,
                     interm: chain.body
                 });
-                
+
                 me.exec(me.bindSSLCerts);
 
                 if (config.withIntSSL && nodeManager.checkCustomSSL()) {
