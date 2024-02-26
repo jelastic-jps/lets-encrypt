@@ -104,8 +104,6 @@ onInstall:
   - cmd[${targetNodes.nodeGroup}]: |-
       [[ -e /usr/bin/python ]] || ln -s /usr/bin/python3 /usr/bin/python 
     user: root
-  - env.control.AddContainerEnvVars[${targetNodes.nodeGroup}]:
-      vars: {"PROXY_PORT":"12345", "LE_PORT":"12346"}
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
