@@ -22,8 +22,6 @@ mkdir -p /etc/letsencrypt/
 
 cd "${DIR}/opt/letsencrypt"
 
-PROXY_PORT=12345
-LE_PORT=12346
 source /.jelenv
 PROXY_PORT=12347
 LE_PORT=12348
