@@ -53,7 +53,7 @@ function SSLManager(config) {
         SETTINGS_PATH = "opt/letsencrypt/settings",
         DECREASE_UPDATE_DAYS = 10,
         REMOVE_UPDATE_DAYS = 90,
-        SUPPORT_EMAIL = "support@jelastic.com",
+        SUPPORT_EMAIL = "paas.support@virtuozzo.com",
         DATE_FORMAT = "yyyy-MM-dd HH:mm:ss",
         DOMAINS_SEP = " ",
         CONFIGURE = "configure",
@@ -67,6 +67,8 @@ function SSLManager(config) {
         BL = "bl",
         LB = "lb",
         CP = "cp",
+        wgetRetries = "5",
+        wgetTimeout = "5",
         isValidToken = false,
         patchBuild = 1,
         debug = [],
@@ -77,9 +79,6 @@ function SSLManager(config) {
 
     config = config || {};
     session = config.session || "";
-
-    wgetRetries = "5";
-    wgetTimeout = "5";
 
     targetAppid = api.dev.apps.CreatePersistence ? config.envAppid : appid;
 
@@ -553,7 +552,7 @@ function SSLManager(config) {
     };
 
     me.createExecuteActionScript = function createExecuteActionScript() {
-        return me.createScript(EXEC_AUTO_UPDATE_ACTION_SCRIPT, AUTO_UPDATE_SCRIPT_NAME);
+        return me.createScript(EXEC_AUTO_UPDATE_ACTION_SCRIPT, AUTO_UPDATE_SCRIPT_NAME, appid);
     };
 
     me.checkEnvAccessAndUpdate = function (errResp) {
@@ -569,6 +568,7 @@ function SSLManager(config) {
 
     me.addAutoUpdateTask = function addAutoUpdateTask() {
         var params = { task: 1 },
+            scriptAppid = targetAppid,
             script,
             resp;
 
@@ -578,6 +578,7 @@ function SSLManager(config) {
         me.logAction("AddLEAutoUpdateTask");
 
         if (compareVersions(resp.version, '7.0.0') >= 0) {
+            scriptAppid = appid;
             script = AUTO_UPDATE_SCRIPT_NAME;
 
             resp = me.checkLEScript();
@@ -597,7 +598,7 @@ function SSLManager(config) {
         }
 
         return jelastic.utils.scheduler.AddTask({
-            appid: targetAppid,
+            appid: scriptAppid,
             session: session,
             script: script,
             trigger: "once_delay:1000",
@@ -944,8 +945,8 @@ function SSLManager(config) {
             url : url,
             logPath : nodeManager.getLogPath(),
             path : nodeManager.getScriptPath(fileName),
-	    wgetRetries : wgetRetries,
-	    wgetTimeout : wgetTimeout,
+            wgetRetries : wgetRetries,
+            wgetTimeout : wgetTimeout,
             nodeId : validateNodeId
         });
         if (resp.result != 0) return resp;
@@ -978,11 +979,12 @@ function SSLManager(config) {
         return resp;
     };
 
-    me.createScript = function createScript (scriptName, scriptingScriptName) {
+    me.createScript = function createScript (scriptName, scriptingScriptName, scriptAppid) {
         var scriptBody,
             resp;
 
         scriptingScriptName = scriptingScriptName || scriptName;
+        scriptAppid = scriptAppid || targetAppid;
 
         try {
             resp = me.getScriptBody(scriptName);
@@ -994,14 +996,14 @@ function SSLManager(config) {
             resp = getScript(scriptingScriptName);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
-                api.dev.scripting.DeleteScript(targetAppid, session, scriptingScriptName);
+                api.dev.scripting.DeleteScript(scriptAppid, session, scriptingScriptName);
             }
             //create a new script
-            resp = api.dev.scripting.CreateScript(targetAppid, session, scriptingScriptName, "js", scriptBody);
+            resp = api.dev.scripting.CreateScript(scriptAppid, session, scriptingScriptName, "js", scriptBody);
             java.lang.Thread.sleep(1000);
 
             //build script to avoid caching
-            jelastic.dev.scripting.Build(targetAppid, session, scriptingScriptName);
+            jelastic.dev.scripting.Build(scriptAppid, session, scriptingScriptName);
         } catch (ex) {
             resp = error(Response.ERROR_UNKNOWN, toJSON(ex));
         }
@@ -1082,14 +1084,14 @@ function SSLManager(config) {
             "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done"
         ], {
             url : url,
-	    wgetRetries : wgetRetries,
-	    wgetTimeout : wgetTimeout,
+            wgetRetries : wgetRetries,
+            wgetTimeout : wgetTimeout,
             path : nodeManager.getScriptPath(INSTALL_LE_SCRIPT)
         });
 
         if (resp.result != 0) return resp;
 
-	return nodeManager.cmd([
+        return nodeManager.cmd([
             "chmod +x %(path)",
             "%(path) %(baseUrl) %(clientVersion) >> %(log)"
         ], {
@@ -1171,15 +1173,15 @@ function SSLManager(config) {
             [ me.cmd, [
                 "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(path)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
                 "chmod +x %(path)",
-		            "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(validationUrl)' -O '%(validationPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
-		            "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
-		            "chmod +x %(validationPath)"
+                "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(validationUrl)' -O '%(validationPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
+                "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(proxyConfigUrl)' -O /etc/tinyproxy/tinyproxy.conf; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
+                "chmod +x %(validationPath)"
             ], {
                 validationUrl : me.getScriptUrl(validationFileName),
                 validationPath : nodeManager.getScriptPath(validationFileName),
                 proxyConfigUrl : me.getConfigUrl(proxyConfigName),
-		            wgetRetries : wgetRetries,
-		            wgetTimeout : wgetTimeout,
+                wgetRetries : wgetRetries,
+                wgetTimeout : wgetTimeout,
                 url : url,
                 path : generateSSLScript
             }]
@@ -1438,7 +1440,7 @@ function SSLManager(config) {
         var scriptUrl = me.getScriptUrl(AUTO_UPDATE_SCRIPT);
 
         return nodeManager.cmd([
-	          "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(scriptPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
+            "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(scriptPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
             "chmod +x %(scriptPath)",
             "crontab -l | grep -v '/root/.acme.sh' | crontab -",
             "crontab -l | grep -v '%(scriptPath)' | crontab -",
@@ -1446,8 +1448,8 @@ function SSLManager(config) {
         ], {
             url : scriptUrl,
             cronTime : crontime ? crontime : config.cronTime,
-	          wgetRetries : wgetRetries,
-	          wgetTimeout : wgetTimeout,
+            wgetRetries : wgetRetries,
+            wgetTimeout : wgetTimeout,
             scriptPath : nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT),
             autoUpdateUrl : me.getAutoUpdateUrl()
         }, "", true);
@@ -2090,8 +2092,8 @@ function SSLManager(config) {
                             "validateCustomSSL"
                         ], {
                             url : nodeManager.getValidationScriptUrl(),
-			                      wgetRetries : wgetRetries,
-			                      wgetTimeout : wgetTimeout,
+                            wgetRetries : wgetRetries,
+                            wgetTimeout : wgetTimeout,
                             path : nodeManager.getValidationPath()
                         });
 
