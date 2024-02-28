@@ -3,7 +3,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..";
 DEFAULT_LOG_FILE=$DIR/var/log/letsencrypt/letsencrypt.log-$(date '+%s')
 KEYS_DIR="$DIR/var/lib/jelastic/keys/"
 SETTINGS="$DIR/opt/letsencrypt/settings"
-TINYPROXY_CONFIG="/etc/tinyproxy/tinyproxy.conf"
 DOMAIN_SEP=" -d "
 GENERAL_RESULT_ERROR=21
 TOO_MANY_CERTS=22
@@ -22,11 +21,8 @@ mkdir -p /etc/letsencrypt/
 
 cd "${DIR}/opt/letsencrypt"
 
-source /.jelenv
 PROXY_PORT=12347
 LE_PORT=12348
-
-sed -ci -e "s/^Port.*/Port ${PROXY_PORT}/g" -e "s/12346/${LE_PORT}/g" ${TINYPROXY_CONFIG}
 
 #Parameters for test certificates
 test_params='';
