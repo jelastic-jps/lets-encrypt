@@ -993,7 +993,7 @@ function SSLManager(config) {
             scriptBody = resp.scriptBody;
             scriptBody = me.replaceText(scriptBody, config);
 
-            resp = getScript(scriptingScriptName);
+            resp = getScript(scriptingScriptName, scriptAppid);
             if (resp.result == Response.OK) {
                 //delete the script if it already exists
                 api.dev.scripting.DeleteScript(scriptAppid, session, scriptingScriptName);
@@ -2163,8 +2163,8 @@ function SSLManager(config) {
         };
     }
 
-    function getScript(name) {
-        return api.dev.scripting.GetScript(targetAppid, session, name);
+    function getScript(name, scriptAppid) {
+        return api.dev.scripting.GetScript(scriptAppid || targetAppid, session, name);
     }
 
     function compareVersions(a, b) {
