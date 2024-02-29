@@ -1,6 +1,6 @@
 version: 1.3
 type: update
-build: 201807232048
+build: 202402271353
 id: letsencrypt-ssl-addon
 name: Let's Encrypt Free SSL
 
@@ -10,44 +10,27 @@ categories:
 targetEditions: [ "devops", "wordpress", "lite_do", "lite_vultr", "lite_gc", "ultimate", "light", "business" ]
 
 targetNodes:
-  nodeType:
-    - tomcat6
-    - tomcat7
-    - tomcat8
-    - tomcat85
-    - tomcat9
-    - tomcat
-    - tomee
-    - tomee-dockerized
-    - glassfish3
-    - glassfish4
-    - glassfish
-    - jetty
-    - jetty6
-    - apache
-    - apache2
-    - nginxphp
-    - apache2-ruby
-    - nginx-ruby
-    - nginx
-    - nginx-dockerized
-    - nginxphp-dockerized
-    - haproxy
-    - apache-lb
-    - varnish
-    - varnish-dockerized
-    - payara
-    - wildfly
-    - nodejs
-    - apache-ruby
-    - apache-python
-    - nginxruby
-    - litespeedphp
-    - litespeedadc
-    - lemp
-    - llsmp
-    - jenkins
-    - jenkins2
+  nodeType: [
+    tomcat6, tomcat7, tomcat8, tomcat85, tomcat9, tomcat,
+    tomee, tomee-dockerized,
+    glassfish3, glassfish4, glassfish,
+    jetty, jetty6,
+    apache, apache2,
+    nginxphp, nginxphp-dockerized,
+    litespeedphp, litespeedadc,
+    lemp, llsmp,
+    apache2-ruby, apache-ruby,
+    nginx-ruby, nginxruby,
+    nginx, nginx-dockerized,
+    haproxy,
+    apache-lb,
+    varnish, varnish-dockerized,
+    payara,
+    wildfly,
+    nodejs,
+    apache-python,
+    jenkins, jenkins2
+  ]
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master
@@ -61,7 +44,7 @@ description:
 globals:
   scriptSufix: letsencrypt-ssl
   app_id: letsencrypt-ssl-addon
-  
+
 mixins:
   - configs/vers.yaml
   - https://raw.githubusercontent.com/jelastic-jps/common/main/clustered-addon-utils.yml
@@ -102,7 +85,7 @@ buttons:
 
 onInstall:
   - cmd[${targetNodes.nodeGroup}]: |-
-      [[ -e /usr/bin/python ]] || ln -s /usr/bin/python3 /usr/bin/python 
+      [[ -e /usr/bin/python ]] || ln -s /usr/bin/python3 /usr/bin/python
     user: root
   - setGlobals:
       nodeId: ${settings.nodeId:}
@@ -141,12 +124,12 @@ onInstall:
               app_id: ${globals.app_id}
       - if (globals.isSecondaryEnv):
           return:
-            type: success 
+            type: success
       - else:
           installScript
   - else:
       installScript
-    
+
 
 onUninstall:
   - checkClustering:
@@ -202,18 +185,19 @@ actions:
       withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
+      appId: ${globals.app_id}
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
       clientVersion: ${globals.version_acme-sh:}
       envAppid: ${globals.envAppid}
-  
+
   callScript:
     script: |
       var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
       var resp = api.dev.scripting.Eval(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
-  
+
   update:
     - checkClustering:
         nodeGroup: ${globals.nodeGroup}
@@ -231,8 +215,8 @@ actions:
     - else:
         callScript:
           action: auto-update
-  
-  configure: 
+
+  configure:
     - checkClustering:
         nodeGroup: ${globals.nodeGroup}
         app_id: letsencrypt-ssl-addon
@@ -260,13 +244,13 @@ actions:
             return:
               type: success
     - installScript
-  
+
   delete:
     script: |
       var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
       api.dev.scripting.DeleteScript(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
-      
+
   installLE:
     install: ${baseUrl}/manifest.jps
     envName: ${this.envName}
@@ -282,7 +266,7 @@ actions:
       webrootPath: ${globals.webrootPath}
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
-      
+
   createScript:
     script: |
       var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
