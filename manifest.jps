@@ -185,6 +185,7 @@ actions:
       withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
       webrootPath: ${globals.webrootPath}
+      appId: ${globals.app_id}
       fallbackToX1: ${globals.fallbackToX1}
       test: ${globals.test}
       clientVersion: ${globals.version_acme-sh:}
