@@ -15,6 +15,7 @@ if (resp.response) {
 
     if (addon && addon.isInstalled) {
         let CONFIGURE_ACTION = "configure";
+        let MAIN_SETTINGS_ID = "main";
 
         if (!hasFullCollaborationSupport(addon)) {
             action = CONFIGURE_ACTION;
@@ -28,7 +29,14 @@ if (resp.response) {
         };
 
         if (action == CONFIGURE_ACTION) {
-            actionParams.settingsId = "main";
+            actionParams.settingsId = MAIN_SETTINGS_ID;
+            
+            let actionButton = (addon.buttons || []).find(button => (button.settings == MAIN_SETTINGS_ID));
+            
+            if (actionButton && actionButton.action) {
+                actionParams.action = actionButton.action;
+            }
+            
             actionParams.params = (addon.settings || {}).data || {
                 customDomains: getParam("customDomains") || ""
             };
