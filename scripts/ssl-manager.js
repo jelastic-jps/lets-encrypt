@@ -1576,7 +1576,7 @@ function SSLManager(config) {
 
         sslCerts = resp.responses;
 
-        if (sslCerts.length) {
+        if (sslCerts.length > 0) {
             resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
             if (resp.result != 0) return resp;
         }
