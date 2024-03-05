@@ -1575,9 +1575,11 @@ function SSLManager(config) {
         if (resp.result != 0) return resp;
 
         sslCerts = resp.responses;
-        
-        resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
-        if (resp.result != 0) return resp;
+
+        if (sslCerts.length) {
+            resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
+            if (resp.result != 0) return resp;
+        }
         
         if (config.withIntSSL && nodeManager.checkCustomSSL()) {
             resp = me.exec(me.removeSSLOnExtraNode);
