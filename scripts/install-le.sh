@@ -36,16 +36,7 @@ echo "Installing required packages"
     }
   }
   if grep -a 'AlmaLinux' /etc/system-release ; then
-    microdnf -y install epel-release; microdnf install -y git bc nss socat --enablerepo='epel';
-    for ((i=1;i<=WGET_RETRIES;i++)); do
-        wget --timeout=10 --waitretry=0 --tries=1 http://repository.jelastic.com/pub/tinyproxy-1.8.3-2.el9.x86_64.rpm -O /tmp/tinyproxy-1.8.3-2.el9.x86_64.rpm
-        if (( $? == 0 )); then
-            break
-        else
-            sleep 1;
-        fi
-    done
-    dnf install -y /tmp/tinyproxy-1.8.3-2.el9.x86_64.rpm --disablerepo=* ; rm -f /tmp/tinyproxy-1.8.3-2.el9.x86_64.rpm
+    microdnf -y install epel-release; microdnf install -y git bc nss socat tinyproxy --enablerepo='epel';
   else
 
     yum-config-manager --save --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5
