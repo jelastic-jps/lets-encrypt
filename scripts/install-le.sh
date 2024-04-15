@@ -64,6 +64,7 @@ echo "Installing required packages"
   }
   cd $DIR/opt/letsencrypt/
   ./acme.sh --install --no-cron --accountemail $email
+  ./acme.sh --set-default-ca --server letsencrypt
 }
 
 [ ! -f "${DIR}/root/validation.sh" ] && {
