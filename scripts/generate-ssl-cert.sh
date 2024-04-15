@@ -21,8 +21,8 @@ mkdir -p /etc/letsencrypt/
 
 cd "${DIR}/opt/letsencrypt"
 
-PROXY_PORT=12345
-LE_PORT=12346
+PROXY_PORT=12347
+LE_PORT=12348
 
 #Parameters for test certificates
 test_params='';
