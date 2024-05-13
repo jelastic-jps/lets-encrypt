@@ -142,7 +142,7 @@ sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
  if grep -a 'AlmaLinux' /etc/system-release ; then
     for _family in ip ip6; do
         for _table in 'filter INPUT' 'nat PREROUTING'; do
-            for handle in $(nft -a list table $_family ${_table/ *} | grep 'comment \"LE\"'| sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g' 2>/dev/null); do
+            for handle in $(nft -a list chain $_family ${_table} | grep 'comment \"LE\"'| sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g' 2>/dev/null); do
                 /usr/sbin/nft delete rule $_family $_table handle $handle;
             done
         done
