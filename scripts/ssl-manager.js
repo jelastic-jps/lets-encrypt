@@ -363,7 +363,13 @@ function SSLManager(config) {
     };
 
     me.uninstall = function () {
-        var autoUpdateScript = nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT);
+        var autoUpdateScript = nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT),
+            resp;
+
+        resp = nodeManager.getEntryPointGroup();
+        if (resp.result != 0) return resp;
+
+        config.nodeGroup = resp.group;
 
         return me.execAll([
             [ me.cmd, "crontab -l 2>/dev/null | grep -v '%(scriptPath)' | crontab -", {
@@ -383,7 +389,8 @@ function SSLManager(config) {
                     nodeManager.getScriptPath(INSTALL_LE_SCRIPT),
                     nodeManager.getScriptPath(VALIDATION_SCRIPT),
                     autoUpdateScript
-                ].join(DOMAINS_SEP)
+                ].join(DOMAINS_SEP),
+                nodeGroup: config.nodeGroup
             }]
         ]);
     };
