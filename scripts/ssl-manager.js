@@ -44,6 +44,7 @@ function SSLManager(config) {
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
         NO_VALID_IP_ADDRESSES = 12008,
+        ENVIRONMENT_NODE_GROUP_NOT_EXISTS = 2391,
         VALIDATION_SCRIPT = "validation.sh",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
@@ -710,10 +711,19 @@ function SSLManager(config) {
             propName,
             resp;
 
+
         resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false", { nodeGroup: config.nodeGroup });
+
+        if (resp.result == ENVIRONMENT_NODE_GROUP_NOT_EXISTS) {
+            resp = nodeManager.getEntryPointGroup();
+            if (resp.result != 0) return resp;
+
+            config.nodeGroup = resp.group;
+        }
+
         if (resp.result != 0) return resp;
 
-        if (resp.responses[0].out == "true") {
+        if (resp.responses && resp.responses[0] && resp.responses[0].out == "true") {
             resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
             if (resp.result != 0) return resp;
 
