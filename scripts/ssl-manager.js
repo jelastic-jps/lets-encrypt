@@ -1444,7 +1444,7 @@ function SSLManager(config) {
             "chmod +x %(scriptPath)",
             "crontab -l | grep -v '/root/.acme.sh' | crontab -",
             "crontab -l | grep -v '%(scriptPath)' | crontab -",
-            "echo \"%(cronTime) su - root -c \\\"%(scriptPath) '%(autoUpdateUrl)' >> %(log)\\\"\" >> /var/spool/cron/root"
+            "echo \"%(cronTime) su - root -c \\\"%(scriptPath) '%(autoUpdateUrl)' >> %(log) 2>&1\\\"\" >> /var/spool/cron/root"
         ], {
             url : scriptUrl,
             cronTime : crontime ? crontime : config.cronTime,
