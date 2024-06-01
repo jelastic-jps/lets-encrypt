@@ -76,7 +76,7 @@ _cur_date_unixtime=$(date "+%s");
 _delta_time=$(( $_exp_date_unixtime - $_cur_date_unixtime  ));
 
 [[ $_delta_time -le $seconds_before_expire ]] && {
-    echo "$(date) - update required" >> ${LOG_FILE};
+    echo "$(date) - update required";
     validateLatestVersion
     resp=$($WGET --no-check-certificate -qO- "${auto_update_url}");
     echo ${resp} >> ${LOG_FILE};
