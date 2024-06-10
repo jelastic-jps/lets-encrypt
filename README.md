@@ -8,6 +8,7 @@
 
 ---
 **NOTE**
+
   You have the option to install the add-on Let’s Encrypt (a service provided by Internet Security Research Group, a California (United States) Nonprofit Public Benefit Corporation) to request a trusted certificate intended to publicly vouch that you control a certain domain name or names that are reachable on the Internet. As part of the process of proving that control, Let’s Encrypt will collect various information related to certificate authentication and management. That information includes the IP addresses from which you access the Let’s Encrypt service; all resolved IP addresses for any domain names requested; server information related to any validation requests; full logs of all inbound HTTP / ACME requests, all outbound validation requests; and information sent by or inferred from your client software.
   Your use of Let’s Encrypt is entirely voluntarily. By installing Let’s Encrypt, you are consenting that your information listed above will be processed as set out in Let’s Encrypt Privacy Policy. If you do not wish your information to be processed by Let’s Encrypt, do not install the add-on, and if you chose to withdraw your consent after its installation, please communicate directly with Let’s Encrypt by contacting them as indicated in their Privacy Policy.
 ---
