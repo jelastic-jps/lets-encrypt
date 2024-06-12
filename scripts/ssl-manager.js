@@ -710,8 +710,16 @@ function SSLManager(config) {
             propName,
             resp;
 
-        resp = me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false", { nodeGroup: config.nodeGroup });
-        if (resp.result != 0) return resp;
+        function readConfig(group) {
+            return me.cmd("[[ -f \"" + CUSTOM_CONFIG + "\" ]] && echo true || echo false", { nodeGroup: group });
+        }
+
+        resp = readConfig(config.nodeGroup);
+
+        if (resp.result == Response.FILE_PATH_NOT_EXIST) {
+            resp = readConfig(BL);
+        }
+        if (resp.result != (0 || Response.FILE_PATH_NOT_EXIST)) return resp;
 
         if (resp.responses[0].out == "true") {
             resp = nodeManager.readFile(CUSTOM_CONFIG, config.nodeGroup);
