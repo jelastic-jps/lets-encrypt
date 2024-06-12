@@ -1438,6 +1438,7 @@ function SSLManager(config) {
 
     me.scheduleAutoUpdate = function scheduleAutoUpdate(crontime) {
         var scriptUrl = me.getScriptUrl(AUTO_UPDATE_SCRIPT);
+        var balancerNode = nodeManager.getBalancerMasterNode();
 
         return nodeManager.cmd([
             "for i in {1..%(wgetRetries)}; do wget --timeout=%(wgetTimeout) --waitretry=0 --tries=1 --no-check-certificate '%(url)' -O '%(scriptPath)'; if (( $? == 0 )); then break; else if (( ${i} == %(wgetRetries) )); then false; else sleep 1; fi; fi; done",
@@ -1451,7 +1452,8 @@ function SSLManager(config) {
             wgetRetries : wgetRetries,
             wgetTimeout : wgetTimeout,
             scriptPath : nodeManager.getScriptPath(AUTO_UPDATE_SCRIPT),
-            autoUpdateUrl : me.getAutoUpdateUrl()
+            autoUpdateUrl : me.getAutoUpdateUrl(),
+            nodeId: (balancerNode && config.nodeGroup == balancerNode.nodeGroup) ? balancerNode.id : ""
         }, "", true);
     };
 
