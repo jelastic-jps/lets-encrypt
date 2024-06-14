@@ -39,7 +39,7 @@ echo "Installing required packages"
     microdnf -y install epel-release; microdnf install -y git bc nss socat tinyproxy --enablerepo='epel';
   else
 
-    yum-config-manager --save --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5
+    yum-config-manager --save --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5 >/dev/null
     yum -y install epel-release git bc nss;
     yum -y install tinyproxy socat --enablerepo='epel';
   fi
