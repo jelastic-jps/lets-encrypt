@@ -55,8 +55,9 @@ mkdir -p $DIR/var/log/letsencrypt
     /usr/sbin/nft insert rule ip filter INPUT tcp dport ${PROXY_PORT} counter accept comment "LE"
     /usr/sbin/nft insert rule ip filter INPUT tcp dport ${LE_PORT} counter accept comment "LE"
     /usr/sbin/nft insert rule ip6 filter INPUT tcp dport ${LE_PORT} counter accept comment "LE"
+    /usr/sbin/nft insert rule ip6 filter INPUT tcp dport ${PROXY_PORT} counter accept comment "LE"
     /usr/sbin/nft insert rule ip nat PREROUTING ip saddr != 127.0.0.1 tcp dport 80 counter redirect to ${PROXY_PORT} comment "LE"
-    /usr/sbin/nft insert rule ip6 nat PREROUTING ip6 saddr ::0 ip6 daddr ::0 tcp dport 80 counter redirect to ${LE_PORT} comment "LE" || \
+    /usr/sbin/nft insert rule ip6 nat PREROUTING ip6 saddr != ::1 tcp dport 80 counter redirect to ${LE_PORT} comment "LE"  || \
         /usr/sbin/nft insert rule ip6 filter INPUT tcp dport 80 counter drop comment "LE"
  else
     iptables -I INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
@@ -141,7 +142,7 @@ sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
  if grep -a 'AlmaLinux' /etc/system-release ; then
     for _family in ip ip6; do
         for _table in 'filter INPUT' 'nat PREROUTING'; do
-            for handle in $(nft -a list table $_family ${_table/ *} | grep 'comment \"LE\"'| sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g' 2>/dev/null); do
+            for handle in $(nft -a list chain $_family ${_table} | grep 'comment \"LE\"'| sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g' 2>/dev/null); do
                 /usr/sbin/nft delete rule $_family $_table handle $handle;
             done
         done
