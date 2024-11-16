@@ -36,7 +36,7 @@ echo "Installing required packages"
     }
   }
   if grep -a 'AlmaLinux' /etc/system-release ; then
-    microdnf -y install epel-release; microdnf install -y git bc nss socat tinyproxy --enablerepo='epel';
+     microdnf clean all; microdnf -y install epel-release; microdnf install -y git bc nss socat tinyproxy --enablerepo='epel';
   else
 
     yum-config-manager --save --setopt=\*.retries=5 --setopt=\*.skip_if_unavailable=true --setopt=\*.timeout=5 >/dev/null
