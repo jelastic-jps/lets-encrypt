@@ -193,7 +193,7 @@ actions:
 
   callScript:
     script: |
-      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      var targetAppid = api.dev.apps.CreatePersistence ? appid : appid;
       var resp = api.dev.scripting.Eval(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}', {action:'${this.action}'});
       if (resp.result == 0 && typeof resp.response === 'object' && resp.response.result != 0) resp = resp.response;
       return resp;
@@ -247,7 +247,7 @@ actions:
 
   delete:
     script: |
-      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      var targetAppid = api.dev.apps.CreatePersistence ? appid : appid;
       api.dev.scripting.DeleteScript(targetAppid, session, '${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}');
       return {result:0}
 
@@ -269,7 +269,7 @@ actions:
 
   createScript:
     script: |
-      var targetAppid = api.dev.apps.CreatePersistence ? "${globals.envAppid}" : appid;
+      var targetAppid = api.dev.apps.CreatePersistence ? appid : appid;
       return api.dev.scripting.CreateScript(targetAppid, session, "${this.scriptName}", "js", "${this.code:}")
 
 success: /text/success.md
