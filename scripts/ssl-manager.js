@@ -1603,6 +1603,10 @@ function SSLManager(config) {
             });
     };
 
+    me.removeSSLOnExtraNode = function removeSSLOnExtraNode() {
+        return me.cmd([ 'jem ssl remove' ]);
+    };
+
     me.removeSSL = function removeSSL() {
         return jelastic.env.binder.RemoveSSL(config.envName, session);
     };
@@ -1616,7 +1620,16 @@ function SSLManager(config) {
 
         sslCerts = resp.responses;
 
-        return jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
+        if (sslCerts.length > 0) {
+            resp = jelastic.env.binder.RemoveSSLCerts(config.envName, session, sslCerts[sslCerts.length - 1].id);
+            if (resp.result != 0) return resp;
+        }
+        
+        if (config.withIntSSL && nodeManager.checkCustomSSL()) {
+            resp = me.exec(me.removeSSLOnExtraNode);
+        }
+        
+        return resp;
     };
 
     me.sendResp = function sendResp(resp, isUpdate) {
