@@ -4,7 +4,7 @@ let resp = api.dev.scripting.Eval("appstore", session, "GetApps", {
     targetAppid: "${envAppid}",
     search: {
         appstore: 1,
-        app_id: "${appId}",
+        app_id: { like: "${appId}%" },
         nodeGroup: "${nodeGroup}"
     }
 });
