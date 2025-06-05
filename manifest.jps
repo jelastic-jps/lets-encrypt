@@ -33,7 +33,7 @@ targetNodes:
   ]
 
 homepage: https://github.com/jelastic-jps/lets-encrypt
-baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@JE-74474
 logo: images/letsencrypt.png
 
 description:

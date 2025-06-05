@@ -7,7 +7,7 @@ ${globals.skippedDomainsText}
 
 Also, the used domain names list can be adjusted later with the **Configure** button.  
 
-![Let's encrypt addon configuration](https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/images/lets-encrypt-addon-config.png)
+![Let's encrypt addon configuration](https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@JE-74474/images/lets-encrypt-addon-config.png)
 
 Useful links:
 * [How to work with Let's Encrypt add-on](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/)
