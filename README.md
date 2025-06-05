@@ -3,7 +3,7 @@
 **[Let’s Encrypt](https://letsencrypt.org/)** is a free and open Certificate Authority, that simplifies and automates processes of browser-trusted SSL certificates issuing and appliance. Using this package you can automatically install Let’s Encrypt as an add-on to your environment.
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/letsencrypt-jelastic-ssl.png" width="400">
+<img src="https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/images/letsencrypt-jelastic-ssl.png" width="400">
 </p>
 
 > **_NOTE:_**  <p>You have the option to install the add-on Let’s Encrypt (a service provided by Internet Security Research Group, a California (United States) Nonprofit Public Benefit Corporation) to request a trusted certificate intended to publicly vouch that you control a certain domain name or names that are reachable on the Internet. As part of the process of proving that control, Let’s Encrypt will collect various information related to certificate authentication and management. That information includes the IP addresses from which you access the Let’s Encrypt service; all resolved IP addresses for any domain names requested; server information related to any validation requests; full logs of all inbound HTTP / ACME requests, all outbound validation requests; and information sent by or inferred from your client software.</p> <p>Your use of Let’s Encrypt is entirely voluntarily. By installing Let’s Encrypt, you are consenting that your information listed above will be processed as set out in [Let’s Encrypt Privacy Policy](https://letsencrypt.org/privacy/). If you do not wish your information to be processed by Let’s Encrypt, do not install the add-on, and if you chose to withdraw your consent after its installation, please communicate directly with Let’s Encrypt by contacting them as indicated in their Privacy Policy.</p>
@@ -24,12 +24,12 @@ To get deeper insights on how the Let’s Encrypt service works, refer to the [o
 
 ## Installation Process
 
-Import the [raw link of the add-on manifest](https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/manifest.jps) within Jelastic PaaS dashboard or initiate the installation within **Marketplace > Add-Ons**.
+Import the [raw link of the add-on manifest](https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/manifest.jps) within Jelastic PaaS dashboard or initiate the installation within **Marketplace > Add-Ons**.
 
-Note: to access the dashboard you need to be registered at one of the [Jelastic Public Cloud providers](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/manifest.jps&keys=app.jelastic.eapps.com;app.cloud.hostnet.nl;app.jelastichosting.nl;app.appengine.flow.ch;app.jelasticlw.com.br;app.mircloud.host;app.jcs.opusinteractive.io;app.paas.quarinet.eu) or have a Private Cloud installation.
+Note: to access the dashboard you need to be registered at one of the [Jelastic Public Cloud providers](https://jelastic.com/install-application/?manifest=https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/manifest.jps&keys=app.jelastic.eapps.com;app.cloud.hostnet.nl;app.jelastichosting.nl;app.appengine.flow.ch;app.jelasticlw.com.br;app.mircloud.host;app.jcs.opusinteractive.io;app.paas.quarinet.eu) or have a Private Cloud installation.
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/install-letsencrypt-ssl.png" width="400">
+<img src="https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/images/install-letsencrypt-ssl.png" width="400">
 </p>
 
 In the opened confirmation window:
@@ -37,7 +37,7 @@ In the opened confirmation window:
   * leave the field blank to create a dummy SSL certificate, assigned to environment internal URL (env_name.{[hoster_domain](https://docs.jelastic.com/jelastic-hoster-info)}), for being used in testing
   * insert the preliminary linked external domain(s) to get trusted certificates; if specifying multiple hostnames, separate them with either comma or semicolon
 <p align="center">
-<img src="https://github.com/jelastic-jps/lets-encrypt/blob/master/images/separate-domains.png" width="400">
+<img src="https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/images/separate-domains.png" width="400">
 </p>
 
 * select the corresponding **Environment name** within the expandable drop-down list 

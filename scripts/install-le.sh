@@ -81,7 +81,7 @@ echo "Installing required packages"
 
 JEM_SSL_MODULE_PATH="/usr/lib/jelastic/modules/ssl.module"
 [[ -f "${JEM_SSL_MODULE_PATH}" && ! -s "$JEM_SSL_MODULE_PATH" ]] && {
-    JEM_SSL_MODULE_LATEST_URL="https://raw.githubusercontent.com/jelastic/jem/master"$JEM_SSL_MODULE_PATH
+    JEM_SSL_MODULE_LATEST_URL="https://cdn.jsdelivr.net/gh/jelastic/jem@master"$JEM_SSL_MODULE_PATH
     localedef -i en_US -f UTF-8 en_US.UTF-8
     for ((i=1;i<=WGET_RETRIES;i++)); do
         wget --no-check-certificate "${JEM_SSL_MODULE_LATEST_URL}" -O $JEM_SSL_MODULE_PATH
