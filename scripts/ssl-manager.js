@@ -80,7 +80,7 @@ function SSLManager(config) {
     config = config || {};
     session = config.session || "";
 
-    targetAppid = api.dev.apps.CreatePersistence ? config.envAppid : appid;
+    targetAppid = api.dev.apps.CreatePersistence ? appid : appid;
 
     nodeManager = new NodeManager(config.envName, config.nodeId, config.baseDir);
     nodeManager.setLogPath("var/log/letsencrypt.log");
