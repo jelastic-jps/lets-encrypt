@@ -60,6 +60,13 @@ settings:
       tooltip: |
         Each of the specified external domains should be preliminarily bound via DNS record to the external IP of the node where add-on is installed (either directly via <a href="https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record" target="_blank">A Record</a> or through CDN / external balancer proxy).<br><br>
         <b>Note:</b> Leave this field blank for issuing a test SSL certificate bound to the internal environment domain. Insert the preliminary linked external domain(s) to get trusted certificates; if specifying multiple hostnames, separate them with either comma or semicolon.
+    - type: boolean
+      name: useSLB
+      caption: Use Shared Load Balancer (SLB) for SSL
+      default: false
+      required: false
+      tooltip: |
+        When enabled, SSL is terminated at the Shared Load Balancer and no public IP is attached to your nodes. Point your domain DNS to the SLB endpoint (not to a node IP). Use this when all traffic is routed through the platform's Shared Load Balancer.
 
 onBeforeRedeployContainer [${targetNodes.nodeGroup}]:
   callScript:
@@ -90,6 +97,7 @@ onInstall:
   - setGlobals:
       nodeId: ${settings.nodeId:}
       nodeGroup: ${targetNodes.nodeGroup:}
+      useSLB: ${settings.useSLB:false}
       withExtIp: ${settings.withExtIp:}
       withIntSSL: ${settings.withIntSSL:true}
       webroot: ${settings.webroot:}
@@ -181,6 +189,7 @@ actions:
       deployHookType: ${globals.deployHookType}
       undeployHook: ${globals.undeployHook}
       undeployHookType: ${globals.undeployHookType}
+      useSLB: ${settings.useSLB:false}
       withExtIp: ${globals.withExtIp}
       withIntSSL: ${globals.withIntSSL}
       webroot: ${globals.webroot}
@@ -258,6 +267,7 @@ actions:
     settings:
       customDomains: ${settings.customDomains}
       nodeGroup: ${globals.nodeGroup}
+      useSLB: ${settings.useSLB:false}
       deployHookType: ${globals.deployHookType}
       undeployHookType: ${globals.undeployHookType}
       withExtIp: ${globals.withExtIp}

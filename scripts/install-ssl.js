@@ -31,6 +31,7 @@ function run() {
         deployHookType   : "${deployHookType}",
         undeployHook     : "${undeployHook}",
         undeployHookType : "${undeployHookType}",
+        useSLB           : "${useSLB}",
         withExtIp        : "${withExtIp}",
         withIntSSL       : "${withIntSSL}",
         webroot          : "${webroot}",

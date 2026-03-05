@@ -23,6 +23,7 @@ function SSLManager(config) {
      *      [deployHookType] : {String}
      *      [undeployHook] : {String}
      *      [undeployHookType] : {String}
+     *      [useSLB] : {Boolean}
      *      [withExtIp] : {Boolean}
      *      [withIntSSL] : {Boolean}
      *      [webroot] : {Boolean}
@@ -748,6 +749,11 @@ function SSLManager(config) {
 
     me.initAddOnExtIp = function initAddOnExtIp(withExtIp) {
         var resp;
+
+        if (config.useSLB && me.initBoolValue(config.useSLB)) {
+            config.withExtIp = false;
+            return { result: 0 };
+        }
 
         withExtIp = String(withExtIp) || true;
         config.withExtIp = me.initBoolValue(withExtIp) || !jelastic.env.binder.GetExtDomains;
