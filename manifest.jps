@@ -47,7 +47,7 @@ globals:
 
 mixins:
   - configs/vers.yaml
-  - https://cdn.jsdelivr.net/gh/jelastic-jps/common@main/clustered-addon-utils.yml
+  - https://raw.githubusercontent.com/sych74/common/refs/heads/main/clustered-addon-utils.yml
 
 settings:
   fields:
