@@ -691,7 +691,7 @@ function SSLManager(config) {
     };
 
     me.getFileUrl = function (filePath) {
-        return config.baseUrl + "/" + filePath + "?_r=" + Math.random();
+        return config.baseUrl + "/" + filePath;
     };
 
     me.getScriptUrl = function (scriptName) {

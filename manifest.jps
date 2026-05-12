@@ -169,7 +169,7 @@ onAfterConfirmTransfer: installScript
 
 actions:
   installScript:
-    script: /scripts/create-installation-script.js?_r=${fn.random}
+    script: /scripts/create-installation-script.js
     params:
       scriptName: ${env.envName}-${targetNodes.nodeGroup}-${globals.scriptSufix}
       baseUrl: ${baseUrl}

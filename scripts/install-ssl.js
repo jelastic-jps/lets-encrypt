@@ -52,7 +52,7 @@ function run() {
 
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
-        body = new Transport().get(baseUrl + "/" + script + "?_r=" + Math.random());
+        body = new Transport().get(baseUrl + "/" + script);
     
     if (!body) {
         return {
