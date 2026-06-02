@@ -28,7 +28,7 @@ targetNodes:
     payara,
     wildfly,
     nodejs,
-    apache-python,
+    apache-python, pythonengine,
     jenkins, jenkins2
   ]
 
