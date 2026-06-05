@@ -10,6 +10,6 @@ Also, the used domain names list can be adjusted later with the **Configure** bu
 ![Let's encrypt addon configuration](https://fastly.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/images/lets-encrypt-addon-config.png)
 
 Useful links:
-* [How to work with Let's Encrypt add-on](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/)
-* [How to bind custom domain via CNAME](https://docs.jelastic.com/custom-domain-via-cname)
-* [How to bind custom domain via A Record](https://docs.jelastic.com/custom-domain-via-arecord)
+* [How to work with Let's Encrypt add-on](https://www.virtuozzo.com/application-management-docs/lets-encrypt-ssl/)
+* [How to bind custom domain via CNAME](https://www.virtuozzo.com/application-management-docs/custom-domains/)
+* [How to bind custom domain via A Record](https://www.virtuozzo.com/application-management-docs/custom-domains/)
