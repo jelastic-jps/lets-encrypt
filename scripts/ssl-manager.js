@@ -241,7 +241,7 @@ function SSLManager(config) {
         var skippedDomains = me.getSkippedDomains().join(DOMAINS_SEP);
 
         if (skippedDomains) {
-            skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/) settings.";
+            skippedDomains = ">**Note:** The Let’s Encrypt SSL was not issued for the following domain names: \n > * " + me.formatDomains(skippedDomains, true) + "\n > \n > Login to your domain registrar admin panel and check [DNS records](https://www.virtuozzo.com/application-management-docs/custom-domains/#how-to-configure-dns-record) for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the [Let's Encrypt](https://www.virtuozzo.com/application-management-docs/lets-encrypt-ssl/) settings.";
         }
 
         resp.skippedDomains = skippedDomains || "";
@@ -1374,7 +1374,7 @@ function SSLManager(config) {
                 if (ind1 != -1) {
                     var ind2 = end ? out.indexOf(end, ind1) : -1;
                     var message = ind2 == -1 ? out.substring(ind1) : out.substring(ind1, ind2); //removed duplicated words in popup
-                    message += "\n \n[More info](https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/)";
+                    message += "\n \n[More info](https://www.virtuozzo.com/application-management-docs/lets-encrypt-ssl/)";
                     resp = error(Response.ERROR_UNKNOWN, message);
                     break;
                 }
@@ -1654,7 +1654,7 @@ function SSLManager(config) {
                 ENVIRONMENT : config.envDomain,
                 ACTION : action,
                 UPDATED_DOMAINS: me.getCustomDomains() ? "<br>Successfully " + action + " custom domains: <b>" + me.formatUpdatedDomains() + "</b>" : "",
-                SKIPPED_DOMAINS: skippedDomains ? "<br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "Login to your domain registrar admin panel and check <a href='https://docs.jelastic.com/custom-domains/#how-to-configure-dns-record' target='_blank'>DNS records</a> for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the <a href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt settings</a>." : ""
+                SKIPPED_DOMAINS: skippedDomains ? "<br>Please note that Let’s Encrypt cannot assign SSL certificates for the following domain names: <b>" + me.formatDomains(skippedDomains) + "</b>.<br>" + "Login to your domain registrar admin panel and check <a href='https://www.virtuozzo.com/application-management-docs/custom-domains/#how-to-configure-dns-record' target='_blank'>DNS records</a> for the provided domains. Ensure they point to the correct IP (environment entry point or proxy if CDN or any other external balancer is used). Alternatively, remove invalid custom domains from the <a href='https://www.virtuozzo.com/application-management-docs/lets-encrypt-ssl/'>Let's Encrypt settings</a>." : ""
             }
         );
     };
@@ -1699,7 +1699,7 @@ function SSLManager(config) {
         resp = resp || {};
 
         if (!me.getCustomDomains() && skippedDomains) {
-            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(skippedDomains) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://jelastic.com/blog/free-ssl-certificates-with-lets-encrypt/'>Let's Encrypt</a> settings.<br><br>" +
+            resp = "<div style='background: rgb(200, 200, 200)'> " + me.escapeHtmlEntities(String(resp)) + "</div><br>Please, ensure that <b>" + me.formatDomains(skippedDomains) + "</b> domains listed in the add-on point to the correct public IP (environment entry point or proxy, like CDN) in your domain registrar. Alternatively, remove invalid custom domains from the <a target='_blank' href='https://www.virtuozzo.com/application-management-docs/lets-encrypt-ssl/'>Let's Encrypt</a> settings.<br><br>" +
                 "If you no longer require SSL certificates within the <b>" + config.envDomain + "</b> environment, remove the Let's Encrypt add-on to stop receiving this error message.";
         } else {
             resp = {
