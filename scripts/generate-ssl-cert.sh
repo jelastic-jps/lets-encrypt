@@ -11,6 +11,7 @@ UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
 NO_VALID_IP_ADDRESSES=28
 counter=1
+LOG_LEVEL=2
 
 [ -f "${SETTINGS}" ] && source "${SETTINGS}" || { echo "No settings available" ; exit 3 ; }
 [ -f "${DIR}/root/validation.sh" ] && source "${DIR}/root/validation.sh" || { echo "No validation library available" ; exit 3 ; }
