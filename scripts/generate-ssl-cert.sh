@@ -76,7 +76,7 @@ do
   LOG_FILE=$DEFAULT_LOG_FILE"-"$counter
 
   $DIR/opt/letsencrypt/acme.sh --set-default-ca --server letsencrypt
-  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 -k 2048 --domain $domain --nocron -f --log-level 2 --log $LOG_FILE 2>&1)
+  resp=$($DIR/opt/letsencrypt/acme.sh --issue $params $test_params --listen-v6 -k 2048 --domain $domain --nocron -f --log-level $LOG_LEVEL --log $LOG_FILE 2>&1)
 
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
