@@ -24,6 +24,27 @@ cd "${DIR}/opt/letsencrypt"
 
 PROXY_PORT=12347
 LE_PORT=12348
+LE_NFT_TABLE=letsencrypt
+
+# Run before BitNinja and other hooks at dstnat - 1 (AlmaLinux nftables).
+le_nft_ensure_chain() {
+    local _family=$1
+    /usr/sbin/nft add table ${_family} ${LE_NFT_TABLE} 2>/dev/null || true
+    /usr/sbin/nft add chain ${_family} ${LE_NFT_TABLE} PREROUTING '{ type nat hook prerouting priority dstnat - 2; policy accept; }' 2>/dev/null || true
+}
+
+le_nft_remove_rules() {
+    for _family in ip ip6; do
+        for _table in 'filter INPUT' "${LE_NFT_TABLE} PREROUTING" 'nat PREROUTING'; do
+            for handle in $(/usr/sbin/nft -a list chain ${_family} ${_table} 2>/dev/null | grep 'comment "LE"' | sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g'); do
+                /usr/sbin/nft delete rule ${_family} ${_table} handle $handle 2>/dev/null
+            done
+        done
+        for _legacy_table in ${LE_NFT_TABLE} le; do
+            /usr/sbin/nft delete table ${_family} ${_legacy_table} 2>/dev/null || true
+        done
+    done
+}
 
 #Parameters for test certificates
 test_params='';
@@ -49,17 +70,23 @@ killall -9 tinyproxy > /dev/null 2>&1
 
 mkdir -p $DIR/var/log/letsencrypt
 
+[[ "$webroot" == "false" ]] && grep -qa 'AlmaLinux' /etc/system-release && \
+    trap le_nft_remove_rules EXIT INT TERM
+
 [[ "$webroot" == "false" ]] && {
     service tinyproxy start || { echo "Failed to start proxy server" ; exit 3 ; }
 
  if grep -a 'AlmaLinux' /etc/system-release ; then
+    le_nft_remove_rules
     /usr/sbin/nft insert rule ip filter INPUT tcp dport ${PROXY_PORT} counter accept comment "LE"
     /usr/sbin/nft insert rule ip filter INPUT tcp dport ${LE_PORT} counter accept comment "LE"
     /usr/sbin/nft insert rule ip6 filter INPUT tcp dport ${LE_PORT} counter accept comment "LE"
     /usr/sbin/nft insert rule ip6 filter INPUT tcp dport ${PROXY_PORT} counter accept comment "LE"
-    /usr/sbin/nft insert rule ip nat PREROUTING ip saddr != 127.0.0.1 tcp dport 80 counter redirect to ${PROXY_PORT} comment "LE"
-    /usr/sbin/nft insert rule ip6 nat PREROUTING ip6 saddr != ::1 tcp dport 80 counter redirect to ${LE_PORT} comment "LE"  || \
-        /usr/sbin/nft insert rule ip6 filter INPUT tcp dport 80 counter drop comment "LE"
+    le_nft_ensure_chain ip
+    le_nft_ensure_chain ip6
+    /usr/sbin/nft insert rule ip ${LE_NFT_TABLE} PREROUTING ip saddr != 127.0.0.1 tcp dport 80 counter redirect to :${PROXY_PORT} comment "LE"
+    /usr/sbin/nft insert rule ip6 ${LE_NFT_TABLE} PREROUTING ip6 saddr != ::1 tcp dport 80 counter redirect to :${LE_PORT} comment "LE" || \
+    /usr/sbin/nft insert rule ip6 filter INPUT tcp dport 80 counter drop comment "LE"
  else
     iptables -I INPUT -p tcp -m tcp --dport ${PROXY_PORT} -j ACCEPT
     iptables -I INPUT -p tcp -m tcp --dport ${LE_PORT} -j ACCEPT
@@ -141,13 +168,7 @@ sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
 
 [[ "$webroot" == "false" ]] && {
  if grep -a 'AlmaLinux' /etc/system-release ; then
-    for _family in ip ip6; do
-        for _table in 'filter INPUT' 'nat PREROUTING'; do
-            for handle in $(nft -a list chain $_family ${_table} | grep 'comment \"LE\"'| sed -r 's/.*#\s+handle\s+([0-9]+)/\1/g' 2>/dev/null); do
-                /usr/sbin/nft delete rule $_family $_table handle $handle;
-            done
-        done
-    done
+    le_nft_remove_rules
  else
     iptables -t nat -D PREROUTING -p tcp -m tcp ! -s 127.0.0.1/32 --dport 80 -j REDIRECT --to-ports ${PROXY_PORT}
     ip6tables -t nat -D PREROUTING -p tcp -m tcp --dport 80 -j REDIRECT --to-ports ${LE_PORT} || ip6tables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
