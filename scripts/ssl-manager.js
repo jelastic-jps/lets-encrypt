@@ -415,7 +415,7 @@ function SSLManager(config) {
                 letsencryptPath: nodeManager.getPath("opt/letsencrypt")
             }],
 
-            [ me.cmd, "cat /var/spool/cron/root | grep letsencrypt-ssl > %(backupPath)/letsencrypt-cron", {
+            [ me.cmd, "grep -m1 letsencrypt-ssl /var/spool/cron/root > %(backupPath)/letsencrypt-cron; sed -i '/letsencrypt-ssl/d' /var/spool/cron/root; cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
                 backupPath: backupPath
             }],
 
@@ -435,7 +435,7 @@ function SSLManager(config) {
             logPath = nodeManager.getLogPath();
 
         return me.execAll([
-            [ me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
+            [ me.cmd, "grep -q letsencrypt-ssl /var/spool/cron/root || cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
                 backupPath: backupPath
             }],
 
@@ -460,7 +460,7 @@ function SSLManager(config) {
     me.restoreCron = function restoreCron() {
         me.logAction("AutoPatchLECronRestore");
 
-        return me.exec(me.cmd, "cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
+        return me.exec(me.cmd, "grep -q letsencrypt-ssl /var/spool/cron/root || cat %(backupPath)/letsencrypt-cron >> /var/spool/cron/root", {
             backupPath: nodeManager.getBackupPath()
         });
     };
