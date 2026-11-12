@@ -10,6 +10,7 @@ WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
 NO_VALID_IP_ADDRESSES=28
+UNKNOWN_ACME_ERROR=29
 counter=1
 LOG_LEVEL=2
 
@@ -122,6 +123,20 @@ do
       }
     }
 
+    # acme.sh names the failed domain in "Invalid status, <domain>:Verify error detail:..."
+    [[ -n $error && -z $invalid_domain ]] && invalid_domain=$(sed -rn 's/.*Invalid status, ([^:]+):Verify error detail:.*/\1/p' $LOG_FILE | sed '$!d')
+
+    # Unrecognized acme.sh failure: report the real error and keep domain settings untouched
+    [[ -z $error || -z $invalid_domain ]] && {
+      # acme.sh logs the challenge failure as errordetail='...'; later "detail" entries may belong to authz deactivation
+      [[ -z $error ]] && error=$(sed -rn "s/.*\serrordetail='(.+)'$/\1/p" $LOG_FILE | sed '$!d')
+      [[ -z $error ]] && error=$(sed -rn 's/.*"detail":\s*"(([^"\\]|\\.)+)".*/\1/p' $LOG_FILE | sed '$!d' | sed 's/\\"/"/g')
+      [[ -z $error ]] && error=$(echo "$resp" | grep -i 'error' | sed '$!d')
+      [[ -z $error ]] && error="Unknown error occurred while issuing the certificate."
+      unknown_error=true;
+      break;
+    }
+
     all_invalid_domains_errors+=$error";"
     all_invalid_domains+=$invalid_domain" "
 
@@ -132,12 +147,15 @@ done
 
 all_invalid_domains_errors=${all_invalid_domains_errors%?}
 
-[[ ! -z $all_invalid_domains ]] && {
-  all_invalid_domains=$(echo $all_invalid_domains | sed -r "s/\s-d//g")
-  sed -i "s|skipped_domains=.*|skipped_domains='${all_invalid_domains}'|g" ${SETTINGS}
-}
-domain=$(echo $domain | sed -r "s/\s-d//g");
-sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
+#Unrecognized acme.sh failure is not a domain problem, keep domain settings untouched
+if [[ $unknown_error != true ]]; then
+  [[ ! -z $all_invalid_domains ]] && {
+    all_invalid_domains=$(echo $all_invalid_domains | sed -r "s/\s-d//g")
+    sed -i "s|skipped_domains=.*|skipped_domains='${all_invalid_domains}'|g" ${SETTINGS}
+  }
+  domain=$(echo $domain | sed -r "s/\s-d//g");
+  sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
+fi
 
 [[ "$webroot" == "false" ]] && {
  if grep -a 'AlmaLinux' /etc/system-release ; then
@@ -168,6 +186,8 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
+[[ $unknown_error == true ]] && { echo "$error"; exit $UNKNOWN_ACME_ERROR; }
+[[ $result_code != "0" && -z $all_invalid_domains_errors ]] && { echo "Unknown error occurred while issuing the certificate."; exit $UNKNOWN_ACME_ERROR; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
 #To be sure that r/w access
