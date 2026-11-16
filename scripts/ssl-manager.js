@@ -44,6 +44,7 @@ function SSLManager(config) {
         UPLOADER_ERROR = 12006,
         READ_TIMED_OUT = 12007,
         NO_VALID_IP_ADDRESSES = 12008,
+        UNKNOWN_ACME_ERROR = 12009,
         VALIDATION_SCRIPT = "validation.sh",
         SHELL_CODES = {},
         INSTALL_LE_SCRIPT = "install-le.sh",
@@ -1152,6 +1153,7 @@ function SSLManager(config) {
         SHELL_CODES[UPLOADER_ERROR] = 26;
         SHELL_CODES[READ_TIMED_OUT] = 27;
         SHELL_CODES[NO_VALID_IP_ADDRESSES] = 28;
+        SHELL_CODES[UNKNOWN_ACME_ERROR] = 29;
     };
 
     me.generateSslCerts = function generateSslCerts() {
@@ -1229,6 +1231,18 @@ function SSLManager(config) {
         if (!config.webroot) {
             //removing redirect
             me.exec(me.manageDnat, "remove");
+        }
+
+        if (resp.result == UNKNOWN_ACME_ERROR) {
+            text = "Error: " + (resp.response || "Unknown error occurred while issuing the certificate.") +
+                "\nCheck the /var/log/letsencrypt log for more details.";
+            return {
+                result: UNKNOWN_ACME_ERROR,
+                error: text,
+                response: text,
+                type: "warning",
+                message: text
+            };
         }
 
         if (resp.result == WRONG_DNS_CUSTOM_DOMAINS) {
@@ -1356,6 +1370,8 @@ function SSLManager(config) {
                 if (resp.exitStatus == SHELL_CODES[READ_TIMED_OUT]) return { result: READ_TIMED_OUT}
                 if (resp.exitStatus == SHELL_CODES[NO_VALID_IP_ADDRESSES]) return { result: NO_VALID_IP_ADDRESSES, response: resp.out }
                 if (resp.exitStatus == SHELL_CODES[RATE_LIMIT_EXCEEDED]) return { result: RATE_LIMIT_EXCEEDED, response: resp.out }
+                //the error is the last line, stdout also contains unrelated output of acme.sh/firewall/proxy commands
+                if (resp.exitStatus == SHELL_CODES[UNKNOWN_ACME_ERROR]) return { result: UNKNOWN_ACME_ERROR, response: String(resp.out || "").replace(/\s+$/, "").split("\n").pop() }
             }
 
             //just cutting "out" for debug logging because it's too long in SSL generation output

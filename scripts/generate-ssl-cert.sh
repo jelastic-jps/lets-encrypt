@@ -10,6 +10,7 @@ WRONG_WEBROOT_ERROR=25
 UPLOAD_CERTS_ERROR=26
 TIME_OUT_ERROR=27
 NO_VALID_IP_ADDRESSES=28
+UNKNOWN_ACME_ERROR=29
 counter=1
 LOG_LEVEL=2
 
@@ -81,6 +82,8 @@ do
   grep -q 'Cert success' $LOG_FILE && grep -q "BEGIN CERTIFICATE" $LOG_FILE && result_code=0 || result_code=$GENERAL_RESULT_ERROR
 
   [[ "$result_code" == "$GENERAL_RESULT_ERROR" ]] && {
+    invalid_domain=""
+    unrecognized_error=false
     error=$(sed -rn 's/.*\s(.*)(DNS problem: .*?)",\"status.*/\2/p' $LOG_FILE | sed '$!d')
     [[ ! -z $error ]] && invalid_domain=$(echo $error | sed -rn 's/.* (.*) - .*/\1/p')
 
@@ -122,22 +125,53 @@ do
       }
     }
 
+    # acme.sh 3.0.x (pinned in configs/vers.yaml) names the failed domain in "Invalid status, <domain>:Verify error detail:...".
+    # acme.sh 3.1.x logs "<domain>: Invalid status. Verification error details: ..." instead, so this regex must be updated
+    # together with the acme.sh version; otherwise such failures fall back to UNKNOWN_ACME_ERROR below.
+    [[ -z $invalid_domain ]] && invalid_domain=$(sed -rn 's/.*Invalid status, ([^:]+):Verify error detail:.*/\1/p' $LOG_FILE | sed '$!d')
+
+    # Unrecognized acme.sh failure: take the real error text from the log
+    [[ -z $error ]] && {
+      # acme.sh logs the challenge failure as errordetail='...'; later "detail" entries may belong to authz deactivation
+      error=$(sed -rn "s/.*\serrordetail='(.+)'$/\1/p" $LOG_FILE | sed '$!d')
+      [[ -z $error ]] && error=$(sed -rn 's/.*"detail":\s*"(([^"\\]|\\.)+)".*/\1/p' $LOG_FILE | sed '$!d' | sed 's/\\"/"/g')
+      [[ -z $error ]] && error=$(echo "$resp" | grep -i 'error' | sed '$!d')
+      [[ -z $error ]] && error="Unknown error occurred while issuing the certificate."
+      unrecognized_error=true
+    }
+
+    # Failure is not bound to a domain: report the real error and keep domain settings untouched
+    [[ -z $invalid_domain ]] && { unknown_error=true; break; }
+
+    # Remove the failed domain by exact match: a substring/regex match would also cut it out of other domains (e.g. www.<domain>)
+    remaining_domain=$(echo $domain | sed 's/ -d / /g' | tr ' ' '\n' | grep -vxF -- "$invalid_domain" | paste -sd' ' - | sed 's/ / -d /g')
+
+    # The failed domain is not in the list (e.g. a redirect target): the same order would be sent again
+    [[ "$remaining_domain" == "$(echo $domain)" ]] && { unknown_error=true; break; }
+
+    # Unrecognized failure on the last remaining domain may be environment-wide (e.g. port 80 closed),
+    # so do not drop all domains from the settings: report the real error and keep them untouched
+    [[ $unrecognized_error == true && -z ${remaining_domain// /} ]] && { unknown_error=true; break; }
+
     all_invalid_domains_errors+=$error";"
     all_invalid_domains+=$invalid_domain" "
 
-    domain=$(echo $domain | sed 's/^'${invalid_domain}'\s-d\s//' | sed 's/\s-d\s'${invalid_domain}'\s-d\s/ -d /' | sed 's/\s-d\s'${invalid_domain}'$//' | sed 's/'${invalid_domain}'//')
+    domain=$remaining_domain
   }
   counter=$((counter + 1))
 done
 
 all_invalid_domains_errors=${all_invalid_domains_errors%?}
 
-[[ ! -z $all_invalid_domains ]] && {
-  all_invalid_domains=$(echo $all_invalid_domains | sed -r "s/\s-d//g")
-  sed -i "s|skipped_domains=.*|skipped_domains='${all_invalid_domains}'|g" ${SETTINGS}
-}
-domain=$(echo $domain | sed -r "s/\s-d//g");
-sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
+#Unrecognized acme.sh failure is not a domain problem, keep domain settings untouched
+if [[ $unknown_error != true ]]; then
+  [[ ! -z $all_invalid_domains ]] && {
+    all_invalid_domains=$(echo $all_invalid_domains | sed -r "s/\s-d//g")
+    sed -i "s|skipped_domains=.*|skipped_domains='${all_invalid_domains}'|g" ${SETTINGS}
+  }
+  domain=$(echo $domain | sed -r "s/\s-d//g");
+  sed -i "s|^domain=.*|domain='${domain}'|g" ${SETTINGS};
+fi
 
 [[ "$webroot" == "false" ]] && {
  if grep -a 'AlmaLinux' /etc/system-release ; then
@@ -168,6 +202,8 @@ fi
 [[ $timed_out == true ]] && exit $TIME_OUT_ERROR;
 [[ $no_valid_ip == true ]] && { echo "$error"; exit $NO_VALID_IP_ADDRESSES; }
 [[ $rate_limit_exceeded == true ]] && { echo "$error"; exit $TOO_MANY_CERTS; }
+[[ $unknown_error == true ]] && { echo "${all_invalid_domains_errors:+$all_invalid_domains_errors;}$error"; exit $UNKNOWN_ACME_ERROR; }
+[[ $result_code != "0" && -z $all_invalid_domains_errors ]] && { echo "Unknown error occurred while issuing the certificate."; exit $UNKNOWN_ACME_ERROR; }
 [[ $result_code != "0" ]] && { echo "$all_invalid_domains_errors"; exit $GENERAL_RESULT_ERROR; }
 
 #To be sure that r/w access
